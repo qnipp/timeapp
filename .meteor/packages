@@ -20,9 +20,9 @@ twbs:bootstrap
 iron:router
 check
 accounts-password
-accounts-ui
 momentjs:moment
 fortawesome:fontawesome
 aldeed:collection2
 aldeed:autoform
 sacha:spin
+ian:accounts-ui-bootstrap-3
