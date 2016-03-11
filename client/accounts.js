@@ -1,5 +1,6 @@
 
 
+/*
 Accounts.ui.config({
 	//passwordSignupFields: "USERNAME_ONLY",
     requestPermissions: {},
@@ -20,3 +21,4 @@ Accounts.ui.config({
 	forceEmailLowercase: true,
     forceUsernameLowercase: true
 });
+*/

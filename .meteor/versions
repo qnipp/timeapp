@@ -97,4 +97,5 @@ useraccounts:foundation@1.13.1
 useraccounts:iron-routing@1.13.1
 webapp@1.2.3
 webapp-hashing@1.0.5
+zimme:active-route@2.3.2
 zurb:foundation-sites@6.2.0_1

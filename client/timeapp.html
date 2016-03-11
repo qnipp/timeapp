@@ -24,7 +24,6 @@
 <template name="logobar">
 <span class="debug">{{currentTemplateName}}</span>
 
-
 <div class="fixed">
 	<nav class="top-bar" data-topbar>
 		<ul class="title-area">
@@ -42,28 +41,10 @@
 			<!-- Left Nav Section -->
 			<ul class="left">
 				<li class="{{isActiveRoute regex='home'}}"><a href="{{pathFor 'home'}}">Home</a></li>
-				<li class="{{isActiveRoute regex='private'}}"><a href="{{pathFor 'private'}}">Private</a></li>
 			</ul>
 		</section>
 	</nav>
 </div>
-
-  
-<nav class="navbar navbar-default navbar-static-top">
-	<div class="container">
-		<div class="navbar-header">
-			<!-- offcanvas menü -->
-			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-				<span class="sr-only">Toggle navigation</span>
-				<span class="icon-bar"></span>
-				<span class="icon-bar"></span>
-				<span class="icon-bar"></span>
-			</button>
-			<a class="navbar-brand" href="/">{{projectName}}</a>
-		</div>	
-		<!--/.nav-collapse -->
-	</div>
-</nav>
 
 </template>
 
@@ -71,6 +52,34 @@
 
 <template name="navbar">
 <span class="debug">{{currentTemplateName}}</span>
+
+
+<div class="fixed">
+	<div class="top-bar">
+		<div class="top-bar-left">
+			<ul class="dropdown menu" data-dropdown-menu>
+			<li class="menu-text">{{projectName}}</li>
+			<li class="has-submenu">
+				<a href="#">One</a>
+				<ul class="submenu menu vertical" data-submenu>
+				<li><a href="#">One</a></li>
+				<li><a href="#">Two</a></li>
+				<li><a href="#">Three</a></li>
+				</ul>
+			</li>
+			<li><a href="#">Two</a></li>
+			<li><a href="#">Three</a></li>
+			</ul>
+		</div>
+		<div class="top-bar-right">
+			<ul class="menu">
+			<li><input type="search" placeholder="Search"></li>
+			<li><button type="button" class="button">Search</button></li>
+			</ul>
+		</div>
+	</div>
+</div>
+
 
 <nav class="navbar navbar-default navbar-static-top">
 	<div class="container">
@@ -86,7 +95,7 @@
 		</div>
 		<div class="nav navbar-left">
 			<div class="navbar-text">
-				{ { > loginButtons align="left" } }
+				{{> atNavButton}}
 			</div>
 		</div>
 		
@@ -112,8 +121,16 @@
 <template name="login">
 <span class="debug">{{currentTemplateName}}</span>
   
-   { { > loginButtons align="center" } }
-   <span class="debug">TODO: center login buttons, remove dropdown here</span>
+   {{> atForm state='signIn'}}
+   <span class="debug">TODO: login form ?!?</span>
+   
+</template>
+
+<template name="register">
+<span class="debug">{{currentTemplateName}}</span>
+  
+   {{> atForm state='signUp'}}
+   <span class="debug">TODO: register form ?!?</span>
    
 </template>
 
