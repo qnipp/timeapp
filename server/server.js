@@ -6,26 +6,26 @@ Meteor.startup(function () {
 // publish read access to collections
 Meteor.publish("items.mine", function() {
 	return Items.find({
-		owner: this.userId
+		createdBy: this.userId
 	});
 });
 
 Meteor.publish("hierarchy.mine", function() {
 	return Hierarchy.find({
-		owner: this.userId
+		createdBy: this.userId
 	});
 });
 
 
 Meteor.publish("times.mine", function() {
 	return Times.find({
-		owner: this.userId
+		createdBy: this.userId
 	});
 });
 
 Meteor.publish("attribs.mine", function() {
 	return Attributes.find({
-		owner: this.userId
+		createdBy: this.userId
 	});
 });
 

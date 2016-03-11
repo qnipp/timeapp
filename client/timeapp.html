@@ -22,7 +22,7 @@
 <!-- route: / -->
 
 <template name="logobar">
-<span class="debug">{{currentTemplateName}}</span>
+<span class="debug">template: template: {{currentTemplateName}}</span>
 
 <div class="fixed">
 	<div class="top-bar">
@@ -47,7 +47,7 @@
 <!-- route: all -->
 
 <template name="navbar">
-<span class="debug">{{currentTemplateName}}</span>
+<span class="debug">template: {{currentTemplateName}}</span>
 
 <span class="debug">TODO: should be only visible on mobile.</span>
 	
@@ -77,7 +77,7 @@
 						<span aria-hidden="true"><i class="fi-refresh"></i></span>
 						Track Times
 					</a></li>
-					<li class="{{isActiveRoute regex='item'}}"><a href="{{pathFor 'item'}}">
+					<li class="{{isActiveRoute regex='item'}}"><a href="{{pathFor 'item.list'}}">
 						<span aria-hidden="true"><i class="fi-list-thumbnails"></i></span>
 						List Items
 					</a></li>
@@ -121,14 +121,14 @@
 
 <!-- route: / -->
 <template name="login">
-<span class="debug">{{currentTemplateName}}</span>
+<span class="debug">template: {{currentTemplateName}}</span>
   
    {{> atForm state='signIn'}}
    
 </template>
 
 <template name="register">
-<span class="debug">{{currentTemplateName}}</span>
+<span class="debug">template: {{currentTemplateName}}</span>
   
    {{> atForm state='signUp'}}
    
@@ -136,81 +136,119 @@
 
 <!-- route: iamin -->
 <template name="iamincontainer">
-<span class="debug">{{currentTemplateName}}</span>
+<span class="debug">template: {{currentTemplateName}}</span>
 	{{> itemcomment}}
 	{{> itemrecentlist}}
 	{{> createbuttons}}
 </template>
 
 <template name="itemrecentlist">
-<span class="debug">{{currentTemplateName}}</span>
+<span class="debug">template: {{currentTemplateName}}</span>
 </template>
 
 <template name="itemcomment">
-<span class="debug">{{currentTemplateName}}</span>
+<span class="debug">template: {{currentTemplateName}}</span>
 </template>
 
 <template name="createbuttons">
-<span class="debug">{{currentTemplateName}}</span>
+<span class="debug">template: {{currentTemplateName}}</span>
+
+<div class="callout clearfix">
+	<ul class="float-right">
+		<li><a href="{{pathFor 'item.create' _id='0'}}">
+			<span aria-hidden="true"><i class="fi-plus"></i></span>
+			New Item
+		</a></li>
+		<li><a href="{{pathFor 'time.create' _id='0'}}">
+			<span aria-hidden="true"><i class="fi-plus"></i></span>
+			add Time
+		</a></li>
+	</ul>
+</div>
+
 </template>
 
 
 <!-- route: item -->
 
 <template name="itemcontainer">
-<span class="debug">{{currentTemplateName}}</span>
+<span class="debug">template: {{currentTemplateName}}</span>
 	{{> itemtree}}
-	{{#if _id}}
-		{{> leafform}}
+	
+	<!-- if a new item is created -->
+	{{#if equals currentRoute "item.create"}}
+		{{> leafform parentitem=_id}}
+	{{else}}
+		{{#if _id}}
+			{{> leafform _id=_id}}
+		{{/if}}
 	{{/if}}
+	
 </template>
 
 <template name="itemtree">
-<span class="debug">{{currentTemplateName}}</span>
+<span class="debug">template: {{currentTemplateName}}</span>
 
 <ul>
 {{#each item in items}}
-	<li><a href="/item/{{item._id}}">{{item.title}}</a></li>
+	<li><a href="{{pathFor 'item.detail' _id=item._id}}">{{item.title}}</a></li>
 {{/each}}
 </ul>
 
 </template>
 
 <template name="leafform">
-<span class="debug">{{currentTemplateName}}</span>
+<span class="debug">template: {{currentTemplateName}}</span>
+
+	{{#if _id}}
+		
+		<h3>Edit Item [ {{item._id}} ]</h3> 
+				
+		{{> quickForm collection="Items" id="editItemForm" doc=item type="method-update" meteormethod="itemUpdate" singleMethodArgument=true}}
+		
+		<a class="btn" href="{{pathFor 'item.list'}}">Back</a>
+		
+	{{else}}
+		<h3>New Item</h3> 
+		
+		{{> quickForm collection="Items" id="insertItemForm" type="method" meteormethod="itemInsert"}}
+	{{/if}}
+	
+	
 </template>
 
 <template name="branchform">
-<span class="debug">{{currentTemplateName}}</span>
+<span class="debug">template: {{currentTemplateName}}</span>
 </template>
 
 <!-- route: attrib -->
 
 <template name="attributecontainer">
-<span class="debug">{{currentTemplateName}}</span>
+<span class="debug">template: {{currentTemplateName}}</span>
 	{{> attributeform}}
 </template>
 
 <template name="attributeform">
-<!-- <span class="debug">{{currentTemplateName}}</span> -->
+<span class="debug">template: {{currentTemplateName}}</span> 
+
 </template>
 
 <!-- route: time -->
 
 <template name="timeform">
-<span class="debug">{{currentTemplateName}}</span>
+<span class="debug">template: {{currentTemplateName}}</span>
 </template>
 
 <!-- route: report -->
 
 <template name="reportlist">
-<span class="debug">{{currentTemplateName}}</span>
+<span class="debug">template: {{currentTemplateName}}</span>
 </template>
 
 <!-- route: settings -->
 
 <template name="settings">
-<span class="debug">{{currentTemplateName}}</span>
+<span class="debug">template: {{currentTemplateName}}</span>
 </template>
 
 
