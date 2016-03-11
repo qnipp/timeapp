@@ -25,25 +25,21 @@
 <span class="debug">{{currentTemplateName}}</span>
 
 <div class="fixed">
-	<nav class="top-bar" data-topbar>
-		<ul class="title-area">
-			<li class="name">
-				<h1><img alt="UserAccounts" width="25" height="25" src="/imgs/ua-logo.png"></h1>
-			</li>
-			<!-- Remove the class "menu-icon" to get rid of menu icon. Take out "Menu" to just have icon alone -->
-			<li class="toggle-topbar menu-icon"><a href="#"><span>Menu</span></a></li>
-		</ul>
-		<section class="top-bar-section">
-			<!-- Right Nav Section -->
-			<ul class="right">
-				{{> atNavButton}}
-			</ul>
-			<!-- Left Nav Section -->
-			<ul class="left">
-				<li class="{{isActiveRoute regex='home'}}"><a href="{{pathFor 'home'}}">Home</a></li>
-			</ul>
-		</section>
-	</nav>
+	<div class="top-bar">
+		<div class="top-bar-title">
+			<span data-responsive-toggle="responsive-menu" data-hide-for="medium">
+				<span class="menu-icon dark" data-toggle></span>
+			</span>
+			<strong>{{projectName}}</strong>
+		</div>
+		<div id="responsive-menu">
+			<div class="top-bar-right">
+				<ul class="menu">
+					<li>{{> atNavButton}}</li>
+				</ul>
+			</div>
+		</div>
+	</div>
 </div>
 
 </template>
@@ -53,64 +49,70 @@
 <template name="navbar">
 <span class="debug">{{currentTemplateName}}</span>
 
-
-<div class="fixed">
-	<div class="top-bar">
-		<div class="top-bar-left">
-			<ul class="dropdown menu" data-dropdown-menu>
-			<li class="menu-text">{{projectName}}</li>
-			<li class="has-submenu">
-				<a href="#">One</a>
-				<ul class="submenu menu vertical" data-submenu>
-				<li><a href="#">One</a></li>
-				<li><a href="#">Two</a></li>
-				<li><a href="#">Three</a></li>
-				</ul>
-			</li>
-			<li><a href="#">Two</a></li>
-			<li><a href="#">Three</a></li>
-			</ul>
-		</div>
-		<div class="top-bar-right">
-			<ul class="menu">
-			<li><input type="search" placeholder="Search"></li>
-			<li><button type="button" class="button">Search</button></li>
-			</ul>
-		</div>
+<span class="debug">TODO: should be only visible on mobile.</span>
+	
+	<div class="title-bar" data-responsive-toggle="main-menu" data-hide-for="medium">
+		<button class="menu-icon" type="button" data-toggle></button>
+		<div class="title-bar-title">Menu</div>
 	</div>
-</div>
+	
+<span class="debug">TODO: home link not align properly. Burger menu useless.</span>
 
-
-<nav class="navbar navbar-default navbar-static-top">
-	<div class="container">
-		<div class="navbar-header">
-			<!-- offcanvas menü -->
-			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-				<span class="sr-only">Toggle navigation</span>
-				<span class="icon-bar"></span>
-				<span class="icon-bar"></span>
-				<span class="icon-bar"></span>
-			</button>
-			<a class="navbar-brand" href="/">{{projectName}}</a>
+	<div class="top-bar" id="main-menu">
+		<div class="top-bar-title">
+			<span data-responsive-toggle="responsive-menu" data-hide-for="medium">
+				<span class="menu-icon dark" data-toggle></span>
+			</span>
+			<strong>
+				<a href="{{pathFor 'home'}}">
+					<span aria-hidden="true"><i class="fi-home"></i></span>
+					{{projectName}}
+				</a>
+			</strong>
 		</div>
-		<div class="nav navbar-left">
-			<div class="navbar-text">
-				{{> atNavButton}}
+		<div id="responsive-menu">
+			<div class="top-bar-left">
+				<ul class="dropdown menu" data-dropdown-menu>
+					<li class="{{isActiveRoute regex='time'}}"><a href="{{pathFor 'time'}}">
+						<span aria-hidden="true"><i class="fi-refresh"></i></span>
+						Track Times
+					</a></li>
+					<li class="{{isActiveRoute regex='item'}}"><a href="{{pathFor 'item'}}">
+						<span aria-hidden="true"><i class="fi-list-thumbnails"></i></span>
+						List Items
+					</a></li>
+					<li class="{{isActiveRoute regex='reports'}}"><a href="{{pathFor 'reports'}}">
+						<span aria-hidden="true"><i class="fi-graph-trend"></i></span>
+						Reports
+					</a></li>
+					<li class="{{isActiveRoute regex='settings'}}"><a href="{{pathFor 'settings'}}">
+						<span aria-hidden="true"><i class="fi-wrench"></i></span>
+						Settings
+					</a></li>
+					<!--
+					<li class="{{isActiveRoute regex='logout'}}"><a href="{{pathFor 'logout'}}">
+						<span aria-hidden="true"><i class="fi-power"></i></span>
+						Logout
+					</a></li>
+					-->
+				</ul>
+			</div>
+			<div class="top-bar-right">
+				<ul class="menu">
+					<li><input type="search" placeholder="Search"></li>
+					<li>
+						<button class="button" type="button">
+							<!-- Screen readers will see "close" -->
+							<span class="show-for-sr">Search</span>
+							<!-- Visual users will see the X, but not the "Close" text -->
+							<span aria-hidden="true"><i class="fi-magnifying-glass"></i></span>
+						</button>
+					</li>
+					<li>{{> atNavButton}}</li>
+				</ul>
 			</div>
 		</div>
-		
-		<div id="navbar" class="navbar-collapse collapse">
-			<ul class="nav navbar-nav">
-				<li><a href="#time">Track Times</a></li>
-				<li><a href="#reports">Reports</a></li>
-				<li><a href="#settings">Settings</a></li>
-				<li><a href="#stop">Stop Time</a></li>
-				<li><a href="#logout">Logout</a></li>
-			</ul>
-		</div>		
-		<!--/.nav-collapse -->
 	</div>
-</nav>
 
 </template>
 
@@ -122,7 +124,6 @@
 <span class="debug">{{currentTemplateName}}</span>
   
    {{> atForm state='signIn'}}
-   <span class="debug">TODO: login form ?!?</span>
    
 </template>
 
@@ -130,7 +131,6 @@
 <span class="debug">{{currentTemplateName}}</span>
   
    {{> atForm state='signUp'}}
-   <span class="debug">TODO: register form ?!?</span>
    
 </template>
 
@@ -220,4 +220,8 @@
     <h3>404 - Houston, we have a problem!!!</h3>
     <h5>The page you're looking for was not found.</h5>
   </div>
+</template>
+
+<template name="atNavButton-test-bootstrap">
+  <button type="button" id="at-nav-button" class="btn btn-default navbar-btn">{{text}}</button>
 </template>

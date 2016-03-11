@@ -20,7 +20,6 @@ iron:router
 check
 accounts-password
 momentjs:moment
-fortawesome:fontawesome
 aldeed:collection2
 aldeed:autoform
 sacha:spin
@@ -29,3 +28,4 @@ useraccounts:foundation
 useraccounts:iron-routing
 useraccounts:core
 zimme:active-route
+maibaum:foundation-icons

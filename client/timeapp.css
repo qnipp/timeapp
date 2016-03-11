@@ -19,3 +19,24 @@ span.debug::before {
 span.debug::after{ 
     content: " */";
 }
+
+
+/* 
+ * Preventing FOUC
+ * http://foundation.zurb.com/sites/docs/responsive-navigation.html
+ * make sure we can't see both top-bar and title-bar at once during start
+ * */
+
+.no-js .top-bar {
+  display: none;
+}
+
+@media screen and (min-width: 40em) {
+  .no-js .top-bar {
+    display: block;
+  }
+
+  .no-js .title-bar {
+    display: none;
+  }
+}
