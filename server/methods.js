@@ -29,13 +29,7 @@ Meteor.methods({
 		return Items.insert(item);
 	},
 	itemUpdate: function (item) {
-		console.log('methods:itemUpdate - '+ item._id);
-		
-		//return Items.update(item._id, item, {validate: false});
-		//return Items.upsert(item._id, item);
-		
+		console.log('methods:itemUpdate - #'+ item._id +' - '+item.title);
 		return Items.update(item._id, item.modifier);
-		
-		//return Items.update(item._id, {$set: {title: item.item, description: item.description}});
 	},
 });

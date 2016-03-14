@@ -144,6 +144,32 @@
 
 <template name="itemrecentlist">
 <span class="debug">template: {{currentTemplateName}}</span>
+
+<div class="panel panel-default">
+
+	<div class="panel-heading">Your recent items:</div>
+	<table class="table table-striped table-hover">
+		<thead class="thead-default">
+			<tr>
+				<th>Path</th>
+				<th>Item</th>
+				<th>Time</th>
+				<th>start/stop</th>
+			</tr>
+		</thead>
+		<tbody>
+		{{#each item in recentitems}}
+			<tr>
+				<th scope="row">{{item.path}}</th>
+				<td><a href="{{pathFor 'item.detail' _id=item._id}}">{{item.title}}</a></td>
+				<td>{{item.timeelapsed}}</td>
+				<td><button class="button">start</button></td>
+			</tr>
+		{{/each}}
+		</tbody>
+	</table>
+</div>
+
 </template>
 
 <template name="itemcomment">
@@ -175,7 +201,6 @@
 <span class="debug">template: {{currentTemplateName}}</span>
 	{{> itemtree}}
 	
-	<!-- if a new item is created -->
 	{{#if equals currentRoute "item.create"}}
 		{{> leafform parentitem=_id}}
 	{{else}}
@@ -214,7 +239,6 @@
 		{{> quickForm collection="Items" id="insertItemForm" type="method" meteormethod="itemInsert"}}
 	{{/if}}
 	
-	
 </template>
 
 <template name="branchform">
@@ -235,8 +259,65 @@
 
 <!-- route: time -->
 
+<template name="timecontainer">
+<span class="debug">template: {{currentTemplateName}}</span>
+	{{> timelist}}
+	
+	{{#if equals currentRoute "time.create"}}
+		{{> timeform parentitem=_id}}
+	{{else}}
+		{{#if _id}}
+			{{> timeform _id=_id}}
+		{{/if}}
+	{{/if}}
+</template>
+
+
+<template name="timelist">
+<span class="debug">template: {{currentTemplateName}}</span>
+
+
+	<div class="panel-heading">Times:</div>
+	<table class="table table-striped table-hover">
+		<thead class="thead-default">
+			<tr>
+				<th>Path</th>
+				<th>Item</th>
+				<th>start</th>
+				<th>end</th>
+			</tr>
+		</thead>
+		<tbody>
+		{{#each time in times}}
+			<tr>
+				<th scope="row">{ {time.item.path} }</th>
+				<td><a href="{ {pathFor 'item.detail' _id=time.item._id} }">{ {time.item.title} }</a></td>
+				<td>{{time.start}}</td>
+				<td>{{time.end}}</td>
+			</tr>
+		{{/each}}
+		</tbody>
+	</table>
+
+</template>
+
 <template name="timeform">
 <span class="debug">template: {{currentTemplateName}}</span>
+
+	{{#if _id}}
+		
+		<h3>Edit Time Entry [ {{time._id}} ]</h3> 
+				
+		{{> quickForm collection="Times" id="editTimeForm" doc=time type="method-update" meteormethod="timeUpdate" singleMethodArgument=true}}
+		
+		<a class="btn" href="{{pathFor 'time.list'}}">Back</a>
+		
+	{{else}}
+		<h3>New Time Entry</h3> 
+		
+		{{> quickForm collection="Times" id="insertTimeForm" type="method" meteormethod="timeInsert"}}
+	{{/if}}
+	
 </template>
 
 <!-- route: report -->
@@ -262,4 +343,9 @@
 
 <template name="atNavButton-test-bootstrap">
   <button type="button" id="at-nav-button" class="btn btn-default navbar-btn">{{text}}</button>
+</template>
+
+<template name="autocompleteItem">
+<span class="debug">template: {{currentTemplateName}}</span>
+Did you mean: {{title}} or {{item.title}}
 </template>

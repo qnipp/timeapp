@@ -1,8 +1,10 @@
 
+// subscribe to publications in server.js
 Meteor.subscribe(
 	'items.mine',
 	'hierarchy.mine',
 	'times.mine',
+	'times.mine.sum',
 	'attribs.mine',
 	'users',
 	);
@@ -28,17 +30,45 @@ Template.registerHelper('equals', function (a, b) {
 });
 
 
+//////////// ITEMS ////////////
+
+
 Template.itemtree.helpers({
 	items: function () {
-		//return [{ title: "test", _id: "1232131" },{ title: "test2", _id: "2424232" }];
 		return Items.find({});
 	}
 });
 
 Template.leafform.helpers({
 	item: function () {
-		//return [{ title: "test", _id: "1232131" },{ title: "test2", _id: "2424232" }];
 		return Items.findOne({_id: this._id});
+	}
+});
+
+
+Template.itemrecentlist.helpers({
+	recentitems: function() {
+		var items = Items.find({});
+			
+		items.forEach(function(item) {
+			item.timeelapsed = Times.find({item: item._id, date: "2016-03-12"}, {fields: {timeelapsed: 1} } );
+		});
+		
+		return items;
+	},
+});
+
+//////////// TIMES ////////////
+
+Template.timelist.helpers({
+	times: function () {
+		return Times.find({}, {orderBy: {createdAt: -1}});
+	}
+});
+
+Template.timeform.helpers({
+	time: function () {
+		return Times.findOne({_id: this._id});
 	}
 });
 
