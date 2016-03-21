@@ -12,6 +12,11 @@ span.debug {
     table-layout: fixed;
     border-collapse: collapse;
 	
+	
+	
+	display: none;
+	visibility: hidden;
+	
 }
 span.debug::before { 
     content: "/* ";

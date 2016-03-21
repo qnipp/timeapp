@@ -57,6 +57,7 @@ Meteor.publish("times.mine", function() {
 	});
 });
 
+/*
 Meteor.publish("times.mine.sum", function() {
 	self = this;
 	
@@ -67,7 +68,7 @@ Meteor.publish("times.mine.sum", function() {
 					date: { $concat: [ {$year: "$start"}, "-", {$month: "$start"}, "-", {$dayOfMonth: "$start"} ]}
 		}}, // limit to list of fields or rename fields
 		{$group: {_id:  {_id: "$_id"}}}]);
-});
+});*/
 
 Meteor.publish("attribs.mine", function() {
 	return Attributes.find({

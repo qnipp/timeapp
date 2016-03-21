@@ -1,0 +1,108 @@
+ 
+
+		<th scope="row">{ {time.item.path} }</th>
+		<td><a href="{{pathFor 'item.detail' _id=time.item._id}}">{{time.item.title}}</a></td>
+		<td>{{time.start}}</td>
+		<td>{{time.end}}</td>
+
+
+
+
+
+db.times.aggregate([ { $project: { item: 1, timeelapsed: { $subtract: [ "$end", "$start" ] } } } ] )
+
+
+db.times.aggregate(
+   [
+     {
+       $group:
+         {
+           _id: { day: { $dayOfYear: "$start"}, year: { $year: "$start" } },
+           total: { $sum: {  $subtract: [ "$end", "$start" ] } },
+           count: { $sum: 1 }
+         }
+     }
+   ]
+)
+
+db.times.aggregate([
+	{ $group: {
+		_id: { item: "$item" },			
+		total: { $sum: {  $subtract: [ "$end", "$start" ] } },
+			count: { $sum: 1 }
+	}}
+])
+
+db.times.aggregate([
+	{ $group: {
+		_id: { item: "$item" },
+		total: { $sum: { $cond: [ { $gt: [ "$end", 0 ] }, 
+			{  $subtract: [ "$end", "$start" ] }, 
+			{  $subtract: [ new Date(), "$start" ] } ] }},
+		emptycount: {$sum: { $cond: [ { $gt: [ "$end", 0 ] }, 0, 1 ] }}
+	}}
+])
+
+# geht ned
+db.times.aggregate([
+	{ $group: {
+		_id: { item: "$item" },			
+		total: { $sum: {  $subtract: [
+			"$cond: { if: { $ne: [ "$end", null ]  }, then: $end, else: new Date() }", 
+			"$start" ] } },
+		count: { $sum: 1 }
+	}}
+])
+
+# geht a ned
+db.times.aggregate([
+	{ $group: {
+		_id: { item: "$item" },			
+		total:
+			{ $cond: [ { $ne: [ "$end", null ]  }, 
+				{ $sum: {  $subtract: [ "$end", "$start" ] } }, 
+				{ $sum: {  $subtract: [ new Date(), "$start" ] } }
+			] },
+		count: { $sum: 1 }
+	}}
+])
+
+
+
+
+			
+
+
+db.times.aggregate([
+	{ $match: {
+		start: {
+			$gte: new Date(new Date().setHours(0,0,0,0)),
+			$lte: new Date(new Date().setHours(23,59,59,999)) 
+		}
+	}},
+	{ $group: {
+			_id: { day: { $dayOfYear: "$start"}, year: { $year: "$start" } },
+			
+			total: { $sum: {  $subtract: [ "$end", "$start" ] } },
+			count: { $sum: 1 }
+	}}
+])
+
+
+
+db.times.aggregate([
+	{ $match: {
+		item: "6kcJ4Zz76RLptagyu",
+		start: {
+			$gte: new Date(new Date().setHours(0,0,0,0)),
+			$lte: new Date(new Date().setHours(23,59,59,999)) 
+		}
+	}},
+	{ $group: {
+			_id: null,
+			total: { $sum: {  $subtract: [ "$end", "$start" ] } }
+	}}
+])
+
+
+new Date().setHours(23,59,59,999)

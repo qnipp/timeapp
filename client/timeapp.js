@@ -1,20 +1,22 @@
 
 // subscribe to publications in server.js
-Meteor.subscribe(
-	'items.mine',
-	'hierarchy.mine',
-	'times.mine',
-	'times.mine.sum',
-	'attribs.mine',
-	'users',
-	);
+Meteor.subscribe('items.mine');
+Meteor.subscribe('times.mine');
+Meteor.subscribe('hierarchy.mine');
+Meteor.subscribe('attribs.mine');
+//Meteor.subscribe('users');
 
+
+// TODO: remove DEBUG
+SimpleSchema.debug = true;
+
+
+counter = 0;
+
+//////////// GLOBALS ////////////
 
 Template.registerHelper('currentTemplateName', function() {
-	var currentTemplateName = Blaze.currentView.parentView.name;
-	//console.log(currentTemplateName);
-	currentTemplateName = currentTemplateName.replace('Template.', '').replace('.', '-');
-	return currentTemplateName;
+	return Blaze.currentView.parentView.name.replace('Template.', '').replace('.', '-');
 });
 
 Template.registerHelper('currentRoute', function() {
@@ -28,6 +30,32 @@ Template.registerHelper('projectName', function() {
 Template.registerHelper('equals', function (a, b) {
 	return a === b;
 });
+
+Template.registerHelper('log', function(log) {
+	console.log("// DEBUG in "+ Blaze.currentView.parentView.name.replace('Template.', '').replace('.', '-') + ': '+ log);	
+});
+	
+Template.registerHelper('var_dump', function(optionalValue) {
+	
+	console.log("// DEBUG in "+ Blaze.currentView.parentView.name.replace('Template.', '').replace('.', '-'));
+	
+	if (typeof optionalValue !== "undefined") {
+		console.log("var_dump(value): ");
+		console.log(optionalValue);
+		console.log("====================");
+	} else {
+		// if(typeof optionalValue !== "undefined") {
+		console.log("var_dump(this): ");
+		console.log(this);
+		console.log("====================");
+	}
+});
+
+// make Schema available in Templates (?)
+// see: http://autoform.meteor.com/updateaf
+Template.registerHelper("Schemas", Schemas);
+Template.registerHelper("Collections", Collections);
+
 
 
 //////////// ITEMS ////////////
@@ -45,24 +73,72 @@ Template.leafform.helpers({
 	}
 });
 
-
 Template.itemrecentlist.helpers({
-	recentitems: function() {
-		var items = Items.find({});
-			
-		items.forEach(function(item) {
-			item.timeelapsed = Times.find({item: item._id, date: "2016-03-12"}, {fields: {timeelapsed: 1} } );
-		});
-		
-		return items;
+	itemsrecent: function() {
+		return Items.find({});
 	},
 });
+
+Template.itemrecentlistentry.helpers({
+	item: function() {
+		return loadItem(this, null);
+	},
+});
+
+Template.itemrecentlistentry.events({
+	'click button.jsitemstop': function() {
+		Meteor.call("setItemEnd", this._id);
+	},
+	'click button.jsitemstart': function() {
+		Meteor.call("setItemStart", this._id);
+	},
+});
+
+
 
 //////////// TIMES ////////////
 
 Template.timelist.helpers({
 	times: function () {
-		return Times.find({}, {orderBy: {createdAt: -1}});
+		return Times.find({}, {sort: {createdAt: -1}});
+	}
+});
+
+
+Template.timerunninglist.helpers({
+	timesrunning: function() {
+		return Times.find({end: {
+				$not: {$ne: null}
+			}});
+	},
+});
+
+Template.timelistentry.events({
+	'click button.jstimestop': function() {
+		Meteor.call("setTimeEnd", this._id);
+	},
+});
+
+Template.timelistentry.helpers({
+	time: function () {
+		var time = this.time;
+				
+		time.item = loadItem(time.item, null);
+		
+		if(time.end) {
+			time.duration_fmt = formatDuration(time.end - time.start);
+		} else {
+			time.duration_fmt = formatDuration(new Date() - time.start);
+		}
+		
+		if(time.start) {
+			time.start_fmt = moment.utc(time.start).format(CNF.FORMAT_DATETIME);
+		}
+		if(time.end) {
+			time.end_fmt = moment.utc(time.end).format(CNF.FORMAT_DATETIME);
+		}
+		
+		return time;
 	}
 });
 
