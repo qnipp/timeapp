@@ -71,6 +71,7 @@ Template.registerHelper("Collections", Collections);
 //////////// ITEMS ////////////
 
 
+/*
 dependItemTree = new Tracker.Dependency();
 
 Template.itemtree.onRendered(function () {
@@ -78,9 +79,6 @@ Template.itemtree.onRendered(function () {
 		core: {
 			data: function (node, cb) {
 				dependItemTree.depend();
-				
-				
-				
 				
 				console.log('Template.itemtree.onRendered');
 				console.log(node);
@@ -114,13 +112,6 @@ Template.itemtree.onRendered(function () {
 							item.parent = '1';
 							//item.parent = null;
 						}
-						/*
-						// fild children
-						hierarchyelement = Hierarchy.findOne({upperitem: item._id}, {fields: {loweritem: 1}});
-						if (hierarchyelement) {
-							item.children = true;
-						}*/
-						
 					});
 					
 					cb(nodes);
@@ -130,23 +121,9 @@ Template.itemtree.onRendered(function () {
 	});
 });
 
-
-/*
-$('#jstree')
-  // listen for event
-  .on('changed.jstree', function (e, data) {
-    var i, j, r = [];
-    for(i = 0, j = data.selected.length; i < j; i++) {
-      r.push(data.instance.get_node(data.selected[i]).text);
-    }
-    $('#event_result').html('Selected: ' + r.join(', '));
-  })
-  // create the instance
-  .jstree();
-  */
   
 Template.itemtree.events({
-	'changed .jstree': function(node, event) {
+	'changed.jstree .jstree-node': function(node, event) {
 		console.log("tree node was activated..");
 		
 		alert(node);
@@ -156,7 +133,18 @@ Template.itemtree.events({
 		console.log("event: ");
 		console.log(event);
 	},
+	'click .jstree-node': function(node, event) {
+		console.log("tree node was clicked..");
+		
+		alert(node);
+		
+		console.log("node: ");
+		console.log(node);
+		console.log("event: ");
+		console.log(event);
+	},
 });
+*/
 
 Template.itemtree.helpers({
 	items: function () {
