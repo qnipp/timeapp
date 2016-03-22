@@ -23,13 +23,14 @@ momentjs:moment
 aldeed:collection2
 aldeed:autoform
 sacha:spin
-zurb:foundation-sites
-useraccounts:foundation
 useraccounts:iron-routing
 useraccounts:core
 zimme:active-route
-maibaum:foundation-icons
 meteorhacks:aggregate
 mpowaga:autoform-autocomplete
 mizzao:autocomplete
 aldeed:autoform-bs-datetimepicker
+twbs:bootstrap
+fortawesome:fontawesome
+ian:accounts-ui-bootstrap-3
+jss:jstree

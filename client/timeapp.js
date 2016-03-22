@@ -31,6 +31,16 @@ Template.registerHelper('equals', function (a, b) {
 	return a === b;
 });
 
+Template.registerHelper('ifsetelse', function (attrib, isSet, isNot) {
+	if(attrib) {
+		return isSet;
+	} else if(isNot) {
+		return isNot;
+	} else {
+		return '';
+	}
+});
+
 Template.registerHelper('log', function(log) {
 	console.log("// DEBUG in "+ Blaze.currentView.parentView.name.replace('Template.', '').replace('.', '-') + ': '+ log);	
 });
@@ -61,6 +71,93 @@ Template.registerHelper("Collections", Collections);
 //////////// ITEMS ////////////
 
 
+dependItemTree = new Tracker.Dependency();
+
+Template.itemtree.onRendered(function () {
+	this.$('div.itemtree').jstree({
+		core: {
+			data: function (node, cb) {
+				dependItemTree.depend();
+				
+				
+				
+				
+				console.log('Template.itemtree.onRendered');
+				console.log(node);
+				
+				if(node.id === '#') {
+					
+					var rootNode = [{
+						text : 'Your Items',
+						id : '1',
+						children : true
+					}];
+					cb(rootNode);
+					
+				}
+				else {
+					
+				
+					var nodes = Items.find().fetch();
+					var hierarchyelement = null;
+					
+					_.forEach(nodes, function(item){
+						//process item
+						item.text = item.title;
+						item.id = item._id;
+						
+						// find parent
+						hierarchyelement = Hierarchy.findOne({loweritem: item._id}, {fields: {upperitem: 1}});
+						if (hierarchyelement) {
+							item.parent = hierarchyelement.upperitem;
+						} else {
+							item.parent = '1';
+							//item.parent = null;
+						}
+						/*
+						// fild children
+						hierarchyelement = Hierarchy.findOne({upperitem: item._id}, {fields: {loweritem: 1}});
+						if (hierarchyelement) {
+							item.children = true;
+						}*/
+						
+					});
+					
+					cb(nodes);
+				}
+			}
+		}
+	});
+});
+
+
+/*
+$('#jstree')
+  // listen for event
+  .on('changed.jstree', function (e, data) {
+    var i, j, r = [];
+    for(i = 0, j = data.selected.length; i < j; i++) {
+      r.push(data.instance.get_node(data.selected[i]).text);
+    }
+    $('#event_result').html('Selected: ' + r.join(', '));
+  })
+  // create the instance
+  .jstree();
+  */
+  
+Template.itemtree.events({
+	'changed .jstree': function(node, event) {
+		console.log("tree node was activated..");
+		
+		alert(node);
+		
+		console.log("node: ");
+		console.log(node);
+		console.log("event: ");
+		console.log(event);
+	},
+});
+
 Template.itemtree.helpers({
 	items: function () {
 		return Items.find({});
@@ -86,10 +183,10 @@ Template.itemrecentlistentry.helpers({
 });
 
 Template.itemrecentlistentry.events({
-	'click button.jsitemstop': function() {
+	'click .jsitemstop': function() {
 		Meteor.call("setItemEnd", this._id);
 	},
-	'click button.jsitemstart': function() {
+	'click .jsitemstart': function() {
 		Meteor.call("setItemStart", this._id);
 	},
 });
@@ -104,7 +201,6 @@ Template.timelist.helpers({
 	}
 });
 
-
 Template.timerunninglist.helpers({
 	timesrunning: function() {
 		return Times.find({end: {
@@ -114,7 +210,7 @@ Template.timerunninglist.helpers({
 });
 
 Template.timelistentry.events({
-	'click button.jstimestop': function() {
+	'click .jstimestop': function() {
 		Meteor.call("setTimeEnd", this._id);
 	},
 });
@@ -140,6 +236,12 @@ Template.timelistentry.helpers({
 		
 		return time;
 	}
+});
+
+Template.timeform.events({
+	'click .jstimeremove': function() {
+		Meteor.call("timeRemove", this._id);
+	},
 });
 
 Template.timeform.helpers({

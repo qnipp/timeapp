@@ -1,3 +1,76 @@
+
+
+<template name="navbar-foundation">
+<span class="debug">template: {{currentTemplateName}}</span>
+
+<span class="debug">TODO: should be only visible on mobile.</span>
+	
+	<div class="title-bar" data-responsive-toggle="main-menu" data-hide-for="medium">
+		<button class="menu-icon" type="button" data-toggle></button>
+		<div class="title-bar-title">Menu</div>
+	</div>
+	
+<span class="debug">TODO: home link not align properly. Burger menu useless.</span>
+
+	<div class="top-bar" id="main-menu">
+		<div class="top-bar-title">
+			<span data-responsive-toggle="responsive-menu" data-hide-for="medium">
+				<span class="menu-icon dark" data-toggle></span>
+			</span>
+			<strong>
+				<a href="{{pathFor 'home'}}">
+					<span aria-hidden="true"><i class="fi-home"></i></span>
+					{{projectName}}
+				</a>
+			</strong>
+		</div>
+		<div id="responsive-menu">
+			<div class="top-bar-left">
+				<ul class="dropdown menu" data-dropdown-menu>
+					<li class="{{isActiveRoute regex='time'}}"><a href="{{pathFor 'time.list'}}">
+						<span aria-hidden="true"><i class="fi-refresh"></i></span>
+						Track Times
+					</a></li>
+					<li class="{{isActiveRoute regex='item'}}"><a href="{{pathFor 'item.list'}}">
+						<span aria-hidden="true"><i class="fi-list-thumbnails"></i></span>
+						List Items
+					</a></li>
+					<li class="{{isActiveRoute regex='reports'}}"><a href="{{pathFor 'reports'}}">
+						<span aria-hidden="true"><i class="fi-graph-trend"></i></span>
+						Reports
+					</a></li>
+					<li class="{{isActiveRoute regex='settings'}}"><a href="{{pathFor 'settings'}}">
+						<span aria-hidden="true"><i class="fi-wrench"></i></span>
+						Settings
+					</a></li>
+					<!--
+					<li class="{{isActiveRoute regex='logout'}}"><a href="{{pathFor 'logout'}}">
+						<span aria-hidden="true"><i class="fi-power"></i></span>
+						Logout
+					</a></li>
+					-->
+				</ul>
+			</div>
+			<div class="top-bar-right">
+				<ul class="menu">
+					<li><input type="search" placeholder="Search"></li>
+					<li>
+						<button class="button" type="button">
+							<!-- Screen readers will see "close" -->
+							<span class="show-for-sr">Search</span>
+							<!-- Visual users will see the X, but not the "Close" text -->
+							<span aria-hidden="true"><i class="fi-magnifying-glass"></i></span>
+						</button>
+					</li>
+					<li>{ {> atNavButton} }</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+
+</template>
+
+
  
 
 		<th scope="row">{ {time.item.path} }</th>

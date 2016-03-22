@@ -112,10 +112,16 @@ Meteor.methods({
 	},
 	timeUpdate: function (time) {
 		console.log('methods:timeUpdate #'+ time._id + ' - ' + time.modifier.$set.start);
-		console.log(time.modifier.$set);
+		//console.log(time.modifier.$set);
 		
 		check(time.modifier.$set, Schemas.Times);
 		return Times.update(time._id, time.modifier);
+	},
+	
+	timeRemove: function (timeid) {
+		console.log('methods:timeRemove #'+ timeid);
+		// TODO: check if my time entry
+		return Times.remove({_id: timeid});
 	},
 });
 

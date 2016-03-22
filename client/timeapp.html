@@ -35,7 +35,7 @@
 		<div id="responsive-menu">
 			<div class="top-bar-right">
 				<ul class="menu">
-					<li>{{> atNavButton}}</li>
+					<li>{ {> atNavButton} }</li>
 				</ul>
 			</div>
 		</div>
@@ -49,73 +49,96 @@
 <template name="navbar">
 <span class="debug">template: {{currentTemplateName}}</span>
 
-<span class="debug">TODO: should be only visible on mobile.</span>
+<nav class="navbar navbar-default">
+	<div class="container-fluid">
 	
-	<div class="title-bar" data-responsive-toggle="main-menu" data-hide-for="medium">
-		<button class="menu-icon" type="button" data-toggle></button>
-		<div class="title-bar-title">Menu</div>
-	</div>
-	
-<span class="debug">TODO: home link not align properly. Burger menu useless.</span>
-
-	<div class="top-bar" id="main-menu">
-		<div class="top-bar-title">
-			<span data-responsive-toggle="responsive-menu" data-hide-for="medium">
-				<span class="menu-icon dark" data-toggle></span>
-			</span>
-			<strong>
-				<a href="{{pathFor 'home'}}">
-					<span aria-hidden="true"><i class="fi-home"></i></span>
-					{{projectName}}
-				</a>
-			</strong>
+		<!-- Brand and toggle get grouped for better mobile display -->
+		<div class="navbar-header">
+			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+			<span class="sr-only">Toggle navigation</span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			<span class="icon-bar"></span>
+			</button>
+			<a class="navbar-brand" href="{{pathFor 'home'}}">
+				<span aria-hidden="true"><i class="glyphicon glyphicon-home"></i></span>
+				{{projectName}}
+			</a>
 		</div>
-		<div id="responsive-menu">
-			<div class="top-bar-left">
-				<ul class="dropdown menu" data-dropdown-menu>
-					<li class="{{isActiveRoute regex='time'}}"><a href="{{pathFor 'time.list'}}">
-						<span aria-hidden="true"><i class="fi-refresh"></i></span>
-						Track Times
-					</a></li>
-					<li class="{{isActiveRoute regex='item'}}"><a href="{{pathFor 'item.list'}}">
-						<span aria-hidden="true"><i class="fi-list-thumbnails"></i></span>
-						List Items
-					</a></li>
-					<li class="{{isActiveRoute regex='reports'}}"><a href="{{pathFor 'reports'}}">
-						<span aria-hidden="true"><i class="fi-graph-trend"></i></span>
-						Reports
-					</a></li>
-					<li class="{{isActiveRoute regex='settings'}}"><a href="{{pathFor 'settings'}}">
-						<span aria-hidden="true"><i class="fi-wrench"></i></span>
-						Settings
-					</a></li>
-					<!--
-					<li class="{{isActiveRoute regex='logout'}}"><a href="{{pathFor 'logout'}}">
-						<span aria-hidden="true"><i class="fi-power"></i></span>
-						Logout
-					</a></li>
-					-->
-				</ul>
-			</div>
-			<div class="top-bar-right">
-				<ul class="menu">
-					<li><input type="search" placeholder="Search"></li>
-					<li>
-						<button class="button" type="button">
-							<!-- Screen readers will see "close" -->
-							<span class="show-for-sr">Search</span>
-							<!-- Visual users will see the X, but not the "Close" text -->
-							<span aria-hidden="true"><i class="fi-magnifying-glass"></i></span>
-						</button>
-					</li>
-					<li>{{> atNavButton}}</li>
-				</ul>
-			</div>
+		<!-- Collect the nav links, forms, and other content for toggling -->
+		<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+			<ul class="nav navbar-nav">
+				<li class="{{isActiveRoute regex='time'}}"><a href="{{pathFor 'time.list'}}">
+					<span aria-hidden="true"><i class="glyphicon glyphicon-time"></i></span>
+					Track Times
+				</a></li>
+				<li class="{{isActiveRoute regex='item'}}"><a href="{{pathFor 'item.list'}}">
+					<span aria-hidden="true"><i class="glyphicon glyphicon-tasks"></i></span>
+					List Items
+				</a></li>
+				<li class="{{isActiveRoute regex='reports'}}"><a href="{{pathFor 'reports'}}">
+					<span aria-hidden="true"><i class="glyphicon glyphicon-signal"></i></span>
+					Reports
+				</a></li>
+				<li class="{{isActiveRoute regex='settings'}}"><a href="{{pathFor 'settings'}}">
+					<span aria-hidden="true"><i class="glyphicon glyphicon-cog"></i></span>
+					Settings
+				</a></li>
+				<!--
+				<li class="{{isActiveRoute regex='logout'}}"><a href="{{pathFor 'logout'}}">
+					<span aria-hidden="true"><i class="fi-power"></i></span>
+					Logout
+				</a></li>
+				-->
+				<!--
+				<li><a href="#">Link</a></li>
+				<li class="dropdown">
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+					<ul class="dropdown-menu">
+						<li><a href="#">Action</a></li>
+						<li><a href="#">Another action</a></li>
+						<li><a href="#">Something else here</a></li>
+						<li role="separator" class="divider"></li>
+						<li><a href="#">Separated link</a></li>
+						<li role="separator" class="divider"></li>
+						<li><a href="#">One more separated link</a></li>
+					</ul>
+				</li>
+				-->
+			</ul>
+			<form class="navbar-form navbar-right" role="search">
+				<div class="form-group">
+					<input type="text" class="form-control" placeholder="Search">
+				</div>
+				<button type="submit" class="btn btn-default">
+					<span aria-hidden="true"><i class="glyphicon glyphicon-search"></i></span>
+				</button>
+				
+				
+			</form>
+			<ul class="nav navbar-nav navbar-right">
+				<!--
+				<li><a href="#">Link</a></li>
+				<li class="dropdown">
+					<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+					<ul class="dropdown-menu">
+						<li><a href="#">Action</a></li>
+						<li><a href="#">Another action</a></li>
+						<li><a href="#">Something else here</a></li>
+						<li role="separator" class="divider"></li>
+						<li><a href="#">Separated link</a></li>
+					</ul>
+				</li>
+				-->
+				<li>{ {> atNavButton} }</li>
+			</ul>
 		</div>
+		<!-- /.navbar-collapse -->
 	</div>
+	<!-- /.container-fluid -->
+</nav>
 
 </template>
-
 
 <!-- templates for main -->
 
@@ -162,9 +185,7 @@
 		</thead>
 		<tbody>
 		{{#each time in timesrunning}}
-			<tr>
-				{{>timelistentry time=time view="running"}}
-			</tr>
+			{{>timelistentry time=time view="running"}}
 		{{/each}}
 		</tbody>
 	</table>
@@ -189,9 +210,7 @@
 		</thead>
 		<tbody>
 		{{#each item in itemsrecent}}
-			<tr>
-				{{>itemrecentlistentry item}}
-			</tr>
+			{{>itemrecentlistentry item}}
 		{{/each}}
 		</tbody>
 	</table>
@@ -203,16 +222,22 @@
 <template name="itemrecentlistentry">
 <span class="debug">template: {{currentTemplateName}}</span>
 	{{#with item}}
+	<tr>
 		<th scope="row">{{path}}</th>
-		<td><a href="{{pathFor 'item.detail' _id=_id}}">{{title}}</a></td>
+		<td><a href="{{pathFor 'item.detail' _id=_id}}" class="{{ifsetelse keepOpen 'bold'}}">{{title}}</a></td>
 		<td>{{timeelapsed.today}} ({{timeelapsed.total}})</td>
 		<td>
 			{{#if isRunning}}
-				<button class="button alert jsitemstop">stop</button>
+				<button class="btn btn-default btn-danger jsitemstop">
+					<span class="glyphicon glyphicon-stop" aria-hidden="true"></span> stop
+				</button>
 			{{else}}
-				<button class="button success jsitemstart">start</button>
+				<button class="btn btn-default btn-success jsitemstart">
+					<span class="glyphicon glyphicon-play" aria-hidden="true"></span> start
+				</button>
 			{{/if}}
 		</td>
+	</tr>
 	{{/with}}
 </template>
 
@@ -226,11 +251,11 @@
 <div class="callout clearfix">
 	<ul class="float-right">
 		<li><a href="{{pathFor 'item.create' _id='0'}}">
-			<span aria-hidden="true"><i class="fi-plus"></i></span>
+			<span aria-hidden="true"><i class="glyphicon glyphicon-plus"></i></span>
 			New Item
 		</a></li>
 		<li><a href="{{pathFor 'time.create' _id='0'}}">
-			<span aria-hidden="true"><i class="fi-plus"></i></span>
+			<span aria-hidden="true"><i class="glyphicon glyphicon-plus"></i></span>
 			add Time
 		</a></li>
 	</ul>
@@ -258,6 +283,8 @@
 <template name="itemtree">
 <span class="debug">template: {{currentTemplateName}}</span>
 
+<div class="tree itemtree"></div>
+
 <ul>
 {{#each item in items}}
 	<li><a href="{{pathFor 'item.detail' _id=item._id}}">{{item.title}}</a></li>
@@ -269,20 +296,56 @@
 <template name="leafform">
 <span class="debug">template: {{currentTemplateName}}</span>
 
+	
+	<div class="panel panel-default">
+	
 	{{#if _id}}
 		
-		<h3>Edit Item [ {{item._id}} ]</h3> 
+		<div class="panel-heading">
+			<h4>Edit Item [ {{item._id}} ]</h4>
+		</div>
+		<div class="panel-body">
+		<!--{ {> quickForm collection="Collections.Items" id="formItem" doc=item type="method-update" meteormethod="itemUpdate" singleMethodArgument=true} }-->
+		{{#autoForm id="formItem" collection="Collections.Items" doc=item type="method-update" meteormethod="itemUpdate" singleMethodArgument=true}}
+		
+			{{> afFormGroup name="title" }}
+			{{> afFormGroup name="description" }}
+			{{> afFormGroup name="keepOpen" }}
+			
+			<div class="form-group">
+				<button type="submit" class="btn btn-primary">
+					<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Save
+				</button>
 				
-		{{> quickForm collection="Collections.Items" id="formItem" doc=item type="method-update" meteormethod="itemUpdate" singleMethodArgument=true}}
-		
-		
-		<a class="btn" href="{{pathFor 'item.list'}}">Back</a>
-		
+				<a class="btn" href="{{pathFor 'item.list'}}">Back</a>
+			</div>
+		{{/autoForm}}
+		</div>
+			
 	{{else}}
-		<h3>New Item</h3> 
 		
-		{{> quickForm collection="Collections.Items" id="formItem" type="method" meteormethod="itemInsert"}}
+		<div class="panel-heading">
+			<h4>New Item</h4>
+		</div>
+		<div class="panel-body">
+		<!-- { {> quickForm collection="Collections.Items" id="formItem" type="method" meteormethod="itemInsert"} } -->
+		{{#autoForm id="formItem" collection="Collections.Items" type="method" meteormethod="itemInsert"}}
+		
+			{{> afFormGroup name="title" }}
+			{{> afFormGroup name="description" }}
+			{{> afFormGroup name="keepOpen" }}
+			
+			<div class="form-group">
+				<button type="submit" class="btn btn-primary">
+					<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Create
+				</button>
+			</div>
+		{{/autoForm}}
+		</div>
+			
 	{{/if}}
+	
+	</div>
 	
 </template>
 
@@ -335,9 +398,7 @@
 		</thead>
 		<tbody>
 		{{#each time in times}}
-			<tr>
-				{{>timelistentry time=time view="all"}}
-			</tr>
+			{{>timelistentry time=time view="all"}}
 		{{/each}}
 		</tbody>
 	</table>
@@ -348,11 +409,10 @@
 <span class="debug">template: {{currentTemplateName}}</span>
 
 	{{#with time}}
-	
+	<tr>
 		<th scope="row">{{item.path}}</th>
-		<td><a href="{{pathFor 'item.detail' _id=item._id}}">{{item.title}}</a></td>
+		<td><a href="{{pathFor 'item.detail' _id=item._id}}" class="{{ifsetelse item.keepOpen 'bold'}}">{{item.title}}</a></td>
 		<td><a href="{{pathFor 'time.detail' _id=_id}}">{{start_fmt}}</a></td>
-	
 	
 	{{#if equals ../view "all"}}
 		<td>{{end_fmt}}</td>
@@ -361,10 +421,14 @@
 		<td>{{duration_fmt}}</td>
 		
 	{{#if equals ../view "running"}}
-		<td><button class="button alert jstimestop">stop</button></td>
+		<td>
+			<button class="btn btn-default btn-danger jstimestop">
+				<span class="glyphicon glyphicon-stop" aria-hidden="true"></span> stop
+			</button>
+		</td>
 	{{/if}}
 	
-	
+	</tr>
 	{{/with}}
 	
 </template>
@@ -373,52 +437,62 @@
 <template name="timeform">
 <span class="debug">template: {{currentTemplateName}}</span>
 
+
+	<div class="panel panel-default">
+	
 	{{#if _id}}
 		
-		<h3>Edit Time Entry [ {{time._id}} ]</h3> 
+		<div class="panel-heading">
+			<h4>Edit Time [ {{time._id}} ]
 		
-		<div>autoforms: </div>		
-				
+			<!-- <button type="submit" class="btn btn-danger jstimeremove pull-right"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button> -->
+			
+			<a href="#" title="remove time entry" class="text-danger jstimeremove pull-right"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></a>
+			</h4>
+		</div>
+		<div class="panel-body">
+		<!-- { {#autoForm id="formTime" collection="Collections.Times" doc=time type="update"} } -->
 		{{#autoForm id="formTime" collection="Collections.Times" doc=time type="method-update" meteormethod="timeUpdate" singleMethodArgument=true}}
-		{ {#autoForm id="formTime" collection="Collections.Times" doc=time type="update"} }
+			
+			{{> afFormGroup name="item" }}
+			{{> afFormGroup name="start" }}
+			{{> afFormGroup name="end" }}
+			
 			<div class="form-group">
-			{{> afFieldInput name="item" }}
-			</div>
-			<div class="form-group">
-			{{> afFieldInput name="start" }}
-			</div>
-			<div class="form-group">
-			{{> afFieldInput name="end" }}
-			</div>
-			<div class="form-group">
-				<button type="submit" class="btn btn-primary">Submit</button>
+				<button type="submit" class="btn btn-primary">
+					<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Save
+				</button>
+				
+				<a class="btn" href="{{pathFor 'time.list'}}">Back</a>
 			</div>
 		{{/autoForm}}
 		
-		<a class="btn" href="{{pathFor 'time.list'}}">Back</a>
+		</div>
 		
 	{{else}}
-		<h3>New Time Entry</h3> 
-		
+	
+		<div class="panel-heading">
+			<h4>New Time</h4>
+		</div>
+		<div class="panel-body">
 		<!--{ {> quickForm collection="Collections.Times" id="insertTimeForm" type="method" meteormethod="timeInsert"} } -->
-		
-		
-		<div>autoforms: </div>
 		{{#autoForm id="formTime" collection="Collections.Times" type="method" meteormethod="timeInsert"}}
+		
+			{{> afFormGroup name="item" }}
+			{{> afFormGroup name="start" }}
+			{{> afFormGroup name="end" }}
+			
 			<div class="form-group">
-			{{> afFieldInput name="item" }}
-			</div>
-			<div class="form-group">
-			{{> afFieldInput name="start" }}
-			</div>
-			<div class="form-group">
-			{{> afFieldInput name="end" }}
-			</div>
-			<div class="form-group">
-				<button type="submit" class="btn btn-primary">Submit</button>
+				<button type="submit" class="btn btn-primary">
+					<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Create
+				</button>
 			</div>
 		{{/autoForm}}
+		</div>
+		
 	{{/if}}
+	
+	</div>
 	
 </template>
 

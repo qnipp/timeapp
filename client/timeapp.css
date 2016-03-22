@@ -25,6 +25,10 @@ span.debug::after{
     content: " */";
 }
 
+.bold {
+	font-weight: 800;
+}
+
 
 /* 
  * Preventing FOUC
