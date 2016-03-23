@@ -26,6 +26,8 @@ Meteor.methods({
 		// basic checks
 		// rate limiting
 		// properties checks
+		// TODO: createAt is not set - therefor check will fail
+		//check(item, Schemas.Items);
 		return Items.insert(item);
 	},
 	itemUpdate: function (item) {
@@ -108,6 +110,8 @@ Meteor.methods({
 	
 	timeInsert: function (time) {
 		console.log('methods:timeInsert - '+ time.start);
+		// TODO: createAt is not set - therefor check will fail
+		//check(time, Schemas.Times);
 		return Times.insert(time);
 	},
 	timeUpdate: function (time) {
@@ -120,8 +124,29 @@ Meteor.methods({
 	
 	timeRemove: function (timeid) {
 		console.log('methods:timeRemove #'+ timeid);
-		// TODO: check if my time entry
+		// TODO: check if its my time entry
 		return Times.remove({_id: timeid});
+	},
+	
+	
+	tagInsert: function (tag) {
+		console.log('methods:tagInsert - '+ tag.name);
+		// TODO: createAt is not set - therefor check will fail
+		//check(tag, Schemas.Tags);
+		return Tags.insert(tag);
+	},
+	tagUpdate: function (tag) {
+		console.log('methods:tagUpdate #'+ tag._id + ' - ' + tag.modifier.$set.name);
+		//console.log(tag.modifier.$set);
+		
+		check(tag.modifier.$set, Schemas.Tags);
+		return Tags.update(tag._id, tag.modifier);
+	},
+	
+	tagRemove: function (tagid) {
+		console.log('methods:tagRemove #'+ tagid);
+		// TODO: check if its my tag entry
+		return Tags.remove({_id: tagid});
 	},
 });
 

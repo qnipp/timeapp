@@ -76,6 +76,13 @@ Meteor.publish("attribs.mine", function() {
 	});
 });
 
+Meteor.publish("tags.mine", function() {
+	return Tags.find({
+		createdBy: this.userId
+	});
+});
+
+
 
 // coments on docs
 Meteor.publish("users", function() {

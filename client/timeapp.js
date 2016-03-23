@@ -4,6 +4,7 @@ Meteor.subscribe('items.mine');
 Meteor.subscribe('times.mine');
 Meteor.subscribe('hierarchy.mine');
 Meteor.subscribe('attribs.mine');
+Meteor.subscribe('tags.mine');
 //Meteor.subscribe('users');
 
 
@@ -45,19 +46,29 @@ Template.registerHelper('log', function(log) {
 	console.log("// DEBUG in "+ Blaze.currentView.parentView.name.replace('Template.', '').replace('.', '-') + ': '+ log);	
 });
 	
-Template.registerHelper('var_dump', function(optionalValue) {
+Template.registerHelper('var_dump', function(variable, variablename) {
 	
 	console.log("// DEBUG in "+ Blaze.currentView.parentView.name.replace('Template.', '').replace('.', '-'));
 	
-	if (typeof optionalValue !== "undefined") {
-		console.log("var_dump(value): ");
-		console.log(optionalValue);
-		console.log("====================");
+	if (typeof variable !== "undefined") {
+		if (typeof variablename === "string") {
+			console.log("var_dump( "+variablename+" ): ");
+			console.log(variable);
+			console.log("====================");
+			
+		} else {
+			console.log("var_dump( variable ): ");
+			console.log(variable);
+			console.log("====================");
+		}
 	} else {
-		// if(typeof optionalValue !== "undefined") {
+		if (typeof variablename === "string") {
+			console.log("Warning: variable "+variablename+" not found");	
+		} 
 		console.log("var_dump(this): ");
 		console.log(this);
 		console.log("====================");
+		
 	}
 });
 
@@ -153,7 +164,9 @@ Template.itemtree.helpers({
 });
 
 Template.leafform.helpers({
+	// TODO: check if this is necessary, item should be set by route already
 	item: function () {
+		// TODO: add parent information 
 		return Items.findOne({_id: this._id});
 	}
 });
@@ -233,15 +246,38 @@ Template.timeform.events({
 });
 
 Template.timeform.helpers({
+	// TODO: check if this is necessary, time should be set by route already
 	time: function () {
 		return Times.findOne({_id: this._id});
-	}
+	},
 });
 
 
 
+//////////// TAGS ////////////
 
 
+Template.taglist.helpers({
+	tags: function () {
+		return Tags.find({}, {sort: {name: 1, value: 1}});
+	}
+});
+
+Template.tagform.events({
+	'click .jstagremove': function() {
+		Meteor.call("tagRemove", this._id);
+	},
+});
+
+Template.tagform.helpers({
+	// TODO: check if this is necessary, tag should be set by route already
+	tag: function () {
+		return Tags.findOne({_id: this._id});
+		
+		// TODO: 
+		// loadTag(this, null);
+	},
+});
 
 /*
 Template.hello.helpers({
