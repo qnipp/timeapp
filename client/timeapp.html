@@ -16,7 +16,9 @@
 
     {{> yield "header"}}
 
+<div class="container-fluid">
     {{> yield "main"}}
+</div> <!-- /container-fluid -->
 
 </template>
 
@@ -208,8 +210,8 @@
 <span class="debug">template: {{currentTemplateName}}</span>
 
 <div class="panel panel-default">
-
 	<div class="panel-heading">Your recent items:</div>
+	
 	<table class="table table-striped table-hover">
 		<thead class="thead-default">
 			<tr>
@@ -225,6 +227,7 @@
 		{{/each}}
 		</tbody>
 	</table>
+	
 </div>
 
 </template>
@@ -312,11 +315,15 @@
 
 <!-- <div class="tree itemtree"></div> -->
 
-<div class="list-group">
-{{#each item in items}}
-	<a class="list-group-item {{#if equals this._id item._id}} list-group-item-info {{/if}}"
-		href="{{pathFor 'item.detail' _id=item._id}}">{{item.title}}</a>
-{{/each}}
+<div class="panel panel-default">
+	<div class="panel-heading">Items:</div>
+	
+	<div class="list-group">
+	{{#each item in items}}
+		<a class="list-group-item {{#if equals this._id item._id}} list-group-item-info {{/if}}"
+			href="{{pathFor 'item.detail' _id=item._id}}">{{item.title}}</a>
+	{{/each}}
+	</div>
 </div>
 
 </template>
@@ -436,6 +443,7 @@
 <template name="timelist">
 <span class="debug">template: {{currentTemplateName}}</span>
 
+<div class="panel panel-default">
 	<div class="panel-heading">Times:</div>
 	<table class="table table-striped table-hover">
 		<thead class="thead-default">
@@ -453,6 +461,7 @@
 		{{/each}}
 		</tbody>
 	</table>
+</div>
 
 </template>
 
@@ -587,6 +596,8 @@
 		<li role="presentation"><a href="#">Messages <span class="badge">3</span></a></li>
 	</ul>
 	-->
+<div class="panel panel-default">
+	<div class="panel-heading">Tags:</div>
 	
 	<div class="list-group">
 	{{#each tag in tags}}
@@ -594,6 +605,8 @@
 			href="{{pathFor 'tag.detail' _id=tag._id}}">{{tag.name}} - {{tag.value}}</a>
 	{{/each}}
 	</div>
+	
+</div>
 
 </template>
 
