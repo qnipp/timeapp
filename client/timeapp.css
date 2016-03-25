@@ -49,3 +49,8 @@ span.debug::after{
     display: none;
   }
 }
+
+/* make * before required fields
+ * see: https://github.com/aldeed/meteor-autoform#how-can-i-show-an-asterisk-after-the-label-for-required-fields
+*/
+[data-required] label:after {content: ' *'}

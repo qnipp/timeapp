@@ -21,25 +21,7 @@ Meteor.methods({
 	},
 	*/
 	
-	itemInsert: function (item) {
-		console.log('methods:itemInsert - '+ item.title);
-		// basic checks
-		// rate limiting
-		// properties checks
-		// TODO: createAt is not set - therefor check will fail
-		//check(item, Schemas.Items);
-		return Items.insert(item);
-	},
-	itemUpdate: function (item) {
-		console.log('methods:itemUpdate #'+ item._id + ' - ' + item.modifier.$set.title );
-		
-		console.log(item.modifier);
-		
-		check(item.modifier.$set, Schemas.Items);
-		return Items.update(item._id, item.modifier);
-	},
 	itemIsTitleUnique: function (title) {
-		
 		return false;
 	},
 	
@@ -108,43 +90,359 @@ Meteor.methods({
 		});
 	},
 	
-	timeInsert: function (time) {
-		console.log('methods:timeInsert - '+ time.start);
-		// TODO: createAt is not set - therefor check will fail
-		//check(time, Schemas.Times);
-		return Times.insert(time);
-	},
-	timeUpdate: function (time) {
-		console.log('methods:timeUpdate #'+ time._id + ' - ' + time.modifier.$set.start);
-		//console.log(time.modifier.$set);
+	
+	// FORM MODIFICATION METHODS
+	
+	// ITEMS
+	
+	itemInsert: function (item) {
+		console.log('methods:itemInsert : '+ item.title);
 		
-		check(time.modifier.$set, Schemas.Times);
-		return Times.update(time._id, time.modifier);
+		Schemas.Items.clean(item);
+		check(item, Schemas.Items);
+		return Items.insert(item);
+	},
+	itemUpdate: function (item, id) {
+		console.log('methods:itemUpdate : '+ id + ' - ' + item.$set.title );
+		
+		check(item, Schemas.Items);
+		return Items.update(id, item);
+	},
+	itemRemove: function (itemid) {
+		// itemRemove not implemented !
+		console.log('haha - no :)');
+		return false;
 	},
 	
+	itemImport: function(form) {
+		console.log('trying: ');
+		console.log(form);
+		
+		check(form, Schemas.ItemImport);
+		
+		var csv = Papa.parse(
+			form.format + "\n" + form.data, 
+			{
+				quotes: true,
+				delimiter: form.delimiter,
+				newline: "\n",
+				header: true,
+				skipEmptyLines: true,
+			});
+		
+		
+		console.log('parsed csv: ');
+		console.log(csv);
+		
+		if(csv.errors && csv.errors.length > 0) {
+			throw new Meteor.error(csv.errors);
+		}
+		
+		// only title, description and tags are allowed
+		// if(csv.meta.fields
+		
+		if(csv.data) {
+			csv.data.forEach(function(row) {
+				console.log('reparsing a single row: ');
+				console.log(row);
+				
+				if(!row.title) {
+					console.log('skip row without title: ');
+					console.log(row);
+					return;
+				}
+				
+				row.title = row.title.trim();
+				
+				var item = Items.findOne({
+					title: row.title
+				});
+				
+				if(item) {
+					console.log('found item "'+row.title +'" with id '+ item._id);
+					
+				} else {
+					
+					item = {};
+					
+					item.title = row.title;
+					
+					if(row.description) {
+						item.description = row.description.trim();
+					}
+					
+					if(form.origin) {
+						item.origin = form.origin.trim();
+					}
+					
+					console.log('inserting item:');
+					console.log(item);
+					
+					var itemid = Items.insert(item);
+					
+					item._id = itemid;
+					
+					console.log('created item "'+ item.title +'" with id '+ itemid);
+				
+				}
+				
+				if(row.tags) {
+					var tagids = [];
+					
+					var tagnames = Papa.parse(
+						row.tags, 
+						{
+							quotes: true,
+							delimiter: ",",
+							newline: "\n\r",
+							header: false,
+							skipEmptyLines: false,
+						});
+					console.log('found tagnames:');
+					console.log(tagnames);
+					
+					
+					if(tagnames.errors && tagnames.errors.length > 0) {
+						throw new Meteor.error(tagnames.errors);
+					}
+					
+					if(tagnames.data) {
+						tagnames.data[0].forEach(function(tagname) {
+							console.log('reading a single tagname: '+ tagname);
+							
+							tagname = tagname.trim();
+							var tagvalue = "";
+							
+							var tag = Tags.findOne({
+								$and: [{
+									type: "item-tag",
+									name: tagname,
+									value: ""
+								}]
+							});
+							
+							if(tag) {
+								console.log('found tag "'+tagname+'" with id '+ tag._id);
+								tagids.push(tag._id);
+							} else {
+								
+								// split tag into name and value
+								
+								var tagparts;
+								tagparts = tagname.split(":");
+								
+								if(tagparts.length == 1) {
+									tagparts = tagname.split("-");
+								}
+								if(tagparts.length == 1) {
+									tagparts = tagname.split(" ");
+								}
+								if(tagparts.length == 1) {
+									console.log('skipping tag: ' + tagname + ' - because it can not be split into name and value');
+									return;
+								}
+								
+								tagname = tagparts[0].trim();
+								tagvalue = tagparts[1].trim();
+								
+								tag = Tags.findOne({
+									$and: [{
+										type: "item-tag",
+										name: tagname,
+										value: tagvalue
+									}]
+								});
+								
+								if(tag) {
+									console.log('found tag "'+tagname+': '+tagvalue+'" with id '+ tag._id);
+									tagids.push(tag._id);
+								} else {
+									
+									var tagid = Tags.insert({
+										type: "item-tag",
+										name: tagname,
+										value: tagvalue,
+										origin: form.origin
+									});
+									
+									if(tagid) {
+										console.log('created tag "'+tagname+': '+tagvalue+'" with id '+ tagid);
+										tagids.push(tagid);
+									} else {
+										console.log('error during insert of tag: ' + tagname);
+										return;
+									}
+								}
+							}
+						});
+					}
+				}
+				
+				if(tagids) {
+					console.log('updating item: '+ item.title + ' with new tags: ' + tagids);
+					console.log(tagids);
+					Items.update({_id: item._id}, {$addToSet: {tags: { $each: tagids }}});
+					//Items.update({_id: item._id}, {$addToSet: {tags: tagids}});
+				} else {
+					console.log('skip item update because no tagids were found');
+				}
+				
+			});
+			
+			return true;
+		} else {
+			console.log('no item data found for import');
+			return false;
+		}
+	},
+	
+	
+	// TIMES
+	
+	timeInsert: function (time) {
+		console.log('methods:timeInsert : '+ time.start);
+		
+		Schemas.Times.clean(time);
+		check(time, Schemas.Times);
+		return Times.insert(time);
+	},
+	timeUpdate: function (time, id) {
+		
+		console.log('methods:timeUpdate : '+ id + ' - ' + time.$set.start);
+		console.log(time);
+		
+		check(time, Schemas.Times);
+		return Times.update(id, time);
+	},
 	timeRemove: function (timeid) {
-		console.log('methods:timeRemove #'+ timeid);
+		console.log('methods:timeRemove : '+ timeid);
 		// TODO: check if its my time entry
 		return Times.remove({_id: timeid});
 	},
 	
+	timeImport: function(form) {
+		console.log('trying: ');
+		console.log(form);
+		
+		check(form, Schemas.TimeImport);
+		
+		if(!form.dateformat) {
+			form.dateformat = "DD.MM.YY HH:mm";
+		}
+		
+		var csv = Papa.parse(
+			form.format + "\n" + form.data, 
+			{
+				quotes: true,
+				delimiter: form.delimiter,
+				newline: "\n",
+				header: true,
+				skipEmptyLines: true,
+			});
+		
+		
+		console.log('parsed csv: ');
+		console.log(csv);
+		
+		if(csv.errors && csv.errors.length > 0) {
+			throw new Meteor.error(csv.errors);
+		}
+		
+		// only item, start and stop are allowed
+		// if(csv.meta.fields
+		
+		if(csv.data) {
+			csv.data.forEach(function(row) {
+				console.log('reparsing a single row: ');
+				console.log(row);
+				
+				if(!row.item || !row.start) {
+					console.log('skip row without item or start: ');
+					console.log(row);
+					return;
+				}
+				
+				row.item = row.item.trim();
+				
+				var item = Items.findOne({
+					title: row.item
+				});
+				
+				if(!item) {
+					console.log('skip row with unknown item: "'+ item + '" - please import items first!');
+					return;
+				} else {
+					console.log('found item "'+ row.item +'" with id '+ item._id);
+					
+					row.start = moment(row.start.trim(), form.dateformat).toDate();
+					
+					if(row.end && row.end != '') {
+						row.end = moment(row.end.trim(), form.dateformat).toDate();
+					}
+					
+					if(row.comments) {
+						row.comments = row.comments.split(',');
+					}
+					
+					var time = Times.findOne({
+						item: item._id,
+						start: row.start
+					});
+					
+					if(time) {
+						console.log('found time "'+ row.start +'" with id '+ time._id + ' - skipping row');
+					} else {
+						timeid = Times.insert({
+							item: item._id,
+							start: row.start,
+							end: row.end,
+							origin: form.origin,
+							comments: row.comments
+						});
+						
+						if(timeid) {
+							console.log('created time "'+item._id+': '+row.start+'" with id '+ timeid);
+							
+						} else {
+							console.log('error during insert of time: ' + row.start);
+							return;
+						}
+					}
+				}
+			});
+			
+			return true;
+		} else {
+			console.log('no time data found for import');
+			return false;
+		}
+	},
+		
+	// TAGS
 	
 	tagInsert: function (tag) {
-		console.log('methods:tagInsert - '+ tag.name);
-		// TODO: createAt is not set - therefor check will fail
-		//check(tag, Schemas.Tags);
+		console.log('methods:tagInsert : '+ tag.name);
+		/*
+		console.log(tag);
+		Schemas.Tags.clean(tag);
+		console.log('tagInsert - after clean: ');
+		console.log(tag);*/
+		
+		Schemas.Tags.clean(tag);
+		check(tag, Schemas.Tags);
 		return Tags.insert(tag);
 	},
-	tagUpdate: function (tag) {
-		console.log('methods:tagUpdate #'+ tag._id + ' - ' + tag.modifier.$set.name);
-		//console.log(tag.modifier.$set);
-		
-		check(tag.modifier.$set, Schemas.Tags);
-		return Tags.update(tag._id, tag.modifier);
+	
+	tagUpdate: function (tag, id) {
+		console.log('methods:tagUpdate : '+ id + ' - ' + tag.$set.name);
+		//console.log(tag);
+		//Schemas.Tags.clean(tag);
+		check(tag, Schemas.Tags);
+		return Tags.update(id, tag);
 	},
 	
 	tagRemove: function (tagid) {
-		console.log('methods:tagRemove #'+ tagid);
+		console.log('methods:tagRemove : '+ tagid);
 		// TODO: check if its my tag entry
 		return Tags.remove({_id: tagid});
 	},

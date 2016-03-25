@@ -5,7 +5,7 @@ Meteor.startup(function () {
 // publish read access to collections
 Meteor.publish("items.mine", function() {
 	return Items.find({
-		createdBy: this.userId
+		"createdBy": this.userId
 	});
 });
 
@@ -46,14 +46,14 @@ Meteor.publish('items.mine', function() {
 
 Meteor.publish("hierarchy.mine", function() {
 	return Hierarchy.find({
-		createdBy: this.userId
+		"createdBy": this.userId
 	});
 });
 
 
 Meteor.publish("times.mine", function() {
 	return Times.find({
-		createdBy: this.userId
+		"createdBy": this.userId
 	});
 });
 
@@ -72,13 +72,13 @@ Meteor.publish("times.mine.sum", function() {
 
 Meteor.publish("attribs.mine", function() {
 	return Attributes.find({
-		createdBy: this.userId
+		"createdBy": this.userId
 	});
 });
 
 Meteor.publish("tags.mine", function() {
 	return Tags.find({
-		createdBy: this.userId
+		"createdBy": this.userId
 	});
 });
 

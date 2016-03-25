@@ -82,104 +82,44 @@ Template.registerHelper("Collections", Collections);
 //////////// ITEMS ////////////
 
 
-/*
-dependItemTree = new Tracker.Dependency();
-
-Template.itemtree.onRendered(function () {
-	this.$('div.itemtree').jstree({
-		core: {
-			data: function (node, cb) {
-				dependItemTree.depend();
-				
-				console.log('Template.itemtree.onRendered');
-				console.log(node);
-				
-				if(node.id === '#') {
-					
-					var rootNode = [{
-						text : 'Your Items',
-						id : '1',
-						children : true
-					}];
-					cb(rootNode);
-					
-				}
-				else {
-					
-				
-					var nodes = Items.find().fetch();
-					var hierarchyelement = null;
-					
-					_.forEach(nodes, function(item){
-						//process item
-						item.text = item.title;
-						item.id = item._id;
-						
-						// find parent
-						hierarchyelement = Hierarchy.findOne({loweritem: item._id}, {fields: {upperitem: 1}});
-						if (hierarchyelement) {
-							item.parent = hierarchyelement.upperitem;
-						} else {
-							item.parent = '1';
-							//item.parent = null;
-						}
-					});
-					
-					cb(nodes);
-				}
-			}
-		}
-	});
-});
-
-  
-Template.itemtree.events({
-	'changed.jstree .jstree-node': function(node, event) {
-		console.log("tree node was activated..");
-		
-		alert(node);
-		
-		console.log("node: ");
-		console.log(node);
-		console.log("event: ");
-		console.log(event);
-	},
-	'click .jstree-node': function(node, event) {
-		console.log("tree node was clicked..");
-		
-		alert(node);
-		
-		console.log("node: ");
-		console.log(node);
-		console.log("event: ");
-		console.log(event);
-	},
-});
-*/
-
-Template.itemtree.helpers({
+Template.itemlist.helpers({
 	items: function () {
-		return Items.find({});
+		return Items.find();
 	}
 });
 
-Template.leafform.helpers({
-	// TODO: check if this is necessary, item should be set by route already
+Template.itemlistentry.helpers({
 	item: function () {
-		// TODO: add parent information 
-		return Items.findOne({_id: this._id});
+		return loadItem(this.item, null);
 	}
+});
+
+Template.itemform.onRendered( function() {
+	this.autorun(function(element) {
+		Template.currentData();
+		AutoForm.resetForm("formItem");
+		AutoForm._forceResetFormValues("formItem");
+	});
 });
 
 Template.itemrecentlist.helpers({
 	itemsrecent: function() {
-		return Items.find({});
+		// show last 5 days
+		var times = Times.find({start: { $gte: new Date((new Date() - 1000*60*60*24*5)) }}, {fields: {item: 1}}).fetch();
+		if(times) {
+			var items = times.map(function (time) {
+				return time.item;
+			});
+			return Items.find({_id: {$in: items}});
+		} else {
+			return null;
+		}
 	},
 });
 
 Template.itemrecentlistentry.helpers({
 	item: function() {
-		return loadItem(this, null);
+		return loadItem(this.item, null);
 	},
 });
 
@@ -198,7 +138,26 @@ Template.itemrecentlistentry.events({
 
 Template.timelist.helpers({
 	times: function () {
-		return Times.find({}, {sort: {createdAt: -1}});
+		return Times.find({},  {sort: {createdAt: -1}});
+		// show only times which have more than 10seconds duration
+		// does only work with aggregate
+		// aggregate only available on isServer
+		/*
+		return Times.find({
+			$or: [
+				{end: {
+					$not: {$ne: null}
+				}},
+				{'$subtract': ['$end', '$start']}
+				
+					
+					{$gt: 10}
+				}
+			]
+		}, {sort: {createdAt: -1}});
+	*/
+		//db.times.aggregate([{ "$project": { "diff": { "$subtract": ["$end", "$start"] }}}])
+
 	}
 });
 
@@ -229,10 +188,12 @@ Template.timelistentry.helpers({
 		}
 		
 		if(time.start) {
-			time.start_fmt = moment.utc(time.start).format(CNF.FORMAT_DATETIME);
+			//time.start_fmt = moment.utc(time.start).format(CNF.FORMAT_DATETIME);
+			time.start_fmt = moment(time.start).format(CNF.FORMAT_DATETIME);
 		}
 		if(time.end) {
-			time.end_fmt = moment.utc(time.end).format(CNF.FORMAT_DATETIME);
+			//time.end_fmt = moment.utc(time.end).format(CNF.FORMAT_DATETIME);
+			time.end_fmt = moment(time.end).format(CNF.FORMAT_DATETIME);
 		}
 		
 		return time;
@@ -244,22 +205,31 @@ Template.timeform.events({
 		Meteor.call("timeRemove", this._id);
 	},
 });
-
+/*
 Template.timeform.helpers({
 	// TODO: check if this is necessary, time should be set by route already
 	time: function () {
 		return Times.findOne({_id: this._id});
 	},
+});*/
+
+Template.timeform.onRendered( function() {
+	this.autorun(function(element) {
+		Template.currentData();
+		AutoForm.resetForm("formTime");
+		AutoForm._forceResetFormValues("formTime");
+	});
 });
-
-
 
 //////////// TAGS ////////////
 
 
 Template.taglist.helpers({
-	tags: function () {
-		return Tags.find({}, {sort: {name: 1, value: 1}});
+	tagsforitems: function () {
+		return Tags.find({type: "item-tag"}, {sort: {name: 1, value: 1}});
+	},
+	tagsfortimes: function () {
+		return Tags.find({type: "time-tag"}, {sort: {name: 1, value: 1}});
 	}
 });
 
@@ -269,28 +239,43 @@ Template.tagform.events({
 	},
 });
 
+/*
 Template.tagform.helpers({
 	// TODO: check if this is necessary, tag should be set by route already
 	tag: function () {
 		return Tags.findOne({_id: this._id});
+	},
+});*/
+
+Template.tagform.onRendered( function() {
+	this.autorun(function(element) {
+		Template.currentData();
+		AutoForm.resetForm("formTag");
+		AutoForm._forceResetFormValues("formTag");
+	});
+});
+
+Template.taglistentry.helpers({
+	// TODO: check if this is necessary, tag should be set by route already
+	tag: function () {
+		var tag;
 		
+		if(this.tag && this.tag._id) {
+			tag = Tags.findOne({_id: this.tag._id});
+			
+			if(tag) {
+				tag.color = {};
+				tag.color.bgname = '#'+intToRGB(hashCode( this.tag.name ) );
+				tag.color.bgvalue = '#'+intToRGB(hashCode( this.tag.value ) );
+				
+				tag.color.fgname = invertCssColor( tag.color.bgname );
+				tag.color.fgvalue = invertCssColor( tag.color.bgvalue );
+			}
+		}
+		
+		return tag;
 		// TODO: 
 		// loadTag(this, null);
 	},
 });
 
-/*
-Template.hello.helpers({
-counter: function () {
-	return Session.get('counter');
-}
-});
-
-Template.hello.events({
-'click button': function () {
-	// increment the counter when button is clicked
-	Session.set('counter', Session.get('counter') + 1);
-}
-});
-
-*/
