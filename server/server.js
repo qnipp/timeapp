@@ -58,6 +58,27 @@ Meteor.publish("times.mine", function() {
 });
 
 /*
+Meteor.publishComposite("times.mine", {
+	find: function() {
+        // Find top ten highest scoring posts
+        return Times.find({
+			"createdBy": this.userId,
+		});
+    },
+	children: [ {
+		find: function(time) {
+			// Find post author. Even though we only want to return
+			// one record here, we use "find" instead of "findOne"
+			// since this function should return a cursor.
+			return Items.find({
+				"_id": time.item,
+				"createdBy": this.userId,
+			}, {limit: 1});
+		}
+	} ]
+});
+*/
+/*
 Meteor.publish("times.mine.sum", function() {
 	self = this;
 	

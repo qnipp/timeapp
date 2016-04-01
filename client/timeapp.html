@@ -1,7 +1,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-	<title>{{projectName}}</title>
+	<title>TimeApp</title>
   
 	<!-- TODO: maybe there is a better way - see: https://atmospherejs.com/aldeed/autoform-select2 -->
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.2/css/select2.min.css" rel="stylesheet" />
@@ -496,6 +496,10 @@
 
 <div class="panel panel-default">
 	<div class="panel-heading">Times:</div>
+	
+	{{> reactiveTable collection=times settings=tableSettingsTime}}
+	
+	<!-- 
 	<table class="table table-striped table-hover">
 		<thead class="thead-default">
 			<tr>
@@ -511,6 +515,7 @@
 		{{/each}}
 		</tbody>
 	</table>
+	-->
 </div>
 
 </template>
@@ -542,6 +547,31 @@
 	</tr>
 	{{/with}}
 	
+</template>
+
+<template name="timelistentryItem">
+<span class="debug">template: {{currentTemplateName}}</span>
+
+	<td scope="row"><a href="{{pathFor 'item.detail' _id=item._id}}" class="{{ifsetelse item.keepOpen 'bold'}}">{{item.title}}</a></td>
+	
+</template>
+
+<template name="timelistentryStart">
+<span class="debug">template: {{currentTemplateName}}</span>
+	
+		<td><a href="{{pathFor 'time.detail' _id=_id}}">{{start_fmt}}</a></td>
+</template>
+
+<template name="timelistentryEnd">
+<span class="debug">template: {{currentTemplateName}}</span>
+
+		<td>{{end_fmt}}</td>
+</template>
+
+<template name="timelistentryDuration">
+<span class="debug">template: {{currentTemplateName}}</span>
+
+		<td>{{duration_fmt}}</td>
 </template>
 
 

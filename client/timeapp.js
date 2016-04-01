@@ -24,8 +24,10 @@ Template.registerHelper('currentRoute', function() {
 	return Router.current().route.getName();
 });
 
+// TODO: does not work in side <head>
+// see: https://atmospherejs.com/pip87/initial-iron-meta
 Template.registerHelper('projectName', function() {
-	return "timeapp";
+	return CNF.APPNAME;
 });
 
 Template.registerHelper('equals', function (a, b) {
@@ -90,7 +92,7 @@ Template.itemlist.helpers({
 
 Template.itemlistentry.helpers({
 	item: function () {
-		return loadItem(this.item, null);
+		return loadItem(this.item, {all: true}, null);
 	}
 });
 
@@ -119,7 +121,7 @@ Template.itemrecentlist.helpers({
 
 Template.itemrecentlistentry.helpers({
 	item: function() {
-		return loadItem(this.item, null);
+		return loadItem(this.item, {all: true}, null);
 	},
 });
 
@@ -136,9 +138,114 @@ Template.itemrecentlistentry.events({
 
 //////////// TIMES ////////////
 
+Template.timelist.events({
+	'click .reactive-table tbody tr': function (event) {
+		
+		console.log('click on row in reactive table: ');
+		//console.log(event);
+		//console.log(this);
+		
+		Router.go(Router.path('time.detail', {_id: this._id}));
+	}
+});
+
 Template.timelist.helpers({
+	tableSettingsTime: function () {
+		return {
+			//collection: times,
+			/*
+			collection: function() {
+				console.log('tableSettingsTime - access to collection.find.');
+				return Times.find({},  {sort: {createdAt: -1}});
+			},*/
+			rowsPerPage: 20,
+			showFilter: true,
+			showNavigation: 'auto',
+			//fields: ['item', 'start', 'end', 'duration'],
+			rowClass: function(item) {
+				return item.id == this.id ? 'info' : '';
+			},
+			fields: [
+				{ 
+					key: 'item', 
+					label: 'Item', 
+					
+					//tmpl: Template.timelistentryItem,
+					
+					fn: function(value, time, key) {
+						var item = loadItem(time.item, false, null);
+						return item.title;
+					},
+					sortByValue: true,
+					sortable: false,
+				},
+				{ 
+					key: 'start', 
+					label: 'Start', 
+					
+					//tmpl: Template.timelistentryStart,
+					
+					fn: function(value, time, key) {
+						if(time.start) {
+							//time.start_fmt = moment.utc(time.start).format(CNF.FORMAT_DATETIME);
+							time.start_fmt = moment(time.start).format(CNF.FORMAT_DATETIME);
+						}
+						return time.start_fmt;
+					},
+					sortByValue: true,
+					sortOrder: 1, 
+					sortDirection: 'descending',
+				},
+				{ 
+					key: 'end', 
+					label: 'End', 
+					//tmpl: Template.timelistentryEnd,
+					
+					fn: function(value, time, key) {
+						if(time.end) {
+							//time.end_fmt = moment.utc(time.end).format(CNF.FORMAT_DATETIME);
+							time.end_fmt = moment(time.end).format(CNF.FORMAT_DATETIME);
+						} else {
+							time.end_fmt = '';
+						}
+						return time.end_fmt;
+					},
+					sortByValue: true,
+					
+					sortOrder: 2, 
+					sortDirection: 'descending', 
+				},
+				{ 
+					key: 'duration', 
+					label: 'duration', 
+					//tmpl: Template.timelistentryDuration,
+					
+					fn: function(value, time, key) {
+						if(time.end) {
+							time.duration_fmt = formatDuration(time.end - time.start);
+						} else {
+							time.duration_fmt = formatDuration(new Date() - time.start);
+						}
+						return time.duration_fmt;
+					},
+					
+					//sortByValue: true,
+					sortable: false,
+				},
+				{ 
+					key: 'createdAt', 
+					label: 'Created At', 
+					hidden: true,
+					sortOrder: 0, 
+					sortDirection: 'descending',
+				},
+			],
+		};
+	},
+	
 	times: function () {
-		return Times.find({},  {sort: {createdAt: -1}});
+		///return Times.find({},  {sort: {createdAt: -1}});
+		return Times.find({},  {sort: {start: -1, end: -1}});
 		// show only times which have more than 10seconds duration
 		// does only work with aggregate
 		// aggregate only available on isServer
@@ -169,6 +276,7 @@ Template.timerunninglist.helpers({
 	},
 });
 
+
 Template.timelistentry.events({
 	'click .jstimestop': function() {
 		Meteor.call("setTimeEnd", this._id);
@@ -179,7 +287,7 @@ Template.timelistentry.helpers({
 	time: function () {
 		var time = this.time;
 				
-		time.item = loadItem(time.item, null);
+		time.item = loadItem(time.item, {all: true}, null);
 		
 		if(time.end) {
 			time.duration_fmt = formatDuration(time.end - time.start);
