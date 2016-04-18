@@ -275,7 +275,7 @@
 <span class="debug">template: {{currentTemplateName}}</span>
 
 <div class="callout clearfix">
-	<ul class="float-right">
+	<ul class="float-right list-unstyled">
 		<li><a href="{{pathFor 'item.create' _id='0'}}">
 			<span aria-hidden="true"><i class="glyphicon glyphicon-plus"></i></span>
 			New Item
@@ -360,7 +360,12 @@
 	
 		<a class="list-group-item clearfix {{#if equals ../itemselected._id _id}} list-group-item-info {{/if}}"
 			href="{{pathFor 'item.detail' _id=_id}}">
-			<h5>{{title}} <small>{{description}}</small></h5>
+			<h5>{{title}} <small>{{description}}</small>
+				<a href="{{pathFor 'time.create' _id=_id}}" class="pull-right">
+					<span aria-hidden="true"><i class="glyphicon glyphicon-plus"></i></span>
+					add Time
+				</a>
+			</h5>
 			<ul class="nav nav-pills pull-right" role="tablist">
 			{{#each tag in tags}}
 				{{>taglistentry tag=tag}}
@@ -616,8 +621,10 @@
 		</div>
 		<div class="panel-body">
 		{{#autoForm id="formTime" collection="Collections.Times" type="method" meteormethod="timeInsert"}}
+	
+		{{time._id}}
 		
-			{{> afFormGroup name="item" }}
+			{{> afFormGroup name="item" value=item._id }}
 			{{> afFormGroup name="start" }}
 			{{> afFormGroup name="end" }}
 			
