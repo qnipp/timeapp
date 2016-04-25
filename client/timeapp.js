@@ -104,6 +104,14 @@ Template.itemform.onRendered( function() {
 	});
 });
 
+Template.itemform.events({
+	'change input.tt-input[name="title"]': function(event) {
+		console.log("fetching and parsing url: ");
+		console.log(event);
+		fetchUrl(event.currentTarget.value, parseUrlResponse);
+	},
+});
+
 Template.itemrecentlist.helpers({
 	itemsrecent: function() {
 		// show last 5 days
