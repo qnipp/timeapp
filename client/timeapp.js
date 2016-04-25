@@ -387,3 +387,229 @@ Template.taglistentry.helpers({
 	},
 });
 
+
+//////////// REPORT ////////////
+Template.reportcontainer.helpers({
+	tableSettingsTags: function () {
+		return {
+			//collection: times,
+			/*
+			collection: function() {
+				console.log('tableSettingsTime - access to collection.find.');
+				return Times.find({},  {sort: {createdAt: -1}});
+			},*/
+			rowsPerPage: 100,
+			showFilter: true,
+			showNavigation: 'auto',
+			//fields: ['item', 'start', 'end', 'duration'],
+			rowClass: function(tag) {
+				return tag.id == this.id ? 'info' : '';
+			},
+			fields: [
+			/*
+				{ 
+					key: 'name', 
+					label: 'Tag Name', 
+					hidden: false,
+					sortOrder: 0, 
+					sortDirection: 'ascending',
+				},
+				{ 
+					key: 'value', 
+					label: 'Tag Value', 
+					hidden: false,
+					sortOrder: 0, 
+					sortDirection: 'ascending',
+				},*/
+				{ 
+					key: 'name', 
+					label: 'Tag', 
+					
+					tmpl: Template.taglistentryItem,
+					
+					fn: function(value, tag, key) {
+						//var item = loadItem(time.item, false, null);
+						return tag;
+					},
+					sortByValue: true,
+					sortable: true,
+				},
+				
+				{
+					key: 'timetoday', 
+					label: 'Today', 
+					fn: function(value, tag, key) {
+						
+						var timeelapsed = 0;
+						
+						if(tag.type = "item-tag") {
+							Items.find({tags: tag._id}).map(function(item) {
+								Times.find({
+									item: item._id,
+									start: {
+										$gte: new Date(new Date().setHours(0,0,0,0)),
+										$lte: new Date(new Date().setHours(23,59,59,999))
+									}
+								}).map(function(doc) {
+									timeelapsed += (doc.end > 0 ? doc.end : new Date()) - doc.start;
+								});
+							});
+							
+						} else if (tag.type = "time-tag") {
+							// TODO
+						}
+						
+						return formatDuration(timeelapsed, true);
+					},
+					sortable: false,
+				},
+				{
+					key: 'timeweek', 
+					label: 'this Week', 
+					fn: function(value, tag, key) {
+						
+						var timeelapsed = 0;
+						
+						var firstDayofWeek = new Date().getDate() - new Date().getDay(); // will be sunday;
+						firstDayofWeek += 1; // will be monday
+						
+						if(tag.type = "item-tag") {
+							Items.find({tags: tag._id}).map(function(item) {
+								Times.find({
+									item: item._id,
+									start: {
+										$gte: new Date(new Date(new Date().setDate(firstDayofWeek  )).setHours(0,0,0,0     )),
+										$lte: new Date(new Date(new Date().setDate(firstDayofWeek+6)).setHours(23,59,59,999))
+									}
+								}).map(function(doc) {
+									timeelapsed += (doc.end > 0 ? doc.end : new Date()) - doc.start;
+								});
+							});
+							
+						} else if (tag.type = "time-tag") {
+							// TODO
+						}
+						
+						return formatDuration(timeelapsed, true);
+					},
+					sortable: false,
+				},
+				{
+					key: 'timeweekprev', 
+					label: 'previous Week', 
+					fn: function(value, tag, key) {
+						
+						var timeelapsed = 0;
+						
+						var firstDayofWeek = new Date().getDate() - new Date().getDay(); // will be sunday;
+						firstDayofWeek += 1; // will be monday
+						
+						if(tag.type = "item-tag") {
+							Items.find({tags: tag._id}).map(function(item) {
+								Times.find({
+									item: item._id,
+									start: {
+										$gte: new Date(new Date(new Date().setDate(firstDayofWeek - 7)).setHours(0,0,0,0     )),
+										$lte: new Date(new Date(new Date().setDate(firstDayofWeek - 1)).setHours(23,59,59,999))
+									}
+								}).map(function(doc) {
+									timeelapsed += (doc.end > 0 ? doc.end : new Date()) - doc.start;
+								});
+							});
+							
+						} else if (tag.type = "time-tag") {
+							// TODO
+						}
+						
+						return formatDuration(timeelapsed, true);
+					},
+					sortable: false,
+				},
+				{
+					key: 'timemonth', 
+					label: 'this Month', 
+					fn: function(value, tag, key) {
+						
+						var timeelapsed = 0;
+						
+						if(tag.type = "item-tag") {
+							Items.find({tags: tag._id}).map(function(item) {
+								Times.find({
+									item: item._id,
+									start: {
+										$gte: new Date(new Date(new Date().setDate(1)).setHours(0,0,0,0     )),
+										$lte: new Date(new Date(new Date(new Date().setMonth(new Date().getMonth() + 1)).setDate(0)).setHours(23,59,59,999))
+									}
+								}).map(function(doc) {
+									timeelapsed += (doc.end > 0 ? doc.end : new Date()) - doc.start;
+								});
+							});
+							
+						} else if (tag.type = "time-tag") {
+							// TODO
+						}
+						
+						return formatDuration(timeelapsed, true);
+					},
+					sortable: false,
+				},
+				{
+					key: 'timemonthprev', 
+					label: 'previous Month', 
+					fn: function(value, tag, key) {
+						
+						var timeelapsed = 0;
+						
+						if(tag.type = "item-tag") {
+							Items.find({tags: tag._id}).map(function(item) {
+								Times.find({
+									item: item._id,
+									start: {
+										$gte: new Date(new Date(new Date(new Date().setMonth(new Date().getMonth() - 1)).setDate(1)).setHours(0,0,0,0     )),
+										$lte: new Date(new Date(new Date().setDate(0)).setHours(23,59,59,999))
+									}
+								}).map(function(doc) {
+									timeelapsed += (doc.end > 0 ? doc.end : new Date()) - doc.start;
+								});
+							});
+							
+						} else if (tag.type = "time-tag") {
+							// TODO
+						}
+						
+						return formatDuration(timeelapsed, true);
+					},
+					sortable: false,
+				},
+				{
+					key: 'timetotal', 
+					label: 'Total', 
+					fn: function(value, tag, key) {
+						
+						var timeelapsed = 0;
+						
+						if(tag.type = "item-tag") {
+							Items.find({tags: tag._id}).map(function(item) {
+								Times.find({
+									item: item._id
+								}).map(function(doc) {
+									timeelapsed += (doc.end > 0 ? doc.end : new Date()) - doc.start;
+								});
+							});
+							
+						} else if (tag.type = "time-tag") {
+							// TODO
+						}
+						
+						return formatDuration(timeelapsed, true);
+					},
+					sortable: false,
+				}
+			],
+		};
+	},
+	tags: function () {
+		//return Tags.find({type: "item-tag"}, {sort: {name: 1, value: 1}});
+		return Tags.find({}, {sort: {name: 1, value: 1}});
+	},
+});

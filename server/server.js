@@ -103,6 +103,12 @@ Meteor.publish("tags.mine", function() {
 	});
 });
 
+Meteor.publish("tags.others", function() {
+	return Tags.find({
+		"createdBy": { $not: this.userId }
+	});
+});
+
 
 
 // coments on docs
