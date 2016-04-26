@@ -135,7 +135,7 @@ Meteor.methods({
 		console.log(csv);
 		
 		if(csv.errors && csv.errors.length > 0) {
-			throw new Meteor.error(csv.errors);
+			throw new Meteor.Error("csv-error", csv.errors);
 		}
 		
 		// only title, description and tags are allowed
@@ -203,7 +203,7 @@ Meteor.methods({
 					
 					
 					if(tagnames.errors && tagnames.errors.length > 0) {
-						throw new Meteor.error(tagnames.errors);
+						throw new Meteor.Error("csv-errors", tagnames.errors);
 					}
 					
 					if(tagnames.data) {
@@ -321,6 +321,10 @@ Meteor.methods({
 	},
 	
 	timeImport: function(form) {
+		
+		//throw new Meteor.Error("test", "test details");
+		
+		
 		console.log('trying: ');
 		console.log(form);
 		
@@ -328,6 +332,9 @@ Meteor.methods({
 		
 		if(!form.dateformat) {
 			form.dateformat = "DD.MM.YY HH:mm";
+		}
+		if(!form.delimiter) {
+			form.delimiter = "	";
 		}
 		
 		var csv = Papa.parse(
@@ -345,7 +352,7 @@ Meteor.methods({
 		console.log(csv);
 		
 		if(csv.errors && csv.errors.length > 0) {
-			throw new Meteor.error(csv.errors);
+			throw new Meteor.Error("csv-errors", csv.errors);
 		}
 		
 		// only item, start and stop are allowed
