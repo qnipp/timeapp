@@ -5,6 +5,7 @@ Meteor.subscribe('times.mine');
 Meteor.subscribe('hierarchy.mine');
 Meteor.subscribe('attribs.mine');
 Meteor.subscribe('tags.mine');
+Meteor.subscribe('tags.others');
 //Meteor.subscribe('users');
 
 
@@ -47,7 +48,8 @@ Template.registerHelper('ifsetelse', function (attrib, isSet, isNot) {
 Template.registerHelper('log', function(log) {
 	console.log("// DEBUG in "+ Blaze.currentView.parentView.name.replace('Template.', '').replace('.', '-') + ': '+ log);	
 });
-	
+
+// usage: {{var_dump variable}}
 Template.registerHelper('var_dump', function(variable, variablename) {
 	
 	console.log("// DEBUG in "+ Blaze.currentView.parentView.name.replace('Template.', '').replace('.', '-'));
@@ -86,7 +88,7 @@ Template.registerHelper("Collections", Collections);
 
 Template.itemlist.helpers({
 	items: function () {
-		return Items.find();
+		return Items.find({}, {sort: {updatedAt: -1}});
 	}
 });
 
@@ -115,12 +117,14 @@ Template.itemform.events({
 Template.itemrecentlist.helpers({
 	itemsrecent: function() {
 		// show last 5 days
-		var times = Times.find({start: { $gte: new Date((new Date() - 1000*60*60*24*5)) }}, {fields: {item: 1}}).fetch();
+		var times = Times.find(
+				{start: { $gte: new Date((new Date() - 1000*60*60*24*5)) }}, 
+				{fields: {item: 1}}).fetch();
 		if(times) {
 			var items = times.map(function (time) {
 				return time.item;
 			});
-			return Items.find({_id: {$in: items}});
+			return Items.find({_id: {$in: items}}, {sort: {updatedAt: -1}});
 		} else {
 			return null;
 		}
@@ -141,6 +145,27 @@ Template.itemrecentlistentry.events({
 		Meteor.call("setItemStart", this._id);
 	},
 });
+
+
+Template.itemreport.helpers({
+	tableSettingsItems: function() {
+		var settings = tableSettingsItems();
+		settings.fields.splice(0, 1);
+		settings.showFilter = false;
+		settings.showNavigation = 'never';
+		
+		return settings;
+	},
+	items: function() {
+		console.log('loading item: ');
+		console.log(this);
+		
+		return Items.find({_id: this._id});
+	},
+});
+
+
+
 
 
 
@@ -380,12 +405,15 @@ Template.taglistentry.helpers({
 			tag = Tags.findOne({_id: this.tag._id});
 			
 			if(tag) {
+				tag = loadTag(tag);
+				/*
 				tag.color = {};
 				tag.color.bgname = '#'+intToRGB(hashCode( this.tag.name ) );
 				tag.color.bgvalue = '#'+intToRGB(hashCode( this.tag.value ) );
 				
 				tag.color.fgname = invertCssColor( tag.color.bgname );
 				tag.color.fgvalue = invertCssColor( tag.color.bgvalue );
+				*/
 			}
 		}
 		
@@ -396,226 +424,28 @@ Template.taglistentry.helpers({
 });
 
 
+Template.tagreport.helpers({
+	//tableSettingsTags: tableSettingsTags,
+	tableSettingsTags: function() {
+		var settings = tableSettingsTags();
+		settings.fields.splice(0, 1);
+		settings.showFilter = false;
+		settings.showNavigation = 'never';
+
+		return settings;
+	},
+
+	tags: function() {
+		console.log('loading tag: ');
+		console.log(this);
+		
+		return Tags.find({_id: this._id});
+	},
+});
+
 //////////// REPORT ////////////
 Template.reportcontainer.helpers({
-	tableSettingsTags: function () {
-		return {
-			//collection: times,
-			/*
-			collection: function() {
-				console.log('tableSettingsTime - access to collection.find.');
-				return Times.find({},  {sort: {createdAt: -1}});
-			},*/
-			rowsPerPage: 100,
-			showFilter: true,
-			showNavigation: 'auto',
-			//fields: ['item', 'start', 'end', 'duration'],
-			rowClass: function(tag) {
-				return tag.id == this.id ? 'info' : '';
-			},
-			fields: [
-			/*
-				{ 
-					key: 'name', 
-					label: 'Tag Name', 
-					hidden: false,
-					sortOrder: 0, 
-					sortDirection: 'ascending',
-				},
-				{ 
-					key: 'value', 
-					label: 'Tag Value', 
-					hidden: false,
-					sortOrder: 0, 
-					sortDirection: 'ascending',
-				},*/
-				{ 
-					key: 'name', 
-					label: 'Tag', 
-					
-					tmpl: Template.taglistentryItem,
-					
-					fn: function(value, tag, key) {
-						//var item = loadItem(time.item, false, null);
-						return tag;
-					},
-					sortByValue: true,
-					sortable: true,
-				},
-				
-				{
-					key: 'timetoday', 
-					label: 'Today', 
-					fn: function(value, tag, key) {
-						
-						var timeelapsed = 0;
-						
-						if(tag.type = "item-tag") {
-							Items.find({tags: tag._id}).map(function(item) {
-								Times.find({
-									item: item._id,
-									start: {
-										$gte: new Date(new Date().setHours(0,0,0,0)),
-										$lte: new Date(new Date().setHours(23,59,59,999))
-									}
-								}).map(function(doc) {
-									timeelapsed += (doc.end > 0 ? doc.end : new Date()) - doc.start;
-								});
-							});
-							
-						} else if (tag.type = "time-tag") {
-							// TODO
-						}
-						
-						return formatDuration(timeelapsed, true);
-					},
-					sortable: false,
-				},
-				{
-					key: 'timeweek', 
-					label: 'this Week', 
-					fn: function(value, tag, key) {
-						
-						var timeelapsed = 0;
-						
-						var firstDayofWeek = new Date().getDate() - new Date().getDay(); // will be sunday;
-						firstDayofWeek += 1; // will be monday
-						
-						if(tag.type = "item-tag") {
-							Items.find({tags: tag._id}).map(function(item) {
-								Times.find({
-									item: item._id,
-									start: {
-										$gte: new Date(new Date(new Date().setDate(firstDayofWeek  )).setHours(0,0,0,0     )),
-										$lte: new Date(new Date(new Date().setDate(firstDayofWeek+6)).setHours(23,59,59,999))
-									}
-								}).map(function(doc) {
-									timeelapsed += (doc.end > 0 ? doc.end : new Date()) - doc.start;
-								});
-							});
-							
-						} else if (tag.type = "time-tag") {
-							// TODO
-						}
-						
-						return formatDuration(timeelapsed, true);
-					},
-					sortable: false,
-				},
-				{
-					key: 'timeweekprev', 
-					label: 'previous Week', 
-					fn: function(value, tag, key) {
-						
-						var timeelapsed = 0;
-						
-						var firstDayofWeek = new Date().getDate() - new Date().getDay(); // will be sunday;
-						firstDayofWeek += 1; // will be monday
-						
-						if(tag.type = "item-tag") {
-							Items.find({tags: tag._id}).map(function(item) {
-								Times.find({
-									item: item._id,
-									start: {
-										$gte: new Date(new Date(new Date().setDate(firstDayofWeek - 7)).setHours(0,0,0,0     )),
-										$lte: new Date(new Date(new Date().setDate(firstDayofWeek - 1)).setHours(23,59,59,999))
-									}
-								}).map(function(doc) {
-									timeelapsed += (doc.end > 0 ? doc.end : new Date()) - doc.start;
-								});
-							});
-							
-						} else if (tag.type = "time-tag") {
-							// TODO
-						}
-						
-						return formatDuration(timeelapsed, true);
-					},
-					sortable: false,
-				},
-				{
-					key: 'timemonth', 
-					label: 'this Month', 
-					fn: function(value, tag, key) {
-						
-						var timeelapsed = 0;
-						
-						if(tag.type = "item-tag") {
-							Items.find({tags: tag._id}).map(function(item) {
-								Times.find({
-									item: item._id,
-									start: {
-										$gte: new Date(new Date(new Date().setDate(1)).setHours(0,0,0,0     )),
-										$lte: new Date(new Date(new Date(new Date().setMonth(new Date().getMonth() + 1)).setDate(0)).setHours(23,59,59,999))
-									}
-								}).map(function(doc) {
-									timeelapsed += (doc.end > 0 ? doc.end : new Date()) - doc.start;
-								});
-							});
-							
-						} else if (tag.type = "time-tag") {
-							// TODO
-						}
-						
-						return formatDuration(timeelapsed, true);
-					},
-					sortable: false,
-				},
-				{
-					key: 'timemonthprev', 
-					label: 'previous Month', 
-					fn: function(value, tag, key) {
-						
-						var timeelapsed = 0;
-						
-						if(tag.type = "item-tag") {
-							Items.find({tags: tag._id}).map(function(item) {
-								Times.find({
-									item: item._id,
-									start: {
-										$gte: new Date(new Date(new Date(new Date().setMonth(new Date().getMonth() - 1)).setDate(1)).setHours(0,0,0,0     )),
-										$lte: new Date(new Date(new Date().setDate(0)).setHours(23,59,59,999))
-									}
-								}).map(function(doc) {
-									timeelapsed += (doc.end > 0 ? doc.end : new Date()) - doc.start;
-								});
-							});
-							
-						} else if (tag.type = "time-tag") {
-							// TODO
-						}
-						
-						return formatDuration(timeelapsed, true);
-					},
-					sortable: false,
-				},
-				{
-					key: 'timetotal', 
-					label: 'Total', 
-					fn: function(value, tag, key) {
-						
-						var timeelapsed = 0;
-						
-						if(tag.type = "item-tag") {
-							Items.find({tags: tag._id}).map(function(item) {
-								Times.find({
-									item: item._id
-								}).map(function(doc) {
-									timeelapsed += (doc.end > 0 ? doc.end : new Date()) - doc.start;
-								});
-							});
-							
-						} else if (tag.type = "time-tag") {
-							// TODO
-						}
-						
-						return formatDuration(timeelapsed, true);
-					},
-					sortable: false,
-				}
-			],
-		};
-	},
+	tableSettingsTags: tableSettingsTags,
 	tags: function () {
 		//return Tags.find({type: "item-tag"}, {sort: {name: 1, value: 1}});
 		return Tags.find({}, {sort: {name: 1, value: 1}});

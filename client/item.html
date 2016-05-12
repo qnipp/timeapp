@@ -1,0 +1,155 @@
+
+<!-- route: item -->
+
+<template name="itemcontainer">
+<span class="debug">template: {{currentTemplateName}}</span>
+
+	<div class="row">
+		<div class="col-sm-6">
+			{{> itemlist}}
+		</div>
+		<div class="col-sm-6">
+			{{#if equals currentRoute "item.create"}}
+				{{> itemform}}
+			{{else}}
+				{{#if equals currentRoute "item.import"}}
+					{{> itemimport}}
+				{{else}}
+					{{#if _id}}
+						{{> itemform}}
+					{{/if}}
+				{{/if}}
+			{{/if}}
+		</div>
+	</div>
+	
+</template>
+
+<template name="itemlist">
+<span class="debug">template: {{currentTemplateName}}</span>
+
+<div class="panel panel-default">
+	<div class="panel-heading">Items:</div>
+	
+	<div class="list-group">
+	{{#each item in items}}
+		{{>itemlistentry item=item itemselected=this}}
+	{{/each}}
+	</div>
+</div>
+
+</template>
+
+
+<template name="itemlistentryItem">
+<span class="debug">template: {{currentTemplateName}}</span>
+	<ul class="nav nav-pills" role="tablist">
+		{{> itemlistentry item=this}}
+	</ul>
+</template>
+
+<template name="itemlistentry">
+<span class="debug">template: {{currentTemplateName}}</span>
+
+	{{#with item}}
+	
+		<a class="list-group-item clearfix {{#if equals ../itemselected._id _id}} list-group-item-info {{/if}}"
+			href="{{pathFor 'item.detail' _id=_id}}">
+			<h5>{{title}} <small>{{description}}</small>
+				<a href="{{pathFor 'time.create' _id=_id}}" class="pull-right">
+					<span aria-hidden="true"><i class="glyphicon glyphicon-plus"></i></span>
+					add Time
+				</a>
+			</h5>
+			<ul class="nav nav-pills pull-right" role="tablist">
+			{{#each tag in tags}}
+				{{>taglistentry tag=tag}}
+			{{/each}}
+			</ul>
+		</a>
+	
+	{{/with}}
+	
+</template>
+
+<template name="itemform">
+<span class="debug">template: {{currentTemplateName}}</span>
+	
+	<div class="panel panel-default">
+	
+	{{#if _id}}
+		
+		<div class="panel-heading">
+			<h4>Edit Item [ {{_id}} ]</h4>
+		</div>
+		<div class="panel-body">
+		{{#autoForm id="formItem" collection="Collections.Items" doc=this type="method-update" meteormethod="itemUpdate"}}
+		
+			{{> afFormGroup name="title" }}
+			{{> afFormGroup name="description" }}
+			{{> afFormGroup name="tags"}}
+			{{> afFormGroup name="keepOpen" }}
+			
+			<div class="form-group">
+				<button type="submit" class="btn btn-primary">
+					<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Save
+				</button>
+				
+				<a class="btn" href="{{pathFor 'item.list'}}">Back</a>
+			</div>
+		{{/autoForm}}
+		</div>
+			
+	{{else}}
+		
+		<div class="panel-heading">
+			<h4>New Item</h4>
+		</div>
+		<div class="panel-body">
+		{{#autoForm id="formItem" collection="Collections.Items" type="method" meteormethod="itemInsert"}}
+		
+			{{> afFormGroup name="title" }}
+			{{> afFormGroup name="description" }}
+			{{> afFormGroup name="tags"}}
+			{{> afFormGroup name="keepOpen" }}
+			
+			<div class="form-group">
+				<button type="submit" class="btn btn-primary">
+					<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Create
+				</button>
+			</div>
+		{{/autoForm}}
+		</div>
+			
+	{{/if}}
+	
+	{{> itemreport}}
+	
+	</div>
+</template>
+
+<template name="itemimport">
+<span class="debug">template: {{currentTemplateName}}</span>
+
+	{{> quickForm id="formItem" schema="Schemas.ItemImport" type="method" meteormethod="itemImport" }}
+	
+	<!-- TODO: reset form after import - and allow default fields to be filled again. same on tag insert. -->
+		
+</template>
+
+
+
+<template name="itemreport">
+<span class="debug">template: {{currentTemplateName}}</span>
+	
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="panel panel-default">
+				
+				{{> reactiveTable collection=items settings=tableSettingsItems}}
+				
+			</div>
+		</div>
+	</div>
+
+</template>

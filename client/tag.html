@@ -1,0 +1,176 @@
+
+<!-- route: tag -->
+
+<template name="tagcontainer">
+<span class="debug">template: {{currentTemplateName}}</span>
+	
+	<div class="row">
+		<div class="col-sm-8">
+			{{> taglist}}
+		</div>
+		<div class="col-sm-4">
+			{{#if equals currentRoute "tag.create"}}
+				{{> tagform}}
+			{{else}}
+				{{#if _id}}
+					{{> tagform}}
+				{{/if}}
+			{{/if}}
+		</div>
+	</div>
+</template>
+
+
+<template name="taglist">
+<span class="debug">template: {{currentTemplateName}}</span>
+
+<div class="panel panel-default">
+	<div class="panel-heading">Tags for Items:</div>
+	
+	
+	<ul class="nav nav-pills" role="tablist">
+	{{#each tag in tagsforitems}}
+		{{>taglistentry tag=tag tagselected=this}}
+	{{/each}}
+	</ul>
+</div>
+
+<div class="panel panel-default">
+	<div class="panel-heading">Tags for Times:</div>
+	
+	<ul class="nav nav-pills" role="tablist">
+	{{#each tag in tagsfortimes}}
+		{{>taglistentry tag=tag tagselected=this}}
+	{{/each}}
+	</ul>
+</div>
+
+</template>
+
+
+<template name="taglistentryItem">
+<span class="debug">template: {{currentTemplateName}}</span>
+	<ul class="nav nav-pills" role="tablist">
+		{{> taglistentry tag=this}}
+	</ul>
+</template>
+
+<template name="brauchmaned">
+
+	<!--
+	{{#with tag}}
+		<a class="list-group-item {{#if equals ../tagselected._id _id}} list-group-item-info {{/if}}"
+		style="background-color: {{color.bgname}}; color: {{color.fgname}};"
+			href="{{pathFor 'tag.detail' _id=_id}}">{{name}} 
+			<span class="badge" style="background-color: {{color.bgvalue}}; color: {{color.fgvalue}};">{{value}}</span></a>
+	{{/with}}
+	-->
+	
+</template>
+
+<template name="taglistentry">
+<span class="debug">template: {{currentTemplateName}}</span>
+
+	{{#with tag}}
+		
+		<li role="presentation" class="small {{#if equals ../tagselected._id _id}} active {{/if}}" >
+			<a href="{{pathFor 'tag.detail' _id=_id}}" style="background-color: {{color.bgname}}; color: {{color.fgname}};">
+			
+		{{#if equals ../tagselected._id _id}}
+			<strong>{{name}}</strong>
+		{{else}}
+			{{name}}
+		{{/if}}
+				<span class="badge" style="background-color: {{color.bgvalue}}; color: {{color.fgvalue}};">{{value}}</span>
+			</a>
+		</li>
+	{{/with}}
+	
+		
+</template>
+
+<template name="tagform">
+<span class="debug">template: {{currentTemplateName}}</span>
+
+
+	<div class="panel panel-default">
+	
+	{{#if _id}}
+		
+		<div class="panel-heading clearfix">
+			<h4>Edit Tag [ {{_id}} ]
+		
+			<button title="remove tag" type="submit" class="btn btn-danger jstagremove pull-right"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
+			
+			<!--<a href="#" title="remove tag" class="text-danger jstagremove pull-right"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></a>-->
+			</h4>
+		</div>
+		<div class="panel-body">
+		
+		<!-- { {> quickForm id="formTag" collection="Collections.Tags" doc=tag type="method-update" meteormethod="tagUpdate" omitFields="createdAt,createdBy,updatedAt"  } } -->
+		
+		{{#autoForm id="formTag" collection="Collections.Tags" doc=this type="method-update" meteormethod="tagUpdate" }}
+			
+			{{> afFormGroup name="name" }}
+			{{> afFormGroup name="value" }}
+			{{> afFormGroup name="type" }}
+			
+			<div class="form-group">
+				<button type="submit" class="btn btn-primary">
+					<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Save
+				</button>
+				
+				<a class="btn" href="{{pathFor 'tag.list'}}">Back</a>
+			</div>
+		{{/autoForm}}
+		
+		</div>
+		
+	{{else}}
+	
+		<div class="panel-heading">
+			<h4>New Tag</h4>
+		</div>
+		<div class="panel-body">
+		<!-- { {> quickForm id="formTag" collection="Collections.Tags" type="method" meteormethod="tagInsert"  omitFields="createdAt,createdBy,updatedAt"} } -->
+		
+		{{#autoForm id="formTag" collection="Collections.Tags" type="method" meteormethod="tagInsert"}}
+		
+			{{> afFormGroup name="name" }}
+			{{> afFormGroup name="value" }}
+			{{> afFormGroup name="type" }}
+			
+			<div class="form-group">
+				<button type="submit" class="btn btn-primary">
+					<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Create
+				</button>
+			</div>
+		{{/autoForm}}
+		
+		</div>
+		
+	{{/if}}
+	
+	
+	
+	{{> tagreport}}
+	
+	</div>
+	
+</template>
+
+
+<template name="tagreport">
+<span class="debug">template: {{currentTemplateName}}</span>
+	
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="panel panel-default">
+				
+				{{> reactiveTable collection=tags settings=tableSettingsTags}}
+				
+			</div>
+		</div>
+	</div>
+
+</template>
