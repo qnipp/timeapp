@@ -111,8 +111,9 @@ Meteor.publish("tags.others", function() {
 
 
 // coments on docs
-Meteor.publish("users", function() {
+Meteor.publish("users.company", function() {
 	// TODO: only list users from group
 	// TODO: add group to users collection
-	return Users.find({});
+	//return Meteor.users.find({}); users.company
+	return Meteor.users.find({}, {fields: {emails: 1, profile: 1}});
 });

@@ -6,7 +6,7 @@ Meteor.subscribe('hierarchy.mine');
 Meteor.subscribe('attribs.mine');
 Meteor.subscribe('tags.mine');
 Meteor.subscribe('tags.others');
-//Meteor.subscribe('users');
+Meteor.subscribe('users.company');
 
 
 // TODO: remove DEBUG
@@ -88,7 +88,7 @@ Template.registerHelper("Collections", Collections);
 
 Template.itemlist.helpers({
 	items: function () {
-		return Items.find({}, {sort: {updatedAt: -1}});
+		return Items.find({}, {sort: {createdAt: -1, updatedAt: -1}});
 	}
 });
 
@@ -183,98 +183,7 @@ Template.timelist.events({
 });
 
 Template.timelist.helpers({
-	tableSettingsTime: function () {
-		return {
-			//collection: times,
-			/*
-			collection: function() {
-				console.log('tableSettingsTime - access to collection.find.');
-				return Times.find({},  {sort: {createdAt: -1}});
-			},*/
-			rowsPerPage: 20,
-			showFilter: true,
-			showNavigation: 'auto',
-			//fields: ['item', 'start', 'end', 'duration'],
-			rowClass: function(item) {
-				return item.id == this.id ? 'info' : '';
-			},
-			fields: [
-				{ 
-					key: 'item', 
-					label: 'Item', 
-					
-					//tmpl: Template.timelistentryItem,
-					
-					fn: function(value, time, key) {
-						var item = loadItem(time.item, false, null);
-						return item.title;
-					},
-					sortByValue: true,
-					sortable: false,
-				},
-				{ 
-					key: 'start', 
-					label: 'Start', 
-					
-					//tmpl: Template.timelistentryStart,
-					
-					fn: function(value, time, key) {
-						if(time.start) {
-							//time.start_fmt = moment.utc(time.start).format(CNF.FORMAT_DATETIME);
-							time.start_fmt = moment(time.start).format(CNF.FORMAT_DATETIME);
-						}
-						return time.start_fmt;
-					},
-					sortByValue: true,
-					sortOrder: 1, 
-					sortDirection: 'descending',
-				},
-				{ 
-					key: 'end', 
-					label: 'End', 
-					//tmpl: Template.timelistentryEnd,
-					
-					fn: function(value, time, key) {
-						if(time.end) {
-							//time.end_fmt = moment.utc(time.end).format(CNF.FORMAT_DATETIME);
-							time.end_fmt = moment(time.end).format(CNF.FORMAT_DATETIME);
-						} else {
-							time.end_fmt = '';
-						}
-						return time.end_fmt;
-					},
-					sortByValue: true,
-					
-					sortOrder: 2, 
-					sortDirection: 'descending', 
-				},
-				{ 
-					key: 'duration', 
-					label: 'duration', 
-					//tmpl: Template.timelistentryDuration,
-					
-					fn: function(value, time, key) {
-						if(time.end) {
-							time.duration_fmt = formatDuration(time.end - time.start);
-						} else {
-							time.duration_fmt = formatDuration(new Date() - time.start);
-						}
-						return time.duration_fmt;
-					},
-					
-					//sortByValue: true,
-					sortable: false,
-				},
-				{ 
-					key: 'createdAt', 
-					label: 'Created At', 
-					hidden: true,
-					sortOrder: 0, 
-					sortDirection: 'descending',
-				},
-			],
-		};
-	},
+	tableSettingsTime: tableSettingsTime,
 	
 	times: function () {
 		///return Times.find({},  {sort: {createdAt: -1}});
@@ -428,11 +337,40 @@ Template.tagreport.helpers({
 	//tableSettingsTags: tableSettingsTags,
 	tableSettingsTags: function() {
 		var settings = tableSettingsTags();
-		settings.fields.splice(0, 1);
+		//settings.fields.splice(0, 1);
+		settings.fields[0].tmpl = null;
+		//settings.fields[0].fn = function(value, tag, key) { return tag.name+ ': '+ tag.value; };
+		settings.fields[0].fn = function(value, tag, key) { return 'Total'; };
+		settings.fields[0].sortByValue = false;
+		settings.fields[0].sortable = false;
 		settings.showFilter = false;
 		settings.showNavigation = 'never';
 
 		return settings;
+	},
+	
+	tableSettingsItems: function() {
+		var settings = tableSettingsItems();
+		//settings.fields.splice(0, 1);
+		settings.fields[0].tmpl = null;
+		settings.fields[0].fn = function(value, item, key) { 
+			return new Spacebars.SafeString(
+				'<span>'+ item.title +' </span>'+
+				'<small>'+ item.description +'</small>');
+		};
+		settings.fields[0].sortByValue = false;
+		settings.fields[0].sortable = false;
+		settings.showFilter = false;
+		settings.showNavigation = 'never';
+		
+		return settings;
+	},
+	
+	items: function() {
+		console.log('loading items from tag: ');
+		console.log(this);
+		
+		return Items.find({tags: this._id}, {sort: {updatedAt: -1}});
 	},
 
 	tags: function() {

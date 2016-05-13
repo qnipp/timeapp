@@ -114,6 +114,7 @@
 			{{> afFormGroup name="name" }}
 			{{> afFormGroup name="value" }}
 			{{> afFormGroup name="type" }}
+			{{> afFormGroup name="share" }}
 			
 			<div class="form-group">
 				<button type="submit" class="btn btn-primary">
@@ -125,6 +126,8 @@
 		{{/autoForm}}
 		
 		</div>
+		
+		{{> tagreport}}
 		
 	{{else}}
 	
@@ -139,6 +142,7 @@
 			{{> afFormGroup name="name" }}
 			{{> afFormGroup name="value" }}
 			{{> afFormGroup name="type" }}
+			{{> afFormGroup name="share" }}
 			
 			<div class="form-group">
 				<button type="submit" class="btn btn-primary">
@@ -153,8 +157,6 @@
 	
 	
 	
-	{{> tagreport}}
-	
 	</div>
 	
 </template>
@@ -168,6 +170,8 @@
 			<div class="panel panel-default">
 				
 				{{> reactiveTable collection=tags settings=tableSettingsTags}}
+				
+				{{> reactiveTable collection=items settings=tableSettingsItems}}
 				
 			</div>
 		</div>
