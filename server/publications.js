@@ -1,3 +1,25 @@
+
+Meteor.publish("users.company", function() {
+	// TODO: only list users from group
+	// TODO: add group to users collection
+	//return Meteor.users.find({}); users.company
+	return Meteor.users.find({}, {fields: {emails: 1, profile: 1}});
+});
+
+Meteor.publish("tags.mine", function() {
+	return Tags.find({
+		"createdBy": this.userId
+	});
+});
+/*
+Meteor.publish("tags.others", function() {
+	return Tags.find({
+		"createdBy": { $not: this.userId },
+		"shared": this.userId
+	});
+});
+*/
+
 // publish read access to collections
 Meteor.publish("items.mine", function() {
 	return Items.find({
@@ -5,6 +27,28 @@ Meteor.publish("items.mine", function() {
 	});
 });
 
+
+Meteor.publishComposite('tags.others', {
+  find: function() {	
+  console.log("seaerching for tags...");
+  
+    return Tags.find({
+			"createdBy": { $not: this.userId },
+			"shared": this.userId
+		});
+  },
+  children: [{
+		find: function(tag) {
+		
+		console.log("finding kids...");
+		
+			return Items.find({ 
+				"createdBy": { $not: this.userId },
+				"tags": tag._id 
+			});
+		}
+	}]
+});
 /*
  * see mongo: https://www.slideshare.net/slideshow/embed_code/36715147
  * and meteor: http://joshowens.me/using-mongodb-aggregations-to-power-a-meteor-js-publication/
@@ -39,12 +83,6 @@ Meteor.publish('items.mine', function() {
 });
 
 */
-
-Meteor.publish("hierarchy.mine", function() {
-	return Hierarchy.find({
-		"createdBy": this.userId
-	});
-});
 
 
 Meteor.publish("times.mine", function() {
@@ -94,26 +132,12 @@ Meteor.publish("attribs.mine", function() {
 });
 
 
-Meteor.publish("tags.mine", function() {
-	return Tags.find({
+Meteor.publish("hierarchy.mine", function() {
+	return Hierarchy.find({
 		"createdBy": this.userId
-	});
-});
-
-
-Meteor.publish("tags.others", function() {
-	return Tags.find({
-		//"createdBy": { $not: { this.userId } }
-		//"createdBy": this.userId
 	});
 });
 
 
 
 // coments on docs
-Meteor.publish("users.company", function() {
-	// TODO: only list users from group
-	// TODO: add group to users collection
-	//return Meteor.users.find({}); users.company
-	return Meteor.users.find({}, {fields: {emails: 1, profile: 1}});
-});

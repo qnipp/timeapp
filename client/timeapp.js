@@ -1,13 +1,19 @@
 
 // subscribe to publications in server.js
+
+Meteor.subscribe('users.company', Meteor.userId());
+Meteor.subscribe('tags.mine');
+Meteor.subscribe('tags.others');
 Meteor.subscribe('items.mine');
 Meteor.subscribe('times.mine');
 Meteor.subscribe('hierarchy.mine');
 Meteor.subscribe('attribs.mine');
-Meteor.subscribe('tags.mine');
-Meteor.subscribe('tags.others');
-Meteor.subscribe('users.company');
 
+//Deps.autorun(function() {
+  // or
+  // Meteor.subscribe("userData", Meteor.userId());
+  // Meteor.subscribe("allUserData", Meteor.userId());
+//}); 	
 
 // TODO: remove DEBUG
 SimpleSchema.debug = true;
@@ -367,15 +373,15 @@ Template.tagreport.helpers({
 	},
 	
 	items: function() {
-		console.log('loading items from tag: ');
-		console.log(this);
+		console.log('loading items from tag: ' + this._id);
+		//console.log(this);
 		
 		return Items.find({tags: this._id}, {sort: {updatedAt: -1}});
 	},
 
 	tags: function() {
-		console.log('loading tag: ');
-		console.log(this);
+		console.log('loading tag: ' + this._id);
+		//console.log(this);
 		
 		return Tags.find({_id: this._id});
 	},
