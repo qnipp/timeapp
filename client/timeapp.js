@@ -2,12 +2,20 @@
 // subscribe to publications in server.js
 
 Meteor.subscribe('users.company', Meteor.userId());
+/*
 Meteor.subscribe('tags.mine');
-Meteor.subscribe('tags.others');
 Meteor.subscribe('items.mine');
 Meteor.subscribe('times.mine');
-Meteor.subscribe('hierarchy.mine');
-Meteor.subscribe('attribs.mine');
+
+//Meteor.subscribe('hierarchy.mine');
+//Meteor.subscribe('attribs.mine');
+
+// Tags, Items and Data from shared tags
+Meteor.subscribe('data.others');
+
+*/
+
+Meteor.subscribe('data.all');
 
 //Deps.autorun(function() {
   // or
@@ -234,8 +242,12 @@ Template.timelistentry.events({
 Template.timelistentry.helpers({
 	time: function () {
 		var time = this.time;
-				
-		time.item = loadItem(time.item, {all: true}, null);
+		
+		console.log("loading item: " + time._id + ' '+  time.item);
+		
+		if(time.item) {
+			time.item = loadItem(time.item, {all: true}, null);
+		}
 		
 		if(time.end) {
 			time.duration_fmt = formatDuration(time.end - time.start);
