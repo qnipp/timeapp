@@ -120,6 +120,8 @@ Template.itemform.onRendered( function() {
 	});
 });
 
+// TODO: search for url
+/*
 Template.itemform.events({
 	'change input.tt-input[name="title"]': function(event) {
 		console.log("fetching and parsing url: ");
@@ -127,6 +129,7 @@ Template.itemform.events({
 		fetchUrl(event.currentTarget.value, parseUrlResponse);
 	},
 });
+*/
 
 Template.itemrecentlist.helpers({
 	itemsrecent: function() {
@@ -171,9 +174,8 @@ Template.itemreport.helpers({
 		return settings;
 	},
 	items: function() {
-		console.log('loading item: ');
-		console.log(this);
-		
+		//console.log('loading item: ');
+		//console.log(this);
 		return Items.find({_id: this._id});
 	},
 });
