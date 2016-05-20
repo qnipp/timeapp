@@ -453,6 +453,17 @@ Meteor.methods({
 		// TODO: check if its my tag entry
 		return Tags.remove({_id: tagid});
 	},
+	
+	// SEARCH
+	
+	openTimeWithItem: function (itemid) {
+		console.log('methods:openTimeWithItem : '+ itemid);
+		
+		
+		//Router.go(Router.path('item.detail', {_id: itemid}));
+		Router.go(Router.path('time.create', {_id: itemid}));
+	}
+	
 });
 
 

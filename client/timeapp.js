@@ -96,6 +96,59 @@ Template.registerHelper("Schemas", Schemas);
 Template.registerHelper("Collections", Collections);
 
 
+//////////// SEARCH ///////////
+
+AutoForm.hooks({
+  formSearch: {
+    onSubmit: function (doc) {
+      
+		
+		console.log('AutoForm.hooks([formSearch]');
+		console.log(doc);
+		//console.log(updateDoc);
+	//	console.log(currentDoc);
+		
+		Router.go(Router.path('time.create', {_id: insertDoc.searchItem}));
+		
+		this.done();
+		return false;
+    }
+  }
+});
+
+/*
+AutoForm.addHooks(['formSearch'],{
+	onSubmit: function(insertDoc, updateDoc, currentDoc) {
+		// You must call this.done()!
+		//this.done(); // submitted successfully, call onSuccess
+		//this.done(new Error('foo')); // failed to submit, call onError with the provided error
+		//this.done(null, "foo"); // submitted successfully, call onSuccess with `result` arg set to "foo"
+		
+		console.log('AutoForm.addHooks([formSearch]');
+		console.log(insertDoc);
+		console.log(updateDoc);
+		console.log(currentDoc);
+		
+		
+		Router.go(Router.path('time.create', {_id: insertDoc.searchItem}));
+		
+		this.done();
+		
+		return false;
+	}
+    onSuccess: function(formType, result) {
+        Router.go('page',{_id: this.docId});
+		
+		console.log('methods:openTimeWithItem : '+ itemid);
+		
+		
+		//Router.go(Router.path('item.detail', {_id: itemid}));
+		Router.go(Router.path('time.create', {_id: this.docId}));
+    }
+    
+});
+*/
+
 
 //////////// ITEMS ////////////
 

@@ -54,3 +54,9 @@ span.debug::after{
  * see: https://github.com/aldeed/meteor-autoform#how-can-i-show-an-asterisk-after-the-label-for-required-fields
 */
 [data-required] label:after {content: ' *'}
+
+
+/* used in tags to add some margin in list*/
+.margin5 {
+	margin: 5px;
+}

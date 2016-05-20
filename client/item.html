@@ -72,6 +72,26 @@
 	
 </template>
 
+
+<template name="iteminputentry">
+<span class="debug">template: {{currentTemplateName}}</span>
+
+	{{#with item}}
+	
+		<button class="btn btn-primary list-group-item clearfix" type="button">
+			<h5>{{title}} <small>{{description}}</small></h5>
+			<ul class="nav nav-pills pull-right" role="tablist">
+			{{#each tag in tags}}
+				{{>taginputentry tag=tag}}
+			{{/each}}
+			</ul>
+		</button>
+	
+	{{/with}}
+	
+</template>
+
+
 <template name="itemform">
 <span class="debug">template: {{currentTemplateName}}</span>
 	
