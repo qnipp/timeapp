@@ -165,6 +165,12 @@ Template.itemlistentry.helpers({
 	}
 });
 
+Template.itemform.helpers({
+	currentuserid: function() {
+		return Meteor.userId();
+	}
+});
+
 Template.itemform.onRendered( function() {
 	this.autorun(function(element) {
 		Template.currentData();
@@ -362,13 +368,12 @@ Template.tagform.events({
 	},
 });
 
-/*
+
 Template.tagform.helpers({
-	// TODO: check if this is necessary, tag should be set by route already
-	tag: function () {
-		return Tags.findOne({_id: this._id});
-	},
-});*/
+	currentuserid: function() {
+		return Meteor.userId();
+	}
+});
 
 Template.tagform.onRendered( function() {
 	this.autorun(function(element) {
