@@ -24,30 +24,6 @@
 	</div>
 </template>
 
-<template name="timerunninglist">
-<span class="debug">template: {{currentTemplateName}}</span>
-
-<div class="panel panel-default">
-
-	<div class="panel-heading">Your running times:</div>
-	<table class="table table-striped table-hover">
-		<thead class="thead-default">
-			<tr>
-				<th>Item</th>
-				<th>start</th>
-				<th>duration</th>
-				<th>stop</th>
-			</tr>
-		</thead>
-		<tbody>
-		{{#each time in timesrunning}}
-			{{>timelistentry time=time view="running"}}
-		{{/each}}
-		</tbody>
-	</table>
-</div>
-
-</template>
 
 <template name="timelist">
 <span class="debug">template: {{currentTemplateName}}</span>
@@ -57,23 +33,6 @@
 	
 	{{> reactiveTable collection=times settings=tableSettingsTime}}
 	
-	<!-- 
-	<table class="table table-striped table-hover">
-		<thead class="thead-default">
-			<tr>
-				<th>Item</th>
-				<th>start</th>
-				<th>end</th>
-				<th>duration</th>
-			</tr>
-		</thead>
-		<tbody>
-		{{#each time in times}}
-			{{>timelistentry time=time view="all" timeselected=this}}
-		{{/each}}
-		</tbody>
-	</table>
-	-->
 </div>
 
 </template>

@@ -179,6 +179,14 @@ Template.itemform.onRendered( function() {
 	});
 });
 
+Template.itemform.events({
+	'click .jsitemremove': function() {
+		if(confirm("Are you sure?")) {
+			Meteor.call("itemRemove", this._id);
+		}
+	},
+});
+
 // TODO: search for url
 /*
 Template.itemform.events({
@@ -193,9 +201,11 @@ Template.itemform.events({
 Template.itemrecentlist.helpers({
 	itemsrecent: function() {
 		// show last 5 days
-		var times = Times.find(
-				{start: { $gte: new Date((new Date() - 1000*60*60*24*5)) }}, 
-				{fields: {item: 1}}).fetch();
+		var times = Times.find({
+			start: { $gte: new Date((new Date() - 1000*60*60*24*5)) },
+			createdBy: Meteor.userId()
+		}, {fields: {item: 1}}); //.fetch(); // FIXME - check if this fetch is necessary
+		
 		if(times) {
 			var items = times.map(function (time) {
 				return time.item;
@@ -262,7 +272,7 @@ Template.timelist.helpers({
 	
 	times: function () {
 		///return Times.find({},  {sort: {createdAt: -1}});
-		return Times.find({},  {sort: {start: -1, end: -1}});
+		return Times.find({createdBy: Meteor.userId()},  {sort: {start: -1, end: -1}});
 		// show only times which have more than 10seconds duration
 		// does only work with aggregate
 		// aggregate only available on isServer
@@ -285,11 +295,12 @@ Template.timelist.helpers({
 	}
 });
 
-Template.timerunninglist.helpers({
+Template.itemrunninglist.helpers({
 	timesrunning: function() {
-		return Times.find({end: {
-				$not: {$ne: null}
-			}});
+		return Times.find({
+			end: {$not: {$ne: null}}, 
+			createdBy: Meteor.userId()
+		});
 	},
 });
 
@@ -304,10 +315,14 @@ Template.timelistentry.helpers({
 	time: function () {
 		var time = this.time;
 		
-		console.log("loading item: " + time._id + ' '+  time.item);
+		//console.log("showing time: " + time._id);
 		
-		if(time.item) {
-			time.item = loadItem(time.item, {all: true}, null);
+		if(time.item ) {			
+			time.item = loadItem(time.item, false, null);
+			
+		} else {
+			console.warn("Time Entry " + time._id + " does not have an item set");
+			console.log(time);
 		}
 		
 		if(time.end) {
@@ -367,7 +382,6 @@ Template.tagform.events({
 		Meteor.call("tagRemove", this._id);
 	},
 });
-
 
 Template.tagform.helpers({
 	currentuserid: function() {

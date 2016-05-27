@@ -21,8 +21,19 @@ Meteor.methods({
 	},
 	*/
 	
-	itemIsTitleUnique: function (title) {
-		return false;
+	// Returns true if current user already has a title with this name
+	itemIsTitleUnique: function (newtitle) {
+		// https://blog.serverdensity.com/checking-if-a-document-exists-mongodb-slow-findone-vs-find/
+		return !Items.find({
+			title: newtitle, 
+			ownedBy: Meteor.userId()
+			/*
+			$or: [
+				{createdBy: Meteor.userId()},
+				{ownedBy: Meteor.userId()}]
+				*/
+		}, {_id: 1});
+		
 	},
 	
 	setTimeEnd: function (timeid) {
@@ -30,10 +41,12 @@ Meteor.methods({
 		
 		var time = Times.findOne(timeid);
 		
-		if(!time) 			
+		if(!time) {
 			throw new Meteor.Error("not-found");
-		if(time.createdBy != Meteor.userId()) 
+		}
+		if(time.createdBy != Meteor.userId()) {
 			throw new Meteor.Error("not-authorized");
+		}
 		
 		return Times.update(time._id, {$set: {end: new Date() }});
 	},
@@ -45,13 +58,17 @@ Meteor.methods({
 		
 		if(!item) 			
 			throw new Meteor.Error("not-found");
+		/*
 		if(item.createdBy != Meteor.userId()) 
 			throw new Meteor.Error("not-authorized");
+		*/
+		// TODO: check if item's tags are shared with current user
 		
 		// stop all other times	
-		var timesrunning = Times.find({end: {
-				$not: {$ne: null}
-			}});
+		var timesrunning = Times.find({
+			end: {	$not: {$ne: null}}, 
+			createdBy: Meteor.userId()
+		});
 		
 		var itemrunning;
 		var items_for_update = [];
@@ -109,9 +126,12 @@ Meteor.methods({
 		return Items.update(id, item);
 	},
 	itemRemove: function (itemid) {
+		console.log('methods:itemRemove : '+ itemid);
 		// itemRemove not implemented !
-		console.log('haha - no :)');
-		return false;
+		//console.log('haha - no :)');
+		//return false;
+		return Items.remove({_id: itemid}) && Times.remove({item: itemid});
+		
 	},
 	
 	itemImport: function(form) {
@@ -393,6 +413,7 @@ Meteor.methods({
 					
 					var time = Times.findOne({
 						item: item._id,
+						createdBy: Meteor.userId(),
 						start: row.start
 					});
 					
@@ -448,12 +469,10 @@ Meteor.methods({
 		//Schemas.Tags.clean(tag);
 		check(tag, Schemas.Tags);
 		
-		console.log(Meteor.userId());
-		console.log(tag);
+		//console.log(Meteor.userId());
+		//console.log(tag);
 		
-		throw new Meteor.Error("do not update tags right now :\  ");
-		
-
+		///throw new Meteor.Error("do not update tags right now :\  ");
 		
 		return Tags.update(id, tag);
 	},
