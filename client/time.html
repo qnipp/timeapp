@@ -37,6 +37,29 @@
 
 </template>
 
+<template name="timelistrunningentry">
+<span class="debug">template: {{currentTemplateName}}</span>
+
+	{{#with time}}
+	
+	<tr class="{{#if equals ../timeselected._id _id}} info {{/if}}">
+		<!--<td scope="row">{{item.path}}</td>-->
+		<td scope="row"><a href="{{pathFor 'item.detail' _id=itemobj._id}}" class="{{ifsetelse itemobj.keepOpen 'bold'}}">{{itemobj.title}}</a></td>
+		<td><a href="{{pathFor 'time.detail' _id=_id}}">{{start_fmt}}</a></td>
+	
+		<td>{{duration_fmt}}</td>
+		
+		<td>
+			<button class="btn btn-default btn-danger jstimestop">
+				<span class="glyphicon glyphicon-stop" aria-hidden="true"></span> stop
+			</button>
+		</td>
+	
+	</tr>
+	{{/with}}
+	
+</template>
+
 <template name="timelistentry">
 <span class="debug">template: {{currentTemplateName}}</span>
 
@@ -44,34 +67,26 @@
 	
 	<tr class="{{#if equals ../timeselected._id _id}} info {{/if}}">
 		<!--<td scope="row">{{item.path}}</td>-->
-		<td scope="row"><a href="{{pathFor 'item.detail' _id=item._id}}" class="{{ifsetelse item.keepOpen 'bold'}}">{{item.title}}</a></td>
+		<td scope="row"><a href="{{pathFor 'item.detail' _id=itemobj._id}}" class="{{ifsetelse itemobj.keepOpen 'bold'}}">{{itemobj.title}}</a></td>
 		<td><a href="{{pathFor 'time.detail' _id=_id}}">{{start_fmt}}</a></td>
 	
-	{{#if equals ../view "all"}}
 		<td>{{end_fmt}}</td>
-	{{/if}}
 		
 		<td>{{duration_fmt}}</td>
 		
-	{{#if equals ../view "running"}}
-		<td>
-			<button class="btn btn-default btn-danger jstimestop">
-				<span class="glyphicon glyphicon-stop" aria-hidden="true"></span> stop
-			</button>
-		</td>
-	{{/if}}
-	
 	</tr>
 	{{/with}}
 	
 </template>
 
+<!--
 <template name="timelistentryItem">
 <span class="debug">template: {{currentTemplateName}}</span>
 
 	<td scope="row"><a href="{{pathFor 'item.detail' _id=item._id}}" class="{{ifsetelse item.keepOpen 'bold'}}">{{item.title}}</a></td>
 	
 </template>
+-->
 
 <template name="timelistentryStart">
 <span class="debug">template: {{currentTemplateName}}</span>
@@ -136,7 +151,7 @@
 	
 		{{time._id}}
 		
-			{{> afFormGroup name="item" value=item._id }}
+			{{> afFormGroup name="item" value=itemobj._id }}
 			{{> afFormGroup name="start" }}
 			{{> afFormGroup name="end" }}
 			

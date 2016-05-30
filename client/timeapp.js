@@ -29,6 +29,23 @@ SimpleSchema.debug = true;
 
 counter = 0;
 
+
+//////////// TRACKER ////////////
+
+// see: http://stackoverflow.com/questions/25301149/momentjs-in-meteor-reactivity
+
+
+
+// example
+/*
+Template.example.helpers({
+  endtime: function () {
+    return fromNowReactive(time.start);
+  }
+});
+*/
+
+
 //////////// GLOBALS ////////////
 
 Template.registerHelper('currentTemplateName', function() {
@@ -161,7 +178,11 @@ Template.itemlist.helpers({
 
 Template.itemlistentry.helpers({
 	item: function () {
-		return loadItem(this.item, {all: true}, null);
+		//return loadItem(this.item, {all: true}, null);
+		if(this.item && !this.itemobj) {
+			this.itemobj = loadItem(this.item, {all: true}, null);
+		}
+		return this.itemobj;
 	}
 });
 
@@ -200,11 +221,11 @@ Template.itemform.events({
 
 Template.itemrecentlist.helpers({
 	itemsrecent: function() {
-		// show last 5 days
+		// show last 8 days
 		var times = Times.find({
-			start: { $gte: new Date((new Date() - 1000*60*60*24*5)) },
+			start: { $gte: new Date((new Date() - 1000*60*60*24*8)) },
 			createdBy: Meteor.userId()
-		}, {fields: {item: 1}}); //.fetch(); // FIXME - check if this fetch is necessary
+		}, {fields: {item: 1}}); //.fetch(); // FIXED - check if this fetch is necessary - no
 		
 		if(times) {
 			var items = times.map(function (time) {
@@ -219,7 +240,10 @@ Template.itemrecentlist.helpers({
 
 Template.itemrecentlistentry.helpers({
 	item: function() {
-		return loadItem(this.item, {all: true}, null);
+		if(this.item && !this.itemobj) {
+			this.itemobj = loadItem(this.item, {all: true}, null);
+		}
+		return this.itemobj;
 	},
 });
 
@@ -246,6 +270,17 @@ Template.itemreport.helpers({
 		//console.log('loading item: ');
 		//console.log(this);
 		return Items.find({_id: this._id});
+	},
+});
+
+
+
+Template.itemrunninglist.helpers({
+	timesrunning: function() {
+		return Times.find({
+			end: {$not: {$ne: null}}, 
+			createdBy: Meteor.userId()
+		});
 	},
 });
 
@@ -295,20 +330,42 @@ Template.timelist.helpers({
 	}
 });
 
-Template.itemrunninglist.helpers({
-	timesrunning: function() {
-		return Times.find({
-			end: {$not: {$ne: null}}, 
-			createdBy: Meteor.userId()
-		});
-	},
-});
-
-
-Template.timelistentry.events({
+Template.timelistrunningentry.events({
 	'click .jstimestop': function() {
 		Meteor.call("setTimeEnd", this._id);
 	},
+});
+
+Template.timelistrunningentry.helpers({
+	time: function () {
+		var time = this.time;
+		
+		//console.log("showing running time: " + time._id);
+		//console.log(time);
+		
+		if(time.item && !time.itemobj) {
+			time.itemobj = loadItem(time.item, false, null);
+			
+		} else if(!time.item) {
+			console.warn("Time Entry " + time._id + " does not have an item set");
+			console.log(time);
+		}
+		
+		if(time.start) {
+			//time.start_fmt = moment.utc(time.start).format(CNF.FORMAT_DATETIME);
+			time.start_fmt = moment(time.start).format(CNF.FORMAT_DATETIME);
+		}
+		
+		if(time.end) {
+			time.duration_fmt = formatDuration(time.end - time.start);
+		} else {
+			//time.duration_fmt = formatDuration(new Date() - time.start);
+			//time.duration_fmt = fromNowReactive(time.start);
+			time.duration_fmt = formatDuration(reactiveDate() - time.start);
+		}
+		
+		return time;
+	}
 });
 
 Template.timelistentry.helpers({
@@ -317,18 +374,12 @@ Template.timelistentry.helpers({
 		
 		//console.log("showing time: " + time._id);
 		
-		if(time.item ) {			
-			time.item = loadItem(time.item, false, null);
+		if(time.item && !time.itemobj) {
+			time.itemobj = loadItem(time.item, false, null);
 			
-		} else {
+		} else if(!time.item) {
 			console.warn("Time Entry " + time._id + " does not have an item set");
 			console.log(time);
-		}
-		
-		if(time.end) {
-			time.duration_fmt = formatDuration(time.end - time.start);
-		} else {
-			time.duration_fmt = formatDuration(new Date() - time.start);
 		}
 		
 		if(time.start) {
@@ -338,6 +389,13 @@ Template.timelistentry.helpers({
 		if(time.end) {
 			//time.end_fmt = moment.utc(time.end).format(CNF.FORMAT_DATETIME);
 			time.end_fmt = moment(time.end).format(CNF.FORMAT_DATETIME);
+		}
+		
+		if(time.end) {
+			time.duration_fmt = formatDuration(time.end - time.start);
+		} else {
+			//time.duration_fmt = formatDuration(new Date() - time.start);
+			time.duration_fmt = formatDuration(reactiveDate() - time.start);
 		}
 		
 		return time;

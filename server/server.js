@@ -3,6 +3,6 @@ Meteor.startup(function () {
 	
 	console.log("Meteor startup is called!");
 	
-	console.log("Dropping indeces on items..");
+	//console.log("Dropping indeces on items..");
 	//Items._dropIndex("title");
 }); 

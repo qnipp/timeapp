@@ -464,7 +464,7 @@ Meteor.methods({
 	tagUpdate: function (tag, id) {
 		console.log('methods:tagUpdate : '+ id + ' - ' + tag.$set.name + ': '+ tag.$set.value);
 		
-		return false;
+		//return false;
 		//console.log(tag);
 		//Schemas.Tags.clean(tag);
 		check(tag, Schemas.Tags);
