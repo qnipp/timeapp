@@ -8,62 +8,6 @@
 	
 </template>
 
-<template name="itemrecentlist">
-<span class="debug">template: {{currentTemplateName}}</span>
-
-<div class="panel panel-default">
-	<div class="panel-heading">Your recent items:</div>
-	
-	<table class="table table-striped table-hover">
-		<thead class="thead-default">
-			<tr>
-				<th>Item</th>
-				<th>Time</th>
-				<th>start/stop</th>
-			</tr>
-		</thead>
-		<tbody>
-		{{#each item in itemsrecent}}
-			{{>itemrecentlistentry item=item}}
-		{{/each}}
-		</tbody>
-	</table>
-	
-</div>
-
-</template>
-
-
-<template name="itemrecentlistentry">
-<span class="debug">template: {{currentTemplateName}}</span>
-	{{#with item}}
-	<tr>
-		<!--<td scope="row">{{path}}</td>-->
-		<td scope="row" class="clearfix">
-			<a href="{{pathFor 'item.detail' _id=_id}}" class="{{ifsetelse keepOpen 'bold'}}">
-				<h5>{{title}} <small>{{description}}</small></h5>
-			</a>
-			<ul class="nav nav-pills pull-right" role="tablist">
-			{{#each tag in tags}}
-				{{>taglistentry tag=tag}}
-			{{/each}}
-			</ul>
-		</td>
-		<td>{{timeelapsed.today}} ({{timeelapsed.total}})</td>
-		<td>
-			{{#if isRunning}}
-				<button class="btn btn-default btn-danger jsitemstop">
-					<span class="glyphicon glyphicon-stop" aria-hidden="true"></span> stop
-				</button>
-			{{else}}
-				<button class="btn btn-default btn-success jsitemstart">
-					<span class="glyphicon glyphicon-play" aria-hidden="true"></span> start
-				</button>
-			{{/if}}
-		</td>
-	</tr>
-	{{/with}}
-</template>
 
 <!--
 <template name="itemcomment">

@@ -36,8 +36,8 @@ Meteor.methods({
 		
 	},
 	
-	setTimeEnd: function (timeid) {
-		console.log('methods:setTimeEnd - '+ timeid);
+	timeSetEnd: function (timeid) {
+		console.log('methods:timeSetEnd - '+ timeid);
 		
 		var time = Times.findOne(timeid);
 		
@@ -51,13 +51,36 @@ Meteor.methods({
 		return Times.update(time._id, {$set: {end: new Date() }});
 	},
 	
-	setItemStart: function (itemid) {
-		console.log('methods:setItemStart - '+ itemid);
+	itemSetEnd: function (itemid) {
+		console.log('methods:itemSetEnd - '+ itemid);
 		
 		var item = Items.findOne(itemid);
 		
-		if(!item) 			
+		if(!item) {
 			throw new Meteor.Error("not-found");
+		}
+		
+		// TODO: check if item's tags are shared with current user
+		
+		return Times.update({
+				$and: [ {
+					end: { $not: {$ne: null}},
+					createdBy: Meteor.userId(),
+					item: itemid
+				} ] },
+				{ $set: {end: new Date() }},
+				{ multi: true }
+			);
+	},
+	
+	itemSetStart: function (itemid) {
+		console.log('methods:itemSetStart - '+ itemid);
+		
+		var item = Items.findOne(itemid);
+		
+		if(!item) {
+			throw new Meteor.Error("not-found");
+		}
 		/*
 		if(item.createdBy != Meteor.userId()) 
 			throw new Meteor.Error("not-authorized");
@@ -94,9 +117,11 @@ Meteor.methods({
 			Times.update({
 				$and: [ {
 					end: { $not: {$ne: null}},
+					createdBy: Meteor.userId(),
 					item: { $in: items_for_update }
 				} ] },
-				{$set: {end: new Date() }}
+				{$set: {end: new Date() }},
+				{ multi: true }
 			);
 		}
 		

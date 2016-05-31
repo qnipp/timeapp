@@ -53,10 +53,23 @@ span.debug::after{
 /* make * before required fields
  * see: https://github.com/aldeed/meteor-autoform#how-can-i-show-an-asterisk-after-the-label-for-required-fields
 */
-[data-required] label:after {content: ' *'}
+[data-required] label:after {
+	content: ' *';
+	color: #d9534f;
+}
 
 
 /* used in tags to add some margin in list*/
 .margin5 {
 	margin: 5px;
+}
+
+/* used in forms to add clickable things on spans or labels */
+span.clickable {
+	cursor: pointer;
+	color: #337AB7;
+	font-weight: normal;
+}
+span.clickable:hover {
+	text-decoration: underline;
 }

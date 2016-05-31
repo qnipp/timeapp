@@ -245,14 +245,28 @@ Template.itemrecentlistentry.helpers({
 		}
 		return this.itemobj;
 	},
+	
+	// CHECK: is running in loadItem does not work reactive (when stopping time)
+	// this helper will be loaded to many times :\
+	// isRunning is done within #with item, therefor this._id = this.item._id
+	isRunning: function() {
+		console.log('check if is running: '+ this._id);
+		return Times.findOne({
+				item: this._id,
+				createdBy: Meteor.userId(),
+				end: {
+					$not: {$ne: null}
+				}
+			}, {limit: 1, fields: {_id: 1}}) ? true : false;
+	}
 });
 
 Template.itemrecentlistentry.events({
 	'click .jsitemstop': function() {
-		Meteor.call("setItemEnd", this._id);
+		Meteor.call("itemSetEnd", this._id);
 	},
 	'click .jsitemstart': function() {
-		Meteor.call("setItemStart", this._id);
+		Meteor.call("itemSetStart", this._id);
 	},
 });
 
@@ -332,7 +346,7 @@ Template.timelist.helpers({
 
 Template.timelistrunningentry.events({
 	'click .jstimestop': function() {
-		Meteor.call("setTimeEnd", this._id);
+		Meteor.call("timeSetEnd", this._id);
 	},
 });
 
@@ -406,10 +420,29 @@ Template.timeform.events({
 	'click .jstimeremove': function() {
 		Meteor.call("timeRemove", this._id);
 	},
+	'click .jstimesetnow': function(event) {
+		//console.log('clicked on label for input: ');
+		//console.log(event.target.parentElement.htmlFor);
+		
+		var now = moment().format('YYYY-MM-DDTHH:mm');
+		$('#'+event.target.parentElement.htmlFor).val(now);
+	},
+	'click .jstimesetlatest': function(event) {
+		// TODO
+		console.log("clickt on now from element: ");
+		console.log('event: ');
+		console.log(event);
+		console.log('target: ');
+		console.log(event.target);
+		console.log('current time: ');
+		console.log(new Date());
+	},
 });
+
 /*
 Template.timeform.helpers({
 	// TODO: check if this is necessary, time should be set by route already
+	// item is set through route as well
 	time: function () {
 		return Times.findOne({_id: this._id});
 	},
