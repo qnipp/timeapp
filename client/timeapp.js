@@ -231,7 +231,10 @@ Template.itemrecentlist.helpers({
 			var items = times.map(function (time) {
 				return time.item;
 			});
+			//items.reverse();
+			// TODO: sort by last Times entry
 			return Items.find({_id: {$in: items}}, {sort: {updatedAt: -1}});
+			//return Items.find({_id: {$in: items}});
 		} else {
 			return null;
 		}
@@ -297,11 +300,6 @@ Template.itemrunninglist.helpers({
 		});
 	},
 });
-
-
-
-
-
 
 //////////// TIMES ////////////
 

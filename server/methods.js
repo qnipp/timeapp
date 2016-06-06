@@ -365,6 +365,61 @@ Meteor.methods({
 		return Times.remove({_id: timeid});
 	},
 	
+	timeRunning: function(form) {
+		
+		console.log('trying: ');
+		console.log(form);
+		console.log("my user id: "+ Meteor.userId());
+		
+		check(form, Schemas.TimeRunning);
+		
+		// adding autovalues
+		Schemas.TimeRunning.clean(form);
+		
+		// DONE: check if ID is my own timeentry
+		
+		return Times.update(
+			{_id: form.timeId, createdBy: Meteor.userId()},
+			// does nothing
+			// see: http://stackoverflow.com/a/15307881/2115610
+			/*
+			{$set: {
+				'comments.-1': {
+					comment: form.comment,
+					createdAt: form.createdAt
+				}
+			}}
+			*/
+			
+			/*
+			// does not work: 
+			// Exception while invoking method 'timeRunning' MongoError: $each term takes only $slice (and optionally $sort) as complements
+			{$push: {
+				comments: {
+					$each: [{
+						comment: form.comment,
+						createdAt: form.createdAt
+					}],
+					// prepend 
+					// see: https://docs.mongodb.com/master/reference/operator/update/position/#up._S_position
+					//$position: 0
+					// see: http://stackoverflow.com/questions/32028472/insert-into-the-front-of-a-mongodb-document-array-without-position-and-each
+					 $sort: { createdAt: -1 }
+				}
+			}}
+			*/
+			// will put comment on the end of the array
+			
+			{$push: {
+				comments: {
+					comment: form.comment,
+					createdAt: form.createdAt
+				}
+			}}
+			
+		);
+	},
+	
 	timeImport: function(form) {
 		
 		//throw new Meteor.Error("test", "test details");
@@ -434,6 +489,18 @@ Meteor.methods({
 					
 					if(row.comments) {
 						row.comments = row.comments.split(',');
+						row.commentobj = [];
+						
+						/*
+						for (index = 0; index < a.length; ++index) {
+							row.comments = {comment: }
+						}*/
+						
+						row.comments.forEach(function(comment) {
+							row.commentobj.push({comment: comment});
+						});
+					} else {
+						row.commentobj = [];
 					}
 					
 					var time = Times.findOne({
@@ -450,7 +517,9 @@ Meteor.methods({
 							start: row.start,
 							end: row.end,
 							origin: form.origin,
-							comments: row.comments
+							//comments: row.comments
+							// "comments.$.comment" 
+							comments: row.commentobj
 						});
 						
 						if(timeid) {
