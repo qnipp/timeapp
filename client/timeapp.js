@@ -182,6 +182,18 @@ Template.itemlistentry.helpers({
 		if(this.item && !this.itemobj) {
 			this.itemobj = loadItem(this.item, {all: true}, null);
 		}
+		
+	// CHECK: is running in loadItem does not work reactive (when stopping time)
+	// this helper will be loaded to many times :\
+	// isRunning is done within #with item, therefor this._id = this.item._id
+		this.itemobj.isRunning = Times.findOne({
+				item: this.itemobj._id,
+				createdBy: Meteor.userId(),
+				end: {
+					$not: {$ne: null}
+				}
+			}, {limit: 1, fields: {_id: 1}}) ? true : false;
+			
 		return this.itemobj;
 	}
 });
@@ -265,6 +277,15 @@ Template.itemrecentlistentry.helpers({
 });
 
 Template.itemrecentlistentry.events({
+	'click .jsitemstop': function() {
+		Meteor.call("itemSetEnd", this._id);
+	},
+	'click .jsitemstart': function() {
+		Meteor.call("itemSetStart", this._id);
+	},
+});
+
+Template.itemlistentry.events({
 	'click .jsitemstop': function() {
 		Meteor.call("itemSetEnd", this._id);
 	},
@@ -426,14 +447,37 @@ Template.timeform.events({
 		$('#'+event.target.parentElement.htmlFor).val(now);
 	},
 	'click .jstimesetlatest': function(event) {
-		// TODO
-		console.log("clickt on now from element: ");
+		var latesttime = Times.findOne({
+			createdBy: Meteor.userId(),
+			start: {
+				$lte: moment().endOf('day').toDate(),
+				$gte: moment().startOf('day').toDate()
+			}
+		},{
+			sort: {end: -1}, 
+			fields: {end: 1},
+			limit: 1
+		});
+		
+		
+		console.log("clicked on latest-time from element: ");
+		console.log(latesttime);
+		
+		if(latesttime) {
+			latesttime.end = moment(latesttime.end).format('YYYY-MM-DDTHH:mm');
+			$('#'+event.target.parentElement.htmlFor).val(latesttime.end);
+		} else {
+			var now = moment().format('YYYY-MM-DDTHH:mm');
+			$('#'+event.target.parentElement.htmlFor).val(now);
+		}
+		/*
 		console.log('event: ');
 		console.log(event);
 		console.log('target: ');
 		console.log(event.target);
 		console.log('current time: ');
 		console.log(new Date());
+		*/
 	},
 });
 
@@ -591,6 +635,7 @@ Template.reportcontainer.helpers({
 		
 	},
 	tableSettingsTotal: tableSettingsTotal,
+	tableSettingsPerMonth: tableSettingsPerMonth,
 	
 	/*
 	tableSettingsTotal: function() {

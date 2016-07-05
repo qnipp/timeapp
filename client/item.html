@@ -142,6 +142,17 @@
 		<a class="list-group-item clearfix {{#if equals ../itemselected._id _id}} list-group-item-info {{/if}}"
 			href="{{pathFor 'item.detail' _id=_id}}">
 			<h5>{{title}} <small>{{description}}</small>
+			
+			{{#if isRunning}}
+				<button class="btn btn-default btn-danger jsitemstop pull-right">
+					<span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
+				</button>
+			{{else}}
+				<button class="btn btn-default btn-success jsitemstart pull-right">
+					<span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+				</button>
+			{{/if}}
+			
 				<a href="{{pathFor 'time.create' _id=_id}}" class="pull-right">
 					<span aria-hidden="true"><i class="glyphicon glyphicon-plus"></i></span>
 					add Time
