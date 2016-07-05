@@ -454,6 +454,13 @@ Template.timeform.onRendered( function() {
 	});
 });
 
+
+Template.timecommentlist.helpers({
+	createdAt: function () {
+		return  moment(this.createdAt).format(CNF.FORMAT_DATETIME);
+	},
+});
+
 //////////// TAGS ////////////
 
 
@@ -569,4 +576,37 @@ Template.reportcontainer.helpers({
 		//return Tags.find({type: "item-tag"}, {sort: {name: 1, value: 1}});
 		return Tags.find({}, {sort: {name: 1, value: 1}});
 	},
+	// all items from current user
+	itemsnotempty: function() {
+		//return Meteor.users.find({_id: Meteor.userId()}, {fields: {emails: 1, profile: 1}});
+		/*
+		return Times.find({
+						createdBy: Meteor.userId(),
+					}, {limit: 1, fields: {_id: 1}});
+		*/
+		//return Meteor.users.find({_id: Meteor.userId()}, {fields: {emails: 1}});
+		//return [{ _id: { $ne: null }}];
+		//return [{ _id: 'Af5gHwtxgurZP6t3Q'}];
+		return [{ _id: Meteor.userId()}];
+		
+	},
+	tableSettingsTotal: tableSettingsTotal,
+	
+	/*
+	tableSettingsTotal: function() {
+		var settings = tableSettingsItems();
+		//settings.fields.splice(0, 1);
+		settings.fields[0].tmpl = null;
+		settings.fields[0].fn = function(value, item, key) { 
+			return new Spacebars.SafeString(
+				'<span>Total</span>');
+		};
+		settings.fields[0].sortByValue = false;
+		settings.fields[0].sortable = false;
+		settings.showFilter = false;
+		settings.showNavigation = 'never';
+		
+		return settings;
+	},
+	*/
 });

@@ -5,17 +5,27 @@
 
 <template name="reportcontainer">
 <span class="debug">template: {{currentTemplateName}}</span>
+
+
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="panel panel-default">
+				
+				<div class="clearfix">
+					{{> reactiveTable collection=itemsnotempty settings=tableSettingsTotal}}
+				</div>
+			</div>
+		</div>
+	</div>
 	
 	<div class="row">
 		<div class="col-sm-12">
-			
-			
 			<div class="panel panel-default">
 				<div class="panel-heading">Tag Reports:</div>
 				
-				
-				{{> reactiveTable collection=tags settings=tableSettingsTags}}
-				
+				<div class="clearfix">
+					{{> reactiveTable collection=tags settings=tableSettingsTags}}
+				</div>
 			</div>
 		</div>
 	</div>

@@ -152,7 +152,7 @@
 		
 		{{else}}
 		
-		<div class="panel-heading clearfix">
+		<div class="panel-heading">
 			<h4>Show Tag [ {{_id}} ]</h4>
 		</div>
 		<div class="panel-body">
@@ -215,11 +215,18 @@
 	<div class="row">
 		<div class="col-sm-12">
 			<div class="panel panel-default">
-				
-				{{> reactiveTable collection=tags settings=tableSettingsTags}}
-				
-				{{> reactiveTable collection=items settings=tableSettingsItems}}
-				
+				<div class="clearfix">
+					{{> reactiveTable collection=tags settings=tableSettingsTags}}
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="panel panel-default">
+				<div class="clearfix">
+					{{> reactiveTable collection=items settings=tableSettingsItems}}
+				</div>
 			</div>
 		</div>
 	</div>

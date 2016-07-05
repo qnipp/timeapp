@@ -539,16 +539,46 @@ Meteor.methods({
 			return false;
 		}
 	},
+	
+	
+	// not in use!
+	timeReport: function() {
+		
+		
+		Times.find({
+			start: {
+				$gte: new Date(new Date().setHours(0,0,0,0)),
+				$lte: new Date(new Date().setHours(23,59,59,999))
+			},
+			createdBy: Meteor.userId(),
+		}).map(function(doc) {
+			//item.timeelapsed.today += (doc.end > 0 ? doc.end : new Date()) - doc.start;
+			item.timeelapsed.today += (doc.end > 0 ? doc.end : reactiveDate()) - doc.start;
+			
+		});
+		
+		/*
+		totaltimes = 0; 
+		Times.find({ 
+			start: { 
+				$gte : moment().startOf('day').toDate()
+			}, 
+			end: { 
+				$lte : moment().weekday(moment().weekday()+1).startOf('day').toDate() 
+			}, 
+			createdBy: Meteor.userId() 
+		}).map( function( t ) { 
+			totaltimes += t.end - t.start; 
+		} ); 
+		//totaltimes / 60 / 60 / 1000;
+		*/
+			
+	},
 		
 	// TAGS
 	
 	tagInsert: function (tag) {
 		console.log('methods:tagInsert : '+ tag.name);
-		/*
-		console.log(tag);
-		Schemas.Tags.clean(tag);
-		console.log('tagInsert - after clean: ');
-		console.log(tag);*/
 		
 		Schemas.Tags.clean(tag);
 		check(tag, Schemas.Tags);
