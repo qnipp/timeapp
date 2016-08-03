@@ -192,11 +192,10 @@
 <template name="itemform">
 <span class="debug">template: {{currentTemplateName}}</span>
 	
-	<div class="panel panel-default">
-	
 	{{#if _id}}
-		
-		{{#if equals ownedBy currentuserid}}
+	
+	<div class="panel panel-default">
+		{{#if equals ownedBy currentuserid }}
 			
 			<div class="panel-heading clearfix">
 				<h4>Edit Item [ {{_id}} ]
@@ -219,6 +218,9 @@
 					</button>
 					
 					<a class="btn" href="{{pathFor 'item.list'}}">Back</a>
+					
+					<a class="btn fetchUrl client" href="#">fetchUrl client</a>
+					<a class="btn fetchUrl server" href="#">fetchUrl server</a>
 				</div>
 			{{/autoForm}}
 			</div>
@@ -245,11 +247,13 @@
 			</div>
 			
 		{{/if}}
+	</div>
 		
-		{{> itemreport}}
+	{{> itemreport}}
 			
 	{{else}}
-		
+	
+	<div class="panel panel-default">
 		<div class="panel-heading">
 			<h4>New Item</h4>
 		</div>
@@ -269,10 +273,11 @@
 			</div>
 		{{/autoForm}}
 		</div>
-			
-	{{/if}}
 	
 	</div>
+	{{/if}}
+	
+	
 </template>
 
 <template name="itemimport">
@@ -294,6 +299,21 @@
 			<div class="panel panel-default">
 				<div class="clearfix">
 					{{> reactiveTable collection=items settings=tableSettingsItems}}
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="panel panel-default">
+			<div class="panel-heading clearfix">
+				<h5>Showing time entries since {{totalsUpdatedAt}}
+				</h5>
+			</div>
+			
+				<div class="clearfix">
+					{{> reactiveTable collection=times settings=tableSettingsTimes}}
 				</div>
 			</div>
 		</div>

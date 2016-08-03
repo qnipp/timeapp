@@ -113,11 +113,9 @@
 <template name="tagform">
 <span class="debug">template: {{currentTemplateName}}</span>
 
-
-	<div class="panel panel-default">
-	
 	{{#if _id}}
-		
+	
+	<div class="panel panel-default">
 		{{#if equals createdBy currentuserid}}
 		
 		<div class="panel-heading clearfix">
@@ -173,10 +171,13 @@
 		</div>
 		
 		{{/if}}
-		
-		{{> tagreport}}
+	</div>
+	
+	{{> tagreport}}
 		
 	{{else}}
+	
+	<div class="panel panel-default">
 	
 		<div class="panel-heading">
 			<h4>New Tag</h4>
@@ -199,12 +200,9 @@
 		{{/autoForm}}
 		
 		</div>
-		
-	{{/if}}
-	
-	
 	
 	</div>
+	{{/if}}
 	
 </template>
 

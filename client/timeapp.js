@@ -15,7 +15,10 @@ Meteor.subscribe('data.others');
 
 */
 
-Meteor.subscribe('data.all');
+//Meteor.subscribe('data.all');
+Meteor.subscribe('data.my.items');
+Meteor.subscribe('data.shared.tags');
+Meteor.subscribe('data.shared.items');
 
 //Deps.autorun(function() {
   // or
@@ -64,6 +67,15 @@ Template.registerHelper('projectName', function() {
 
 Template.registerHelper('equals', function (a, b) {
 	return a === b;
+});
+
+Template.registerHelper('or', function(cond1, cond2) {
+	/*
+	for (var i = 0; i < arguments.length; i++) {
+		alert(arguments[i]);
+	}*/
+	alert(cond1);
+	alert(cond2);
 });
 
 Template.registerHelper('ifsetelse', function (attrib, isSet, isNot) {
@@ -218,6 +230,23 @@ Template.itemform.events({
 			Meteor.call("itemRemove", this._id);
 		}
 	},
+	'click .fetchUrl.client': function() {
+		// Error: 
+		// No 'Access-Control-Allow-Origin' header is present on the requested resource. 
+		// Origin 'https://timeapp.qnipp.com' is therefore not allowed access.
+		
+		console.log('direct client call: ');
+		fetchUrl('https://jira.super-fi.net/browse/INGWEB-906');
+	},
+	
+	'click .fetchUrl.server': function() {
+		console.log('indirect server call: ');
+		var result = Meteor.call("fetchUrl", 'https://jira.super-fi.net/rest/auth/1/session', false);
+		
+		console.log('result: ' + result);
+		
+		//Meteor.call("fetchUrl", 'https://jira.super-fi.net/browse/INGWEB-906');
+	}
 });
 
 // TODO: search for url
@@ -265,7 +294,7 @@ Template.itemrecentlistentry.helpers({
 	// this helper will be loaded to many times :\
 	// isRunning is done within #with item, therefor this._id = this.item._id
 	isRunning: function() {
-		console.log('check if is running: '+ this._id);
+		//console.log('check if is running: '+ this._id);
 		return Times.findOne({
 				item: this._id,
 				createdBy: Meteor.userId(),
@@ -294,6 +323,12 @@ Template.itemlistentry.events({
 	},
 });
 
+Template.itemreport.events({
+	//'click .reactive-table tbody tr': function (event) {
+	'click .jstimeload': function(event) {
+		Router.go(Router.path('time.detail', {_id: this._id}));
+	}
+});
 
 Template.itemreport.helpers({
 	tableSettingsItems: function() {
@@ -301,6 +336,21 @@ Template.itemreport.helpers({
 		settings.fields.splice(0, 1);
 		settings.showFilter = false;
 		settings.showNavigation = 'never';
+		// remove on click handler
+		settings.rowClass = null;
+		
+		return settings;
+	},
+	tableSettingsTimes: function() {
+		var settings = tableSettingsTime();
+		
+		
+		settings.fields.splice(0, 1);
+		settings.showFilter = false;
+		settings.showNavigation = 'never';
+		// remove on click handler
+		//settings.rowClass = null;
+		
 		
 		return settings;
 	},
@@ -309,6 +359,19 @@ Template.itemreport.helpers({
 		//console.log(this);
 		return Items.find({_id: this._id});
 	},
+	times: function() {
+		return Times.find({
+			createdBy: Meteor.userId(), 
+			item: this._id
+		});
+	},
+	totalsUpdatedAt: function() {
+		if(this.totalsUpdatedAt) {
+			return moment(this.totalsUpdatedAt).format(CNF.FORMAT_DATETIME);
+		} else {
+			return "ever";
+		}
+	}
 });
 
 
@@ -547,14 +610,6 @@ Template.taglistentry.helpers({
 			
 			if(tag) {
 				tag = loadTag(tag);
-				/*
-				tag.color = {};
-				tag.color.bgname = '#'+intToRGB(hashCode( this.tag.name ) );
-				tag.color.bgvalue = '#'+intToRGB(hashCode( this.tag.value ) );
-				
-				tag.color.fgname = invertCssColor( tag.color.bgname );
-				tag.color.fgvalue = invertCssColor( tag.color.bgvalue );
-				*/
 			}
 		}
 		
@@ -564,6 +619,13 @@ Template.taglistentry.helpers({
 	},
 });
 
+
+Template.tagreport.events({
+	//'click .reactive-table tbody tr': function (event) {
+	'click .jsitemload': function(event) {
+		Router.go(Router.path('item.detail', {_id: this._id}));
+	}
+});
 
 Template.tagreport.helpers({
 	//tableSettingsTags: tableSettingsTags,
@@ -592,6 +654,7 @@ Template.tagreport.helpers({
 		};
 		settings.fields[0].sortByValue = false;
 		settings.fields[0].sortable = false;
+		
 		settings.showFilter = false;
 		settings.showNavigation = 'never';
 		
@@ -622,36 +685,9 @@ Template.reportcontainer.helpers({
 	},
 	// all items from current user
 	itemsnotempty: function() {
-		//return Meteor.users.find({_id: Meteor.userId()}, {fields: {emails: 1, profile: 1}});
-		/*
-		return Times.find({
-						createdBy: Meteor.userId(),
-					}, {limit: 1, fields: {_id: 1}});
-		*/
-		//return Meteor.users.find({_id: Meteor.userId()}, {fields: {emails: 1}});
-		//return [{ _id: { $ne: null }}];
-		//return [{ _id: 'Af5gHwtxgurZP6t3Q'}];
 		return [{ _id: Meteor.userId()}];
-		
 	},
 	tableSettingsTotal: tableSettingsTotal,
 	tableSettingsPerMonth: tableSettingsPerMonth,
 	
-	/*
-	tableSettingsTotal: function() {
-		var settings = tableSettingsItems();
-		//settings.fields.splice(0, 1);
-		settings.fields[0].tmpl = null;
-		settings.fields[0].fn = function(value, item, key) { 
-			return new Spacebars.SafeString(
-				'<span>Total</span>');
-		};
-		settings.fields[0].sortByValue = false;
-		settings.fields[0].sortable = false;
-		settings.showFilter = false;
-		settings.showNavigation = 'never';
-		
-		return settings;
-	},
-	*/
 });

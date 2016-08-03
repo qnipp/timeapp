@@ -21,18 +21,19 @@ Meteor.methods({
 	},
 	*/
 	
-	// Returns true if current user already has a title with this name
-	itemIsTitleUnique: function (newtitle) {
+	// Returns true if current user has no item with the same name - true if name is unique
+	itemIsTitleUnique: function (newtitle, currentid) {
 		// https://blog.serverdensity.com/checking-if-a-document-exists-mongodb-slow-findone-vs-find/
-		return !Items.find({
+		return !Items.findOne({
 			title: newtitle, 
-			ownedBy: Meteor.userId()
+			ownedBy: Meteor.userId(),
+			_id: {$ne: currentid }
 			/*
 			$or: [
 				{createdBy: Meteor.userId()},
 				{ownedBy: Meteor.userId()}]
 				*/
-		}, {_id: 1});
+		}, {fields: {_id: 1}});
 		
 	},
 	
@@ -142,12 +143,28 @@ Meteor.methods({
 		
 		Schemas.Items.clean(item);
 		check(item, Schemas.Items);
+		
+		if(!Meteor.call("itemIsTitleUnique", item.title, item._id)) {
+			console.log('methods:itemInsert : '+ item.title + ' failed - itemIsTitleUnique not met');
+			throw new Meteor.Error("notUnique", "item title is notUnique");
+			return false;
+		}
+		
 		return Items.insert(item);
 	},
 	itemUpdate: function (item, id) {
 		console.log('methods:itemUpdate : '+ id + ' - ' + item.$set.title );
 		
 		check(item, Schemas.Items);
+		
+		if(!Meteor.call("itemIsTitleUnique", item.$set.title, id)) {
+			console.log('methods:itemUpdate : '+ item.$set.title + ' failed - itemIsTitleUnique not met');
+			throw new Meteor.Error("notUnique", "item title is notUnique");
+			return false;
+		} else {
+			console.log('methods:itemInsert : '+ item.title + ' ok - itemIsTitleUnique is ok');
+		}
+		
 		return Items.update(id, item);
 	},
 	itemRemove: function (itemid) {
@@ -348,7 +365,7 @@ Meteor.methods({
 		console.log('methods:timeInsert : '+ time.start);
 		
 		Schemas.Times.clean(time);
-		check(time, Schemas.Times);
+		check(time, Schemas.Times);		
 		return Times.insert(time);
 	},
 	timeUpdate: function (time, id) {
@@ -357,6 +374,9 @@ Meteor.methods({
 		console.log(time);
 		
 		check(time, Schemas.Times);
+		
+		
+		
 		return Times.update(id, time);
 	},
 	timeRemove: function (timeid) {
@@ -615,6 +635,134 @@ Meteor.methods({
 		
 		//Router.go(Router.path('item.detail', {_id: itemid}));
 		Router.go(Router.path('time.create', {_id: itemid}));
+	},
+	
+	
+	// fetchUrl
+	
+	fetchUrl: function (url, options, regex) {
+		console.log('methods:fetchUrl : '+ url);
+		
+		return fetchUrl(url, options, regex);
+	},
+	
+	
+	
+	// calculations
+	
+	doCalculations: function() {
+		console.log("Total Items: " + Items.find({}).count());
+		console.log("My Items: " + Items.find({createdBy: Meteor.userId()}).count());
+		
+		console.log("Total Times: " + Times.find({}).count());
+		console.log("My Times: " + Times.find({createdBy: Meteor.userId()}).count());
+		
+		// go through all items
+		//Items.find({_id: 'rqvj5bXJQtJL2A2go'}).map(function(doc_item) {
+		Items.find({
+			//_id: 'rqvj5bXJQtJL2A2go', 
+			//tags: 'KwaxGTBiSybcq2d43',
+			$or: [
+			{ ownedBy: Meteor.userId() },
+			{ ownedBy: null, createdBy: Meteor.userId() }
+			]
+		}).map(function(doc_item) {
+			
+			// will calc through all times
+			//var updatedAt = moment().toDate();
+			// will leave current month untouched
+			var updatedAt = moment().startOf("month").toDate();
+			
+			var totals = {};
+			
+			// for each timeslot ..
+			for (timeslot in CNF.timeslots) {
+				
+				// define timeslot
+				//totals[timeslot] = {};
+				
+				//console.log('doing calculations for: '+ doc_item.title + ' timeslot: ' + timeslot );
+				
+				// timeslot: today
+				Times.find({
+					item: doc_item._id,
+					start: CNF.timeslots[timeslot].start,
+					// only count finished times - having an end time set
+					end: {$ne: null},
+					// only newer then update date
+					createdAt: {$lte: updatedAt}
+				}).map(function(doc_time) {
+					
+					//console.log('found item entry: '+ doc_time.start + ' by '+ doc_time.createdBy);
+					
+					// sum up times per user
+					if(typeof totals[doc_time.createdBy] === "undefined") {
+						totals[doc_time.createdBy] = {};
+					}
+					if(typeof totals[doc_time.createdBy][timeslot] === "undefined") {
+						totals[doc_time.createdBy][timeslot] = doc_time.end - doc_time.start;
+					} else {
+						totals[doc_time.createdBy][timeslot] += doc_time.end - doc_time.start;
+					}
+				});
+			}
+			
+			
+			// resulting format: 
+			// 		totals[_id of user1][today] = 123
+			// 		totals[_id of user2][today] = 234
+			// 		totals[_id of user1][yesterday] = 345
+			
+			// reformat totals
+			// targeting format:
+			// 		totals[0].userid = _id of user1
+			// 		totals[0].today = 123
+			// 		totals[0].yesterday = 345
+			// 		totals[1].userid = _id of user2
+			// 		totals[1].today = 234
+			
+			// reset totals for this item
+			doc_item.totals = [];
+			
+			for (userid in totals) {
+				
+				// totals[userid].today = 123; this shold already be there
+				
+				totals[userid].userid = userid;
+				//totals[userid].updatedAt = updatedAt;
+				
+				doc_item.totals.push( totals[userid] );
+			}
+			
+			console.log('updating doc_item._id: ' + doc_item._id +' - ' + 
+				' totalsUpdatedAt: '+ updatedAt + 
+				' title: ' + doc_item.title +
+				' using:');
+			console.log(doc_item.totals);
+			
+			// updating current using new totals
+			return Items.update(doc_item._id, {
+				$set: {
+					ownedBy: doc_item.ownedBy, 
+					totals: doc_item.totals, 
+					totalsUpdatedAt: updatedAt
+				},
+				//$unset: {totals: "", totalsUpdatedAt: ""}
+			});
+		});
+		
+		
+		/*
+		Times.find({
+			createdBy: Meteor.userId(),
+		}).map(function(doc) {
+			//item.timeelapsed.today += (doc.end > 0 ? doc.end : new Date()) - doc.start;
+			item.timeelapsed.today += (doc.end > 0 ? doc.end : reactiveDate()) - doc.start;
+			
+		});
+		
+		
+		*/
 	}
 	
 });

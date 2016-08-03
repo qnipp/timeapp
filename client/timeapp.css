@@ -73,3 +73,11 @@ span.clickable {
 span.clickable:hover {
 	text-decoration: underline;
 }
+
+/* all js-classes should have this class */
+.haspointer {
+	cursor: pointer;
+}
+[class^="js"] {
+    cursor: pointer;
+}
