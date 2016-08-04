@@ -119,6 +119,12 @@ Template.registerHelper('var_dump', function(variable, variablename) {
 	}
 });
 
+Template.registerHelper('formatDuration', function(timeinms) {
+	return formatDuration(timeinms);
+});
+ 
+
+
 // make Schema available in Templates (?)
 // see: http://autoform.meteor.com/updateaf
 Template.registerHelper("Schemas", Schemas);
@@ -279,7 +285,7 @@ Template.itemrecentlist.helpers({
 		} else {
 			return null;
 		}
-	},
+	}
 });
 
 Template.itemrecentlistentry.helpers({
@@ -302,6 +308,9 @@ Template.itemrecentlistentry.helpers({
 					$not: {$ne: null}
 				}
 			}, {limit: 1, fields: {_id: 1}}) ? true : false;
+	},
+	currentuserid: function() {
+		return Meteor.userId();
 	}
 });
 

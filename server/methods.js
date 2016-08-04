@@ -671,8 +671,7 @@ Meteor.methods({
 			// will calc through all times
 			//var updatedAt = moment().toDate();
 			// will leave current month untouched
-			var updatedAt = moment().startOf("month").toDate();
-			
+			var updatedAt = moment().subtract(1, 'months').startOf("month").toDate();
 			var totals = {};
 			
 			// for each timeslot ..

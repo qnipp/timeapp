@@ -42,7 +42,14 @@
 			{{/each}}
 			</ul>
 		</td>
-		<td>{{timeelapsed.today}} ({{timeelapsed.total}})</td>
+		<td>
+		{{#each total in totals}}
+				{{#if equals total.userid currentuserid}}
+					{{formatDuration total.today}} ({{formatDuration total.total}})
+				{{/if}}
+			{{/each}}
+		</td>
+		
 		<td>
 			{{#if isRunning}}
 				<button class="btn btn-default btn-danger jsitemstop">

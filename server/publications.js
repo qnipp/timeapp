@@ -1,9 +1,18 @@
 
+
+
 Meteor.publish("users.company", function() {
 	// TODO: only list users from group
 	// TODO: add group to users collection
 	//return Meteor.users.find({}); users.company
+	
+	if (!this.userId) {
+        this.ready();
+        return;
+    }
+	
 	return Meteor.users.find({}, {fields: {emails: 1, profile: 1}});
+	
 });
 
 
@@ -124,6 +133,11 @@ Meteor.publishComposite('data.all', {
 Meteor.publishComposite('data.my.items', {
 	// find my own items 
 	find: function() {
+		if (!this.userId) {
+			this.ready();
+			return;
+		}
+    
 		return Items.find({
 			// find my own items
 			"ownedBy": this.userId
@@ -148,6 +162,11 @@ Meteor.publishComposite('data.my.items', {
 Meteor.publishComposite('data.shared.tags', {
 	// find tags that are mine or shared with me
 	find: function() {
+		if (!this.userId) {
+			this.ready();
+			return;
+		}
+		
 		return Tags.find({
 			$or: [{
 				// my own tags
@@ -198,6 +217,11 @@ Meteor.publishComposite('data.shared.tags', {
 Meteor.publishComposite('data.shared.items', {
 	// find items that does not belong to me, but having my id in totals summed up
 	find: function() {
+		if (!this.userId) {
+			this.ready();
+			return;
+		}
+		
 		return Items.find({
 			// find my own 
 			"ownedBy": { $ne: this.userId },
@@ -216,6 +240,7 @@ Meteor.publishComposite('data.shared.items', {
 		}
 	}]
 });
+
 
 // duplicated:
 // times not own by me with my or shared tags that are tracked to my items
