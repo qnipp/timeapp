@@ -762,6 +762,12 @@ Meteor.methods({
 		
 		
 		*/
+	},
+	
+	// returns all Times for a specific item and user
+	findTimes: function(item, userid) {
+		//console.log("loading times for: "+ item + " user: "+ userid);
+		return Times.find({item: item, createdBy: userid}).fetch();
 	}
 	
 });

@@ -40,3 +40,4 @@ standard-minifier-css
 standard-minifier-js
 aldeed:template-extension@3.4.3
 aldeed:autoform-select2@2.0.2
+reactive-var

@@ -332,6 +332,33 @@ Template.itemlistentry.events({
 	},
 });
 
+
+Template.itemreport.onCreated(function (){
+    var self = this;
+    self.asyncTimes = new ReactiveVar([{comments: [{comment: "Waiting for response from server..."}]}]);
+	
+	//console.log("itemreport onCreated: ");
+	
+	Meteor.call("findTimes", Template.currentData()._id, Meteor.userId(), 
+		function(error, result) {
+			console.log("itemreport onCreated with result: "); 
+			self.asyncTimes.set(result);
+	});
+	
+	self.autorun(function() {
+		//console.log("itemreport autorun: ");
+		
+		Meteor.call("findTimes", Template.currentData()._id, Meteor.userId(), 
+			function(error, result) {
+				//console.log("itemreport autorun with result: "); 
+				self.asyncTimes.set(result);
+		});
+	});
+	
+	
+});
+
+
 Template.itemreport.events({
 	//'click .reactive-table tbody tr': function (event) {
 	'click .jstimeload': function(event) {
@@ -353,36 +380,42 @@ Template.itemreport.helpers({
 	tableSettingsTimes: function() {
 		var settings = tableSettingsTime();
 		
-		
 		settings.fields.splice(0, 1);
 		settings.showFilter = false;
 		settings.showNavigation = 'never';
 		// remove on click handler
 		//settings.rowClass = null;
 		
-		
 		return settings;
 	},
 	items: function() {
-		//console.log('loading item: ');
-		//console.log(this);
 		return Items.find({_id: this._id});
 	},
 	times: function() {
+		
+		//console.log("itemreport times called.");
+		
+		return Template.instance().asyncTimes.get();
+		/*
 		return Times.find({
 			createdBy: Meteor.userId(), 
 			item: this._id
-		});
+		});*/
+		
 	},
+	isReady: function() {
+		//console.log("itemreport isReady called.");
+		return Template.instance().asyncTimes.get();
+	},
+	
 	totalsUpdatedAt: function() {
 		if(this.totalsUpdatedAt) {
 			return moment(this.totalsUpdatedAt).format(CNF.FORMAT_DATETIME);
 		} else {
 			return "ever";
 		}
-	}
+	},	
 });
-
 
 
 Template.itemrunninglist.helpers({
