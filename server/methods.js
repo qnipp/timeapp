@@ -155,6 +155,8 @@ Meteor.methods({
 	itemUpdate: function (item, id) {
 		console.log('methods:itemUpdate : '+ id + ' - ' + item.$set.title );
 		
+		console.log(item);
+		
 		check(item, Schemas.Items);
 		
 		if(!Meteor.call("itemIsTitleUnique", item.$set.title, id)) {
@@ -162,7 +164,7 @@ Meteor.methods({
 			throw new Meteor.Error("notUnique", "item title is notUnique");
 			return false;
 		} else {
-			console.log('methods:itemInsert : '+ item.title + ' ok - itemIsTitleUnique is ok');
+			console.log('methods:itemUpdate : '+ item.title + ' ok - itemIsTitleUnique is ok');
 		}
 		
 		return Items.update(id, item);
@@ -375,14 +377,12 @@ Meteor.methods({
 		
 		check(time, Schemas.Times);
 		
-		
-		
 		return Times.update(id, time);
 	},
 	timeRemove: function (timeid) {
 		console.log('methods:timeRemove : '+ timeid);
 		// TODO: check if its my time entry
-		return Times.remove({_id: timeid});
+		return Times.remove({_id: timeid, createdBy: Meteor.userId()});
 	},
 	
 	timeRunning: function(form) {
@@ -627,6 +627,38 @@ Meteor.methods({
 		return Tags.remove({_id: tagid});
 	},
 	
+	// ATTRIBUTE
+	
+	attributeInsert: function (attribute) {
+		console.log('methods:attributeInsert : '+ attribute.name +' ['+ attribute.type + ']');
+		
+		Schemas.Attributes.clean(attribute);
+		check(attribute, Schemas.Attributes);
+		return Attributes.insert(attribute);
+	},
+	
+	attributeUpdate: function (attribute, id) {
+		console.log('methods:attributeUpdate : '+ id + ' - ' + attribute.$set.name +' ['+ attribute.$set.type + ']');
+		
+		//return false;
+		//console.log(tag);
+		//Schemas.Tags.clean(tag);
+		check(attribute, Schemas.Attributes);
+		
+		//console.log(Meteor.userId());
+		//console.log(tag);
+		
+		///throw new Meteor.Error("do not update tags right now :\  ");
+		
+		return Attributes.update(id, attribute);
+	},
+	
+	attributeRemove: function (attributeid) {
+		console.log('methods:attributeRemove : '+ attributeid);
+		// TODO: check if its my attribute entry
+		return Attributes.remove({_id: attributeid});
+	},
+	
 	// SEARCH
 	
 	openTimeWithItem: function (itemid) {
@@ -670,8 +702,10 @@ Meteor.methods({
 			
 			// will calc through all times
 			//var updatedAt = moment().toDate();
+			// will leave last 2 months untouched
+			//var updatedAt = moment().subtract(1, 'months').startOf("month").toDate();
 			// will leave current month untouched
-			var updatedAt = moment().subtract(1, 'months').startOf("month").toDate();
+			var updatedAt = moment().startOf("month").toDate();
 			var totals = {};
 			
 			// for each timeslot ..
@@ -764,11 +798,295 @@ Meteor.methods({
 		*/
 	},
 	
+	csvExport: function(item) {
+		console.log("csvExport - user: "+ Meteor.userId() + " ItemID: "+ item);
+		var exports = [];
+		var query = {};
+		query['createdBy'] = Meteor.userId();
+		
+		if(item) {
+			query['item'] = item;
+		}
+		Times.find(query, {sort: {start: 1}}).map(function(time) {
+				exports.push(
+					Items.findOne({_id: time.item}).title + ";" + 
+					moment(time.start).format(CNF.FORMAT_DATETIME) + ";" + 
+					moment(time.end).format(CNF.FORMAT_DATETIME) + ";" + 
+					formatDuration(time.end-time.start, true) +";"+ 
+						(time.comments ? time.comments.map(function(comment){ if(comment && comment.comment) { return comment.comment; } else { return ""; } }).join(", ") : '')  
+				); 
+			});
+		return exports;
+	},
+	
+	// route: /items/:id
 	// returns all Times for a specific item and user
-	findTimes: function(item, userid) {
+	findTimes: function(item) {
 		//console.log("loading times for: "+ item + " user: "+ userid);
-		return Times.find({item: item, createdBy: userid}).fetch();
-	}
+		return Times.find({item: item, createdBy: Meteor.userId()}).fetch();
+	},
+	
+	// route: /times/:id
+	// returns a single time entry Times for a specific item and user
+	findTime: function(time) {
+		//console.log("loading times for: "+ item + " user: "+ userid);
+		//return Times.findOne({_id: time, createdBy: Meteor.userId()});
+		return Times.findOne({_id: time, createdBy: Meteor.userId()});
+	},
+	
+	
+	createJiraAuth: function(user, password) {
+		console.log("createJiraAuth - creating new session id for user: "+ user);
+		
+		var result = fetchUrl(CNF.PLUGIN.JIRA.URL+"/rest/auth/1/session", 
+						{ data: { "username": user, "password": password} });
+		if(result.data && result.data.session && result.data.session.value) {
+			return result.data.session.value;
+			
+		} else {
+			console.log("createJiraAuth - invalid user/password combination.");
+			throw new Meteor.Error("not-authorized");
+			return -1;
+		}
+		// result: cookie = result.data.session.name; // { name: JSESSIONID, value: 12341234 };
+	},
+	clearAttributes: function(itemid) {
+		/*
+		if(!itemid) {
+			itemid = "7XN664Hr4fnFyNBjn";
+		}
+		return Items.update({_id: itemid}, {$unset: {attributes: 1}});
+*/
+		// make sure all attributes are set in arrays instead of objects!
+		Items.find({attributes: {$ne: null}}).map(
+			function (item) {
+				if (typeof item.attributes.length == "undefined") {
+					console.log(item._id + ' ' + item.attributes);
+					
+					Items.update({_id: item._id}, {$set: {attributes: [item.attributes[0]]}});
+				}
+			});
+
+
+		
+	},
+	setJiraID: function(project, sessionid) {
+		console.log("setJiraID - adding JIRA ID to tickets.");
+		
+		if(!project) {
+			console.log("setJiraID - missing jira project in method call.");
+			throw new Meteor.Error("missing-jira-project");
+		}
+		
+		var regex = new RegExp(".*("+project+"\-[0-9]+).*", "g");
+		
+		// TODO: JIRA key will be added always to attributes.0 for each item 
+		// - could probably overwrite something else there
+		Items.find({"title": regex},  {sort: {createdAt: 1}}).map(function (itemdoc) {
+			console.log("Setting JIRA reference for: "+ itemdoc.title);
+			
+			var attribIdKey = Attributes.findOne({"name": CNF.PLUGIN.JIRA.ATTRIBUTES.KEY})._id;
+			var attributeValue = {
+				attribid: attribIdKey,
+				value: itemdoc.title.replace(regex, "$1")
+			};
+			var attributeSet = {};
+			var indexJiraID;
+			
+			/*
+			
+			if(itemdoc.attributes) {
+				indexJiraID = getIndexfromArray(Attributes.findOne({"name": CNF.PLUGIN.JIRA.ATTRIBUTES.KEY})._id, itemdoc.attributes, "attribid");
+				
+				if(indexJiraID < 0) {
+					indexJiraID = itemdoc.attributes.length;
+				}
+			}
+			
+			if(!indexJiraID) {
+				indexJiraID = 0
+			}
+			*/
+			
+			if(itemdoc.attributes) {
+							
+				indexJiraID = getIndexfromArray(attribIdKey, itemdoc.attributes, "attribid");
+				
+				if(indexJiraID >= 0) {
+					// if attribute is already there - update them with $ operator
+					attributeSet["attributes.$"] = attributeValue;
+					console.log("Updating Item with updateded Jira Reference: ");
+					console.log(attributeSet);
+				
+					Items.update({_id: itemdoc._id, 'attributes.attribid': attributeValue.attribid }, {$set: attributeSet});
+				} else {
+					// if there are attributes but missing new one.
+					
+					/*itemdoc.attributes.push(attributeValue);
+					attributeValue = itemdoc.attributes;*/
+					attributeSet["attributes"] = attributeValue;
+					console.log("Updating Item with additional Jira Reference: ");
+					console.log(attributeSet);
+					
+					Items.update({_id: itemdoc._id}, {$addToSet: attributeSet});
+				}
+			} else {
+				// if there are no attribute values, just add a new subdocument
+				
+				//attributeSet["attributes."+indexJiraID] = attributeValue;
+				attributeSet["attributes"] = [attributeValue];
+				console.log("Update Item with new Jira Reference: ");
+				console.log(attributeSet);
+				Items.update({_id: itemdoc._id }, {$set: attributeSet});
+			}
+			
+			
+			// update estimates as well.
+			if(sessionid) {
+				Meteor.call("updateJiraDetails",  itemdoc._id, sessionid);
+			}
+			
+			/*
+			Items.update({_id: itemdoc._id, 'attributes.attribid': },
+				{$set: {
+					"attributes."+indexJiraID+".attribid": ,
+					"attributes."+indexJiraID+".value": 
+				}});
+			*/
+			//Items.update({_id: itemdoc._id},  {$set: {"attributes[0]": {"attribid": "4oKTwk4ZSvybBuXmj", "value": itemdoc.title.substring(0,10) } }} );
+		});
+		
+		// how can i use a another field in update ?
+		/*
+		Items.update({"_id": "7XN664Hr4fnFyNBjn", "title": /INGWEB\-[0-9]+.*  /}, 
+			{$set: {"attributes.0.attribid": "4oKTwk4ZSvybBuXmj", 
+							"attributes.0.value": this.title.substring(0,10)    } });
+		*/
+	},
+	
+	loadJiraIssue: function(jiraid, sessionid) {
+		console.log("loadJiraIssue - loading jira details for: "+ jiraid);
+		
+		if(!sessionid) {
+			console.log("loadJiraIssue - no valid Jira authentication available.");
+			throw new Meteor.Error("Missing valid Jira Auth Session - use: createJiraAuth('username', 'password');"); 
+			//throw new Meteor.Error("not-authorized");
+		}
+		
+		var result = fetchUrl(CNF.PLUGIN.JIRA.URL+"/rest/api/2/issue/"+jiraid, 
+						{ headers: {"Cookie": "JSESSIONID="+sessionid }  });
+		
+		var estimate = null;	
+		
+		/*
+		result: data.fields.customfield_10314   Array[4]
+				0: "Role: 10304 (18000 | 18000)"
+				1: "Role: 10303 (null | null)"
+				2: "Role: 10306 (1800 | 1800)"
+				3: "Role: 10305 (null | null)"
+
+				Backend 
+					Estimated: 5h
+					Remaining:	5h
+					
+				Konzept & PM
+					Estimated: 30m
+					Remaining:30m
+		*/
+		
+		
+		if(result.data.fields.customfield_10314 && result.data.fields.customfield_10314[0]) {
+			// e.g.: "Role: 10304 (18000 | 18000)"
+			estimate = result.data.fields.customfield_10314[0];
+			estimate = estimate.replace(/Role: 10304 \(([0-9]*) \|.*\)/, "$1");
+			
+			if(!isNaN(estimate)) { //Number.isInteger(estimate)) { // $.isNumeric(estimate)) {
+				estimate = estimate / 60 / 60;
+			} else {
+				estimate = null;
+			}
+		}
+		
+		var resultCrop = {
+			title: result.data.fields.summary,
+			description: result.data.fields.description,
+			key: result.data.key,
+			status: result.data.fields.status.name,
+			type: result.data.fields.issuetype.name,
+			estimate: estimate,
+			//fullresult: result,
+			};
+			
+		//console.log("loading Jira result: ");
+		//console.log(resultCrop);
+		
+		return resultCrop;
+	},
+	
+	updateJiraDetails: function(itemid, sessionid) {
+		//var index = getIndexfromArray(CNF.PLUGIN.JIRA.ATTRIBUTES.KEY, this.attributes, "name");
+		// TODO: this.attributes - is not an array, but an object :\
+		
+		var itemdoc;
+		itemdoc = Items.findOne(itemid);
+		
+		console.log("updateJiraDetails - Updating Item with JIRA Details "+ itemdoc.title);
+		
+		var indexJiraID = getIndexfromArray(Attributes.findOne({"name": CNF.PLUGIN.JIRA.ATTRIBUTES.KEY})._id, itemdoc.attributes, "attribid");
+		//return "updateJiraDetails - itemid: "+ itemid +" sessionid: "+ sessionid + " found indexJiraID: "+ indexJiraID;
+		//console.log("found index: " + index);
+		
+		// check if item has a JIRA ID set
+		if(indexJiraID >= 0 && itemdoc.attributes[indexJiraID].value) {
+		
+			console.log("loading jira id: "+ itemdoc.attributes[indexJiraID].value);
+			var detailsJira;
+			
+			detailsJira = Meteor.call("loadJiraIssue", itemdoc.attributes[indexJiraID].value, sessionid);
+			
+			var setModifier = {$set: {
+				title: detailsJira.key +" "+ detailsJira.title, 
+				description: detailsJira.description ? detailsJira.description.substring(0, 200) : '',
+			}}
+			
+			var attribIdEstimate = Attributes.findOne({"name": CNF.PLUGIN.JIRA.ATTRIBUTES.ESTIMATE})._id;
+			var indexEstimate = getIndexfromArray(attribIdEstimate, itemdoc.attributes, "attribid");
+			
+			var attributeValue = {
+				attribid: attribIdEstimate,
+				value: detailsJira.estimate
+			};
+			
+			if(indexEstimate >= 0) {
+				// if attribute is already there - update them with $ operator
+				//attributeSet["attributes.$"] = attributeValue;
+				setModifier["$set"]["attributes.$"] = attributeValue;
+				console.log("Updating Item with updateded Jira Estimate: ");
+				console.log(setModifier);
+			
+				return Items.update({_id: itemdoc._id, 'attributes.attribid': attributeValue.attribid }, setModifier);
+			} else {
+				// if there are attributes but missing new one.
+				
+				/*itemdoc.attributes.push(attributeValue);
+				attributeValue = itemdoc.attributes;*/
+				// attributeSet["attributes"] = attributeValue;
+				setModifier["$addToSet"] = {};
+				setModifier["$addToSet"]["attributes"] = attributeValue;
+				console.log("Updating Item with additional Jira Reference: ");
+				console.log(setModifier);
+				
+				return Items.update({_id: itemdoc._id}, setModifier);
+			}			
+			
+		} else {
+			console.log("no jira id is set for this item.");
+			throw new Meteor.Error("no jira id is set for this item");
+		}
+	},
+	
+	
+	
 	
 });
 

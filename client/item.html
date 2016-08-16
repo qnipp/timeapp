@@ -134,6 +134,13 @@
 </template>
 
 
+<template name="itemlistentryItemSimple">
+<span class="debug">template: {{currentTemplateName}}</span>
+	<ul class="nav nav-pills" role="tablist">
+		<h5>{{title}} <small>{{description}}</small></h5>
+	</ul>
+</template>
+
 <template name="itemlistentryItem">
 <span class="debug">template: {{currentTemplateName}}</span>
 	<ul class="nav nav-pills" role="tablist">
@@ -212,12 +219,14 @@
 			</div>
 			<div class="panel-body">
 			{{#autoForm id="formItem" collection="Collections.Items" doc=this type="method-update" meteormethod="itemUpdate"}}
-			
+			    
 				{{> afFormGroup name="title" }}
 				{{> afFormGroup name="description" }}
 				{{> afFormGroup name="tags" }}
 				{{> afFormGroup name="ownedBy" }}
 				{{> afFormGroup name="keepOpen" }}
+								
+				{{{renderAttributeValues element=this}}}
 				
 				<div class="form-group">
 					<button type="submit" class="btn btn-primary">
@@ -226,7 +235,6 @@
 					
 					<a class="btn" href="{{pathFor 'item.list'}}">Back</a>
 					
-					<a class="btn fetchUrl client" href="#">fetchUrl client</a>
 					<a class="btn fetchUrl server" href="#">fetchUrl server</a>
 				</div>
 			{{/autoForm}}
@@ -305,7 +313,7 @@
 		<div class="col-sm-12">
 			<div class="panel panel-default">
 				<div class="clearfix">
-					{{> reactiveTable collection=items settings=tableSettingsItems}}
+					{{> reactiveTable collection=items settings=tableSettingsGroupByItem}}
 				</div>
 			</div>
 		</div>
@@ -314,11 +322,10 @@
 	<div class="row">
 		<div class="col-sm-12">
 			<div class="panel panel-default">
-			<!-- <div class="panel-heading clearfix">
-				<h5>Showing time entries since {{totalsUpdatedAt}}
+			<div class="panel-heading clearfix">
+				<h5>Details only available back to {{totalsUpdatedAt}}
 				</h5>
 			</div>
-			-->
 			
 				<div class="clearfix">
 					{{> reactiveTable collection=times ready=isReady settings=tableSettingsTimes}}

@@ -12,7 +12,7 @@
 			<div class="panel panel-default">
 				
 				<div class="clearfix">
-					{{> reactiveTable collection=itemsnotempty settings=tableSettingsTotal}}
+					{{> reactiveTable collection=users settings=tableSettingsGroupByUserRecent}}
 				</div>
 			</div>
 		</div>
@@ -21,10 +21,10 @@
 	
 	<div class="row">
 		<div class="col-sm-12">
-			<div class="panel panel-default">
+			<div class="panel panel-de">
 				
 				<div class="clearfix">
-					{{> reactiveTable collection=itemsnotempty settings=tableSettingsPerMonth}}
+					{{> reactiveTable collection=users settings=tableSettingsGroupByUser}}
 				</div>
 			</div>
 		</div>
@@ -38,10 +38,30 @@
 				<div class="panel-heading">Tag Reports:</div>
 				
 				<div class="clearfix">
-					{{> reactiveTable collection=tags settings=tableSettingsTags}}
+					{{> reactiveTable collection=tags settings=tableSettingsGroupByTag}}
 				</div>
 			</div>
 		</div>
 	</div>
 	
+	<div class="row">
+		<div class="col-sm-12">
+			<div class="panel panel-default">
+				<div class="panel-heading">Item Reports:</div>
+				
+				<div class="clearfix">
+					{{> reactiveTable collection=items settings=tableSettingsGroupByItem}}
+				</div>
+			</div>
+		</div>
+	</div>
+	
+</template>
+
+
+<template name="estimatedresultentry">
+<span class="debug">template: {{currentTemplateName}}</span>
+	{{#with estimate}}
+		<span style="color: {{color}}">{{percentage}} of {{timeestimated}}</span>
+	{{/with}}
 </template>

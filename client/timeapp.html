@@ -102,7 +102,7 @@
 				<ul class="nav navbar-nav">
 					<li class="{{isActiveRoute regex='time'}}"><a href="{{pathFor 'time.list'}}">
 						<span aria-hidden="true"><i class="glyphicon glyphicon-time"></i></span>
-						Track Times
+						Times
 					</a></li>
 					<li class="{{isActiveRoute regex='item'}}"><a href="{{pathFor 'item.list'}}">
 						<span aria-hidden="true"><i class="glyphicon glyphicon-tasks"></i></span>
@@ -113,11 +113,14 @@
 						Tags
 					</a></li>
 					
+					<li class="{{isActiveRoute regex='attrib'}}"><a href="{{pathFor 'attribute.list'}}">
+						<span aria-hidden="true"><i class="glyphicon glyphicon-pushpin"></i></span>
+						Attributes
+					</a></li>
 					<li class="{{isActiveRoute regex='report'}}"><a href="{{pathFor 'report.list'}}">
 						<span aria-hidden="true"><i class="glyphicon glyphicon-signal"></i></span>
 						Reports
 					</a></li>
-					
 					<li class="{{isActiveRoute regex='profile'}}"><a href="{{pathFor 'profile'}}">
 						<span aria-hidden="true"><i class="glyphicon glyphicon-user"></i></span>
 						Profile
@@ -218,17 +221,33 @@
 
 
 
-<!-- route: attrib -->
+<!-- templates all tables -->
 
-<template name="attributecontainer">
+<!-- 
+DO NOT WORK
+there is no way to access values from virtual columns (fn) in templates
+
+<template name="tablecellSimple">
 <span class="debug">template: {{currentTemplateName}}</span>
-	{{> attributeform}}
+	{{#with this userid}}
+		{{formatDuration timeelabsed}}
+	{{/with}}
+	
+	 {{var_dump test}}
 </template>
 
-<template name="attributeform">
-<span class="debug">template: {{currentTemplateName}}</span> 
-
+<template name="tablecellMulti">
+<span class="debug">template: {{currentTemplateName}}</span>
+	{{#each user in this}}
+		{{formatDuration user.timeelabsed}}
+	{{/each}}
 </template>
+
+<template name="tablecellTotal">
+<span class="debug">template: {{currentTemplateName}}</span>
+	{{formatDuration timeelabsed}}
+</template>
+-->
 
 
 <!-- route: settings -->

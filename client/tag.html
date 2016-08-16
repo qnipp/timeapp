@@ -55,6 +55,7 @@
 	</ul>
 </template>
 
+
 <template name="brauchmaned">
 
 	<!--
@@ -137,6 +138,8 @@
 			{{> afFormGroup name="type" }}
 			{{> afFormGroup name="shared" }}
 			
+			{{> afFormGroup name="attributes"}}
+			
 			<div class="form-group">
 				<button type="submit" class="btn btn-primary">
 					<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Save
@@ -162,6 +165,10 @@
 			{{> afFormGroup name="type" }}
 			{{> afFormGroup name="shared" }}
 			
+			{{#if attributes}}
+				{{> afFormGroup name="attributes"}}
+			{{/if}}
+			 
 			<div class="form-group">
 				
 				<a class="btn" href="{{pathFor 'tag.list'}}">Back</a>
@@ -192,6 +199,8 @@
 			{{> afFormGroup name="type" }}
 			{{> afFormGroup name="share" }}
 			
+			{{> afFormGroup name="attributes"}}
+			
 			<div class="form-group">
 				<button type="submit" class="btn btn-primary">
 					<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Create
@@ -214,7 +223,7 @@
 		<div class="col-sm-12">
 			<div class="panel panel-default">
 				<div class="clearfix">
-					{{> reactiveTable collection=tags settings=tableSettingsTags}}
+					{{> reactiveTable collection=tags settings=tableSettingsGroupByTag}}
 				</div>
 			</div>
 		</div>
@@ -223,7 +232,7 @@
 		<div class="col-sm-12">
 			<div class="panel panel-default">
 				<div class="clearfix">
-					{{> reactiveTable collection=items settings=tableSettingsItems}}
+					{{> reactiveTable collection=items settings=tableSettingsGroupByItem}}
 				</div>
 			</div>
 		</div>

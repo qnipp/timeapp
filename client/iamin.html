@@ -19,32 +19,83 @@
 <span class="debug">template: {{currentTemplateName}}</span>
 
 <div class="callout clearfix">
-	<ul class="float-right list-unstyled">
-		<li><a href="{{pathFor 'item.create' _id='0'}}">
-			<span aria-hidden="true"><i class="glyphicon glyphicon-plus"></i></span>
+
+	<ul class="nav nav-pills nav-stacked">
+		<li role="presentation" class="{{isActiveRoute regex='time.create'}}"><a href="{{pathFor 'time.create' _id='0'}}">
+			<span aria-hidden="true"><i class="glyphicon glyphicon-time"></i></span>
+			New Time
+		</a></li>
+		<li role="presentation" class="{{isActiveRoute regex='item.create'}}"><a href="{{pathFor 'item.create' _id='0'}}">
+			<span aria-hidden="true"><i class="glyphicon glyphicon-tasks"></i></span>
 			New Item
 		</a></li>
+		<li role="presentation" class="{{isActiveRoute regex='tag.create'}}"><a href="{{pathFor 'tag.create' _id='0'}}">
+			<span aria-hidden="true"><i class="glyphicon glyphicon-tags"></i></span>
+			New Tag
+		</a></li>
+		<li role="presentation" class="{{isActiveRoute regex='attribute.create'}}"><a href="{{pathFor 'attribute.create' _id='0'}}">
+			<span aria-hidden="true"><i class="glyphicon glyphicon-pushpin"></i></span>
+			New Attribute
+		</a></li>
 		
-		<li><a href="{{pathFor 'item.import' _id='0'}}">
-			<span aria-hidden="true"><i class="glyphicon glyphicon-plus"></i></span>
+		<li role="presentation" class="{{isActiveRoute regex='time.import'}}"><a href="{{pathFor 'time.import' _id='0'}}">
+			<span aria-hidden="true"><i class="glyphicon glyphicon-time"></i></span>
+			Import Times
+		</a></li>
+		<li role="presentation" class="{{isActiveRoute regex='item.import'}}"><a href="{{pathFor 'item.import' _id='0'}}">
+			<span aria-hidden="true"><i class="glyphicon glyphicon-tasks"></i></span>
 			Import Items
 		</a></li>
 		
+		<!--
+		<li role="presentation" class="dropdown">
+			<a href="{{pathFor 'time.create' _id='0'}}" role="button">
+				<span aria-hidden="true"><i class="glyphicon glyphicon-time"></i></span>
+				New Time
+				<span class="caret"></span>
+			</a>
+			<a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"></a>
+			<ul class="dropdown-menu">
+				<li role="presentation" class="{{isActiveRoute regex='time.import'}}"><a href="{{pathFor 'time.import' _id='0'}}">
+					<span aria-hidden="true"><i class="glyphicon glyphicon-time"></i></span>
+					Import Times
+				</a></li>
+			</ul>
+		</li>
+		-->
+	</ul>
+
+<!--
+	<ul class="float-right list-unstyled">
+		
 		<li><a href="{{pathFor 'time.create' _id='0'}}">
-			<span aria-hidden="true"><i class="glyphicon glyphicon-plus"></i></span>
-			add Time
+			<span aria-hidden="true"><i class="glyphicon glyphicon-time"></i></span>
+			New Time
 		</a></li>
+		<li><a href="{{pathFor 'item.create' _id='0'}}">
+			<span aria-hidden="true"><i class="glyphicon glyphicon-tasks"></i></span>
+			New Item
+		</a></li>
+		<li><a href="{{pathFor 'tag.create' _id='0'}}">
+			<span aria-hidden="true"><i class="glyphicon glyphicon-tags"></i></span>
+			New Tag
+		</a></li>
+		<li><a href="{{pathFor 'attribute.create' _id='0'}}">
+			<span aria-hidden="true"><i class="glyphicon glyphicon-signal"></i></span>
+			New Attribute
+		</a></li>
+		
 		
 		<li><a href="{{pathFor 'time.import' _id='0'}}">
-			<span aria-hidden="true"><i class="glyphicon glyphicon-plus"></i></span>
+			<span aria-hidden="true"><i class="glyphicon glyphicon-time"></i></span>
 			Import Times
 		</a></li>
-		
-		<li><a href="{{pathFor 'tag.create' _id='0'}}">
-			<span aria-hidden="true"><i class="glyphicon glyphicon-plus"></i></span>
-			create Tag
+		<li><a href="{{pathFor 'item.import' _id='0'}}">
+			<span aria-hidden="true"><i class="glyphicon glyphicon-tasks"></i></span>
+			Import Items
 		</a></li>
 	</ul>
+	-->
 </div>
 
 </template>

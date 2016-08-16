@@ -1,0 +1,192 @@
+
+<!-- route: attrib -->
+
+<template name="attributecontainer">
+<span class="debug">template: {{currentTemplateName}}</span>
+	
+	<div class="row">
+		<div class="col-sm-6">
+			{{> attributelist}}
+		</div>
+		<div class="col-sm-6">
+			{{#if equals currentRoute "attribute.create"}}
+				{{> attributeform}}
+			{{else}}
+				{{#if _id}}
+					{{> attributeform}}
+				{{/if}}
+			{{/if}}
+		</div>
+	</div>
+</template>
+
+
+<template name="attributelist">
+<span class="debug">template: {{currentTemplateName}}</span>
+
+<div class="panel panel-default">
+	<div class="panel-heading">Attributes for Tags:</div>
+	
+	
+	<ul class="nav nav-pills" role="tablist">
+	{{#each attribute in attributes}}
+		{{>attributelistentry attribute=attribute attributeselected=this}}
+	{{/each}}
+	</ul>
+</div>
+
+
+</template>
+
+
+<template name="attributelistentryItem">
+<span class="debug">template: {{currentTemplateName}}</span>
+	<ul class="nav nav-pills" role="tablist">
+		{{> attributelistentry attribute=this}}
+	</ul>
+</template>
+
+<template name="attributelistentry">
+<span class="debug">template: {{currentTemplateName}}</span>
+
+	{{#with attribute}}
+		
+		<li role="presentation" class="small {{#if equals ../attributeselected._id _id}} active {{/if}} margin5" >
+			<a href="{{pathFor 'attribute.detail' _id=_id}}" style="background-color: {{color.bgname}}; color: {{color.fgname}};">
+			
+		{{#if equals ../attributeselected._id _id}}
+			<strong>{{name}}</strong>
+		{{else}}
+			{{name}}
+		{{/if}}
+				<span class="badge" style="background-color: {{color.bgvalue}}; color: {{color.fgvalue}};">{{value}}</span>
+			</a>
+		</li>
+	{{/with}}
+	
+		
+</template>
+
+<template name="attributeinputentry">
+<span class="debug">template: {{currentTemplateName}}</span>
+
+	{{#with attribute}}
+		
+		<li role="presentation" class="small {{#if equals ../attributeselected._id _id}} active {{/if}} margin5" >
+			<button class="btn btn-primary" type="button" style="background-color: {{color.namebg}}; color: {{color.namefg}};">
+			
+		{{#if equals ../attributeselected._id _id}}
+			<strong>{{name}}</strong>
+		{{else}}
+			{{name}}
+		{{/if}}
+				<span class="badge">{{type}}</span>
+			</button>
+		</li>
+	{{/with}}
+	
+		
+</template>
+
+<template name="attributeform">
+<span class="debug">template: {{currentTemplateName}}</span>
+
+	{{#if _id}}
+	
+	<div class="panel panel-default">
+		{{#if equals createdBy currentuserid}}
+		
+		<div class="panel-heading clearfix">
+			<h4>Edit Attribute [ {{_id}} ]
+		
+			<button title="remove attribute" type="submit" class="btn btn-danger jsattributeremove pull-right"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
+			
+			</h4>
+		</div>
+		<div class="panel-body">
+		
+		<!-- { {> quickForm id="formAttribute" collection="Collections.Attributes" doc=attribute type="method-update" meteormethod="attributeUpdate" omitFields="createdAt,createdBy,updatedAt"  } } -->
+		
+		{{#autoForm id="formAttribute" collection="Collections.Attributes" doc=this type="method-update" meteormethod="attributeUpdate" }}
+			
+			{{> afFormGroup name="name" }}
+			{{> afFormGroup name="type" }}
+			{{> afFormGroup name="defaultValue" }}
+						
+			<div class="form-group">
+				<button type="submit" class="btn btn-primary">
+					<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Save
+				</button>
+				
+				<a class="btn" href="{{pathFor 'attribute.list'}}">Back</a>
+			</div>
+		{{/autoForm}}
+		
+		</div>
+		
+		{{else}}
+		
+		<div class="panel-heading">
+			<h4>Show Attribute [ {{_id}} ]</h4>
+		</div>
+		<div class="panel-body">
+				
+		{{#autoForm id="formAttribute" collection="Collections.Attributes" doc=this type="disabled" }}
+			
+			{{> afFormGroup name="name" }}
+			{{> afFormGroup name="type" }}
+			{{> afFormGroup name="defaultValue" }}
+			 
+			<div class="form-group">
+				
+				<a class="btn" href="{{pathFor 'attribute.list'}}">Back</a>
+			</div>
+		{{/autoForm}}
+		
+		</div>
+		
+		{{/if}}
+	</div>
+		
+	{{else}}
+	
+	<div class="panel panel-default">
+	
+		<div class="panel-heading">
+			<h4>New Attribute</h4>
+		</div>
+		<div class="panel-body">
+		<!-- { {> quickForm id="formTag" collection="Collections.Tags" type="method" meteormethod="tagInsert"  omitFields="createdAt,createdBy,updatedAt"} } -->
+		
+		{{#autoForm id="formAttribute" collection="Collections.Attributes" type="method" meteormethod="attributeInsert"}}
+		
+			{{> afFormGroup name="name" }}
+			{{> afFormGroup name="type" }}
+			{{> afFormGroup name="defaultValue" }}
+			
+			<div class="form-group">
+				<button type="submit" class="btn btn-primary">
+					<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Create
+				</button>
+			</div>
+		{{/autoForm}}
+		
+		</div>
+	
+	</div>
+	{{/if}}
+	
+</template>
+
+<template name="attributedynamic">
+
+{{> afQuickField name=fieldnameID 
+	type="hidden" required="true" 
+	value=fieldvalueID valueOut=fieldvalueID}}
+	
+{{> afFormGroup name=fieldnameValue 
+	type=attrib.type required="false"
+	value=fieldvalueName valueOut=fieldvalueName
+	label=attrib.name placeholder=attrib.defaultValue}}
+
+</template>

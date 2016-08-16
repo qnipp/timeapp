@@ -19,6 +19,16 @@
 </template>
 
 
+<!-- route: /forgot -->
+
+<template name="forgot">
+<span class="debug">template: {{currentTemplateName}}</span>
+  
+   {{> atForm state='forgotPwd'}}
+   
+</template>
+
+
 
 <!-- route: profile -->
 
@@ -37,7 +47,6 @@
 	
 	
 </template>
-
 
  
 <template name="profileform">
@@ -116,4 +125,13 @@
 	
 	</div>
 	
+</template>
+
+<!-- route: report -->
+
+<template name="userlistentryItemSimple">
+<span class="debug">template: {{currentTemplateName}}</span>
+	<ul class="nav nav-pills" role="tablist">
+		<h5>{{#each emails}} {{address}} {{/each}}</h5>
+	</ul>
 </template>
