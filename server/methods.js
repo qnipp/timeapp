@@ -994,16 +994,25 @@ Meteor.methods({
 					Remaining:30m
 		*/
 		
+		estimatedValue = null;
 		
 		if(result.data.fields.customfield_10314 && result.data.fields.customfield_10314[0]) {
 			// e.g.: "Role: 10304 (18000 | 18000)"
-			estimate = result.data.fields.customfield_10314[0];
-			estimate = estimate.replace(/Role: 10304 \(([0-9]*) \|.*\)/, "$1");
+			estimate = result.data.fields.customfield_10314;
 			
-			if(!isNaN(estimate)) { //Number.isInteger(estimate)) { // $.isNumeric(estimate)) {
-				estimate = estimate / 60 / 60;
-			} else {
-				estimate = null;
+			if(estimate) {
+				for(var i = 0;i < estimate.length; i++) {
+					if(estimate[i].match(/^Role: 10304.*/) !== null) {
+						estimatedValue = estimate[i].replace(/Role: 10304 \(([0-9]*) \|.*\)/, "$1");
+						break;
+					}
+				}
+				
+				if(estimatedValue != null && !isNaN(estimatedValue)) { // if(!isNaN(estimatedValue)) { //Number.isInteger(estimate)) { // $.isNumeric(estimate)) {
+					estimatedValue = estimatedValue / 60 / 60;
+				} else {
+					estimatedValue = null;
+				}
 			}
 		}
 		
@@ -1013,7 +1022,7 @@ Meteor.methods({
 			key: result.data.key,
 			status: result.data.fields.status.name,
 			type: result.data.fields.issuetype.name,
-			estimate: estimate,
+			estimate: estimatedValue,
 			//fullresult: result,
 			};
 			

@@ -1118,9 +1118,9 @@ Template.estimatedresultentry.helpers({
 			} else if(timeelapsed < timeestimated * 1.10) {
 				color = "green";
 			} else if(timeelapsed < timeestimated * 1.20) {
-				color = "gold";
+				color = "GoldenRod";
 			} else if(timeelapsed < timeestimated * 1.50) {
-				color = "orange";
+				color = "DarkOrange";
 			} else if(timeelapsed < timeestimated * 3) {
 				color = "red";
 			} else {
