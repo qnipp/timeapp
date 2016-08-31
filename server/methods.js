@@ -496,7 +496,7 @@ Meteor.methods({
 				});
 				
 				if(!item) {
-					console.log('skip row with unknown item: "'+ item + '" - please import items first!');
+					console.log('skip row with unknown item: "'+ row.item + '" - please import items first!');
 					return;
 				} else {
 					console.log('found item "'+ row.item +'" with id '+ item._id);
@@ -682,12 +682,32 @@ Meteor.methods({
 	
 	// calculations
 	
-	doCalculations: function() {
+	doCalculations: function(updatedAt) {
+		
+		console.log("doCalculations - user: "+ Meteor.userId());
+		
+		if(!updatedAt || !moment(updatedAt).isValid()) {
+			// will calc through all times
+			// updatedAt = moment().toDate();
+			// will leave last 2 months untouched
+			// updatedAt = moment().subtract(1, 'months').startOf("month").toDate();
+			// will leave current month untouched
+			updatedAt = moment().startOf("month").toDate();
+			// will leave only today untouched
+			//updatedAt = moment().startOf("day").toDate();
+			
+			console.log("for all Times created before: " + updatedAt);
+		} else {
+			console.log("for all Times created before given date: " + updatedAt);
+		}
+		
 		console.log("Total Items: " + Items.find({}).count());
 		console.log("My Items: " + Items.find({createdBy: Meteor.userId()}).count());
 		
 		console.log("Total Times: " + Times.find({}).count());
 		console.log("My Times: " + Times.find({createdBy: Meteor.userId()}).count());
+		
+		var itemCount = 0;
 		
 		// go through all items
 		//Items.find({_id: 'rqvj5bXJQtJL2A2go'}).map(function(doc_item) {
@@ -700,12 +720,6 @@ Meteor.methods({
 			]
 		}).map(function(doc_item) {
 			
-			// will calc through all times
-			//var updatedAt = moment().toDate();
-			// will leave last 2 months untouched
-			//var updatedAt = moment().subtract(1, 'months').startOf("month").toDate();
-			// will leave current month untouched
-			var updatedAt = moment().startOf("month").toDate();
 			var totals = {};
 			
 			// for each timeslot ..
@@ -767,11 +781,15 @@ Meteor.methods({
 				doc_item.totals.push( totals[userid] );
 			}
 			
+			/*
 			console.log('updating doc_item._id: ' + doc_item._id +' - ' + 
 				' totalsUpdatedAt: '+ updatedAt + 
 				' title: ' + doc_item.title +
 				' using:');
 			console.log(doc_item.totals);
+			*/
+			
+			itemCount++;
 			
 			// updating current using new totals
 			return Items.update(doc_item._id, {
@@ -796,8 +814,29 @@ Meteor.methods({
 		
 		
 		*/
+		
+		console.log('doCalculations - user: '+ Meteor.userId() + ' done - summed up a total of: '+ itemCount + ' items');
+		return 'doCalculations - done - summed up a total of: '+ itemCount + ' items';
 	},
 	
+	removeItems: function(origin) {
+		console.log("removeItems - user: "+ Meteor.userId() + " origin: "+ origin);
+		if(origin) {
+			return Items.remove({createdBy: Meteor.userId(), origin: origin});
+		} else {
+			console.log("removeItems - missing origin string");
+			throw new Meteor.Error("Please provide an origin!");
+		}
+	},
+	removeTimes: function(origin) {
+		console.log("removeTimes - user: "+ Meteor.userId() + " origin: "+ origin);
+		if(origin) {
+			return Times.remove({createdBy: Meteor.userId(), origin: origin});
+		} else {
+			console.log("removeTimes - missing origin string");
+			throw new Meteor.Error("Please provide an origin!");
+		}
+	},
 	csvExport: function(item) {
 		console.log("csvExport - user: "+ Meteor.userId() + " ItemID: "+ item);
 		var exports = [];
@@ -996,7 +1035,7 @@ Meteor.methods({
 		
 		estimatedValue = null;
 		
-		if(result.data.fields.customfield_10314 && result.data.fields.customfield_10314[0]) {
+		if(result.data.fields.customfield_10314) {
 			// e.g.: "Role: 10304 (18000 | 18000)"
 			estimate = result.data.fields.customfield_10314;
 			
@@ -1017,12 +1056,13 @@ Meteor.methods({
 		}
 		
 		var resultCrop = {
-			title: result.data.fields.summary,
-			description: result.data.fields.description,
-			key: result.data.key,
-			status: result.data.fields.status.name,
-			type: result.data.fields.issuetype.name,
-			estimate: estimatedValue,
+			title: 			result.data.fields.summary,
+			description: 	result.data.fields.description,
+			key: 			result.data.key,
+			state: 			result.data.fields.status.name,
+			orderstate: 	(result.data.fields.customfield_10300 ? result.data.fields.customfield_10300.value : null),
+			type: 			result.data.fields.issuetype.name,
+			estimate: 		estimatedValue,
 			//fullresult: result,
 			};
 			
@@ -1054,7 +1094,7 @@ Meteor.methods({
 			detailsJira = Meteor.call("loadJiraIssue", itemdoc.attributes[indexJiraID].value, sessionid);
 			
 			var setModifier = {$set: {
-				title: detailsJira.key +" "+ detailsJira.title, 
+				title: detailsJira.key +" "+ (detailsJira.type ? '['+detailsJira.type+']' : '') +" "+ detailsJira.title, 
 				description: detailsJira.description ? detailsJira.description.substring(0, 200) : '',
 			}}
 			
