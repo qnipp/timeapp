@@ -709,6 +709,18 @@ Meteor.methods({
 		
 		var itemCount = 0;
 		
+		// first reset old values (so thisweek and prevweek still work)
+		Items.update({
+			//_id: 'rqvj5bXJQtJL2A2go', 
+			//tags: 'KwaxGTBiSybcq2d43',
+			$or: [
+			{ ownedBy: Meteor.userId() },
+			{ ownedBy: null, createdBy: Meteor.userId() }
+			]
+		}, {$set: { ownedBy: Meteor.userId() }, 
+			$unset: { totals: "", totalsUpdatedAt: "" },
+		});
+		
 		// go through all items
 		//Items.find({_id: 'rqvj5bXJQtJL2A2go'}).map(function(doc_item) {
 		Items.find({
