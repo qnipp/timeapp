@@ -137,7 +137,7 @@ Meteor.publishComposite('data.my.items', {
 			this.ready();
 			return;
 		}
-    
+
 		return Items.find({
 			// find my own items
 			"ownedBy": this.userId

@@ -1145,10 +1145,17 @@ Meteor.methods({
 			throw new Meteor.Error("no jira id is set for this item");
 		}
 	},
-	
-	
-	
-	
+
+	takeoverItem: function(itemid) {
+		var itemdoc;
+                itemdoc = Items.findOne(itemid);
+
+                console.log("takeoverItem - takeover item: "+ itemdoc.title + " user: "+ Meteor.userId());
+
+		Items.update(itemid, {$set: { ownedBy: Meteor.userId() }}, {validate: false});
+		return "The Item: "+ itemdoc.title + " belongs now to you";
+
+	},	
 });
 
 
