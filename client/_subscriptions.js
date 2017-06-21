@@ -1,6 +1,6 @@
 // subscribe to publications in server.js
 
-var Subscriptions = {};
+const Subscriptions = {};
 
 Subscriptions.users = Meteor.subscribe('users.company', Meteor.userId());
 /*
@@ -16,14 +16,14 @@ Meteor.subscribe('data.others');
 
 */
 
-//Meteor.subscribe('data.all');
+// Meteor.subscribe('data.all');
 Subscriptions.myitems = Meteor.subscribe('data.my.items');
 Subscriptions.sharedtags = Meteor.subscribe('data.shared.tags');
 Subscriptions.shareditems = Meteor.subscribe('data.shared.items');
 Subscriptions.myAttributes = Meteor.subscribe('data.my.attributes');
 
-//Deps.autorun(function() {
-  // or
-  // Meteor.subscribe("userData", Meteor.userId());
-  // Meteor.subscribe("allUserData", Meteor.userId());
-//}); 	
+// Deps.autorun(function() {
+// or
+// Meteor.subscribe("userData", Meteor.userId());
+// Meteor.subscribe("allUserData", Meteor.userId());
+// });

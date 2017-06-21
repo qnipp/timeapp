@@ -8,12 +8,12 @@ Template.itemcontainer.helpers({
       {
         createdBy: Meteor.userId(),
         end: {
-          $not: { $ne: null }
-        }
+          $not: { $ne: null },
+        },
       },
       { fields: { item: 1 } }
     )
       .fetch()
       .map(doc => doc.item);
-  }
+  },
 });

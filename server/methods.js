@@ -22,13 +22,13 @@ Meteor.methods({
 	*/
 
   // Returns true if current user has no item with the same name - true if name is unique
-  itemIsTitleUnique: function(newtitle, currentid) {
+  itemIsTitleUnique(newtitle, currentid) {
     // https://blog.serverdensity.com/checking-if-a-document-exists-mongodb-slow-findone-vs-find/
     return !Items.findOne(
       {
         title: newtitle,
         ownedBy: Meteor.userId(),
-        _id: { $ne: currentid }
+        _id: { $ne: currentid },
         /*
 			$or: [
 				{createdBy: Meteor.userId()},
@@ -39,28 +39,28 @@ Meteor.methods({
     );
   },
 
-  timeSetEnd: function(timeid) {
-    console.log("methods:timeSetEnd - " + timeid);
+  timeSetEnd(timeid) {
+    console.log(`methods:timeSetEnd - ${timeid}`);
 
-    var time = Times.findOne(timeid);
+    const time = Times.findOne(timeid);
 
     if (!time) {
-      throw new Meteor.Error("not-found");
+      throw new Meteor.Error('not-found');
     }
     if (time.createdBy != Meteor.userId()) {
-      throw new Meteor.Error("not-authorized");
+      throw new Meteor.Error('not-authorized');
     }
 
     return Times.update(time._id, { $set: { end: new Date() } });
   },
 
-  itemSetEnd: function(itemid) {
-    console.log("methods:itemSetEnd - " + itemid);
+  itemSetEnd(itemid) {
+    console.log(`methods:itemSetEnd - ${itemid}`);
 
-    var item = Items.findOne(itemid);
+    const item = Items.findOne(itemid);
 
     if (!item) {
-      throw new Meteor.Error("not-found");
+      throw new Meteor.Error('not-found');
     }
 
     // TODO: check if item's tags are shared with current user
@@ -71,22 +71,22 @@ Meteor.methods({
           {
             end: { $not: { $ne: null } },
             createdBy: Meteor.userId(),
-            item: itemid
-          }
-        ]
+            item: itemid,
+          },
+        ],
       },
       { $set: { end: new Date() } },
       { multi: true }
     );
   },
 
-  itemSetStart: function(itemid) {
-    console.log("methods:itemSetStart - " + itemid);
+  itemSetStart(itemid) {
+    console.log(`methods:itemSetStart - ${itemid}`);
 
-    var item = Items.findOne(itemid);
+    const item = Items.findOne(itemid);
 
     if (!item) {
-      throw new Meteor.Error("not-found");
+      throw new Meteor.Error('not-found');
     }
     /*
 		if(item.createdBy != Meteor.userId()) 
@@ -95,18 +95,18 @@ Meteor.methods({
     // TODO: check if item's tags are shared with current user
 
     // stop all other times
-    var timesrunning = Times.find({
+    const timesrunning = Times.find({
       end: { $not: { $ne: null } },
-      createdBy: Meteor.userId()
+      createdBy: Meteor.userId(),
     });
 
-    var itemrunning;
-    var items_for_update = [];
+    let itemrunning;
+    const items_for_update = [];
 
     timesrunning.forEach(function(timerunning) {
       // load item of running time
       itemrunning = Items.findOne(timerunning.item, {
-        fields: { keepOpen: 1 }
+        fields: { keepOpen: 1 },
       });
 
       if (itemrunning) {
@@ -114,7 +114,7 @@ Meteor.methods({
         // current selected Item will always be stopped and restartet
         if (!itemrunning.keepOpen || item._id == itemrunning._id) {
           items_for_update.push(itemrunning._id);
-        } /*else {
+        } /* else {
 					console.log("running time will not be stopped: ");
 					console.log(itemrunning);
 				}*/
@@ -129,9 +129,9 @@ Meteor.methods({
             {
               end: { $not: { $ne: null } },
               createdBy: Meteor.userId(),
-              item: { $in: items_for_update }
-            }
-          ]
+              item: { $in: items_for_update },
+            },
+          ],
         },
         { $set: { end: new Date() } },
         { multi: true }
@@ -141,7 +141,7 @@ Meteor.methods({
     // create new Time entry for selected Item
     return Times.insert({
       item: item._id,
-      start: new Date()
+      start: new Date(),
     });
   },
 
@@ -149,74 +149,70 @@ Meteor.methods({
 
   // ITEMS
 
-  itemInsert: function(item) {
-    console.log("methods:itemInsert : " + item.title);
+  itemInsert(item) {
+    console.log(`methods:itemInsert : ${item.title}`);
 
     Schemas.Items.clean(item);
     check(item, Schemas.Items);
 
-    if (!Meteor.call("itemIsTitleUnique", item.title, item._id)) {
+    if (!Meteor.call('itemIsTitleUnique', item.title, item._id)) {
       console.log(
-        "methods:itemInsert : " +
-          item.title +
-          " failed - itemIsTitleUnique not met"
+        `methods:itemInsert : ${item.title} failed - itemIsTitleUnique not met`
       );
-      throw new Meteor.Error("notUnique", "item title is notUnique");
+      throw new Meteor.Error('notUnique', 'item title is notUnique');
       return false;
     }
 
     return Items.insert(item);
   },
-  itemUpdate: function(item, id) {
-    console.log("methods:itemUpdate : " + id + " - " + item.$set.title);
+  itemUpdate(item, id) {
+    console.log(`methods:itemUpdate : ${id} - ${item.$set.title}`);
 
     console.log(item);
 
     check(item, Schemas.Items);
 
-    if (!Meteor.call("itemIsTitleUnique", item.$set.title, id)) {
+    if (!Meteor.call('itemIsTitleUnique', item.$set.title, id)) {
       console.log(
-        "methods:itemUpdate : " +
-          item.$set.title +
-          " failed - itemIsTitleUnique not met"
+        `methods:itemUpdate : ${item.$set
+          .title} failed - itemIsTitleUnique not met`
       );
-      throw new Meteor.Error("notUnique", "item title is notUnique");
+      throw new Meteor.Error('notUnique', 'item title is notUnique');
       return false;
-    } else {
-      console.log(
-        "methods:itemUpdate : " + item.title + " ok - itemIsTitleUnique is ok"
-      );
     }
+    console.log(
+      `methods:itemUpdate : ${item.title} ok - itemIsTitleUnique is ok`
+    );
 
     return Items.update(id, item);
   },
-  itemRemove: function(itemid) {
-    console.log("methods:itemRemove : " + itemid);
+  itemRemove(itemid) {
+    console.log(`methods:itemRemove : ${itemid}`);
     // itemRemove not implemented !
-    //console.log('haha - no :)');
-    //return false;
+    // console.log('haha - no :)');
+    // return false;
     return Items.remove({ _id: itemid }) && Times.remove({ item: itemid });
   },
 
-  itemImport: function(form) {
-    console.log("trying: ");
+  itemImport(form) {
+    console.log('trying: ');
     console.log(form);
 
     check(form, Schemas.ItemImport);
 
-    var csv = Papa.parse(form.format + "\n" + form.data, {
+    const csv = Papa.parse(`${form.format}\n${form.data}`, {
       quotes: true,
       delimiter: form.delimiter,
-      newline: "\n",
+      newline: '\n',
       header: true,
-      skipEmptyLines: true
+      skipEmptyLines: true,
     });
 
-    console.log("parsed csv: ");
+    console.log('parsed csv: ');
     console.log(csv);
 
     if (csv.errors && csv.errors.length > 0) {
-      throw new Meteor.Error("csv-error", csv.errors);
+      throw new Meteor.Error('csv-error', csv.errors);
     }
 
     // only title, description and tags are allowed
@@ -224,23 +220,23 @@ Meteor.methods({
 
     if (csv.data) {
       csv.data.forEach(function(row) {
-        console.log("reparsing a single row: ");
+        console.log('reparsing a single row: ');
         console.log(row);
 
         if (!row.title) {
-          console.log("skip row without title: ");
+          console.log('skip row without title: ');
           console.log(row);
           return;
         }
 
         row.title = row.title.trim();
 
-        var item = Items.findOne({
-          title: row.title
+        let item = Items.findOne({
+          title: row.title,
         });
 
         if (item) {
-          console.log('found item "' + row.title + '" with id ' + item._id);
+          console.log(`found item "${row.title}" with id ${item._id}`);
         } else {
           item = {};
 
@@ -254,70 +250,68 @@ Meteor.methods({
             item.origin = form.origin.trim();
           }
 
-          console.log("inserting item:");
+          console.log('inserting item:');
           console.log(item);
 
-          var itemid = Items.insert(item);
+          const itemid = Items.insert(item);
 
           item._id = itemid;
 
-          console.log('created item "' + item.title + '" with id ' + itemid);
+          console.log(`created item "${item.title}" with id ${itemid}`);
         }
 
         if (row.tags) {
           var tagids = [];
 
-          var tagnames = Papa.parse(row.tags, {
+          const tagnames = Papa.parse(row.tags, {
             quotes: true,
-            delimiter: ",",
-            newline: "\n\r",
+            delimiter: ',',
+            newline: '\n\r',
             header: false,
-            skipEmptyLines: false
+            skipEmptyLines: false,
           });
-          console.log("found tagnames:");
+          console.log('found tagnames:');
           console.log(tagnames);
 
           if (tagnames.errors && tagnames.errors.length > 0) {
-            throw new Meteor.Error("csv-errors", tagnames.errors);
+            throw new Meteor.Error('csv-errors', tagnames.errors);
           }
 
           if (tagnames.data) {
             tagnames.data[0].forEach(function(tagname) {
-              console.log("reading a single tagname: " + tagname);
+              console.log(`reading a single tagname: ${tagname}`);
 
               tagname = tagname.trim();
-              var tagvalue = "";
+              let tagvalue = '';
 
-              var tag = Tags.findOne({
+              let tag = Tags.findOne({
                 $and: [
                   {
-                    type: "item-tag",
+                    type: 'item-tag',
                     name: tagname,
-                    value: ""
-                  }
-                ]
+                    value: '',
+                  },
+                ],
               });
 
               if (tag) {
-                console.log('found tag "' + tagname + '" with id ' + tag._id);
+                console.log(`found tag "${tagname}" with id ${tag._id}`);
                 tagids.push(tag._id);
               } else {
                 // split tag into name and value
 
-                var tagparts;
-                tagparts = tagname.split(":");
+                let tagparts;
+                tagparts = tagname.split(':');
 
                 if (tagparts.length == 1) {
-                  tagparts = tagname.split("-");
+                  tagparts = tagname.split('-');
                 }
                 if (tagparts.length == 1) {
-                  tagparts = tagname.split(" ");
+                  tagparts = tagname.split(' ');
                 }
                 if (tagparts.length == 1) {
                   console.log(
-                    "skipping tag: " +
-                      tagname +
-                      " - because it can not be split into name and value"
+                    `skipping tag: ${tagname} - because it can not be split into name and value`
                   );
                   return;
                 }
@@ -328,44 +322,33 @@ Meteor.methods({
                 tag = Tags.findOne({
                   $and: [
                     {
-                      type: "item-tag",
+                      type: 'item-tag',
                       name: tagname,
-                      value: tagvalue
-                    }
-                  ]
+                      value: tagvalue,
+                    },
+                  ],
                 });
 
                 if (tag) {
                   console.log(
-                    'found tag "' +
-                      tagname +
-                      ": " +
-                      tagvalue +
-                      '" with id ' +
-                      tag._id
+                    `found tag "${tagname}: ${tagvalue}" with id ${tag._id}`
                   );
                   tagids.push(tag._id);
                 } else {
-                  var tagid = Tags.insert({
-                    type: "item-tag",
+                  const tagid = Tags.insert({
+                    type: 'item-tag',
                     name: tagname,
                     value: tagvalue,
-                    origin: form.origin
+                    origin: form.origin,
                   });
 
                   if (tagid) {
                     console.log(
-                      'created tag "' +
-                        tagname +
-                        ": " +
-                        tagvalue +
-                        '" with id ' +
-                        tagid
+                      `created tag "${tagname}: ${tagvalue}" with id ${tagid}`
                     );
                     tagids.push(tagid);
                   } else {
-                    console.log("error during insert of tag: " + tagname);
-                    return;
+                    console.log(`error during insert of tag: ${tagname}`);
                   }
                 }
               }
@@ -374,54 +357,51 @@ Meteor.methods({
         }
 
         if (tagids) {
-          console.log(
-            "updating item: " + item.title + " with new tags: " + tagids
-          );
+          console.log(`updating item: ${item.title} with new tags: ${tagids}`);
           console.log(tagids);
           Items.update(
             { _id: item._id },
             { $addToSet: { tags: { $each: tagids } } }
           );
-          //Items.update({_id: item._id}, {$addToSet: {tags: tagids}});
+          // Items.update({_id: item._id}, {$addToSet: {tags: tagids}});
         } else {
-          console.log("skip item update because no tagids were found");
+          console.log('skip item update because no tagids were found');
         }
       });
 
       return true;
-    } else {
-      console.log("no item data found for import");
-      return false;
     }
+    console.log('no item data found for import');
+    return false;
   },
 
   // TIMES
 
-  timeInsert: function(time) {
-    console.log("methods:timeInsert : " + time.start);
+  timeInsert(time) {
+    console.log(`methods:timeInsert : ${time.start}`);
 
     Schemas.Times.clean(time);
     check(time, Schemas.Times);
     return Times.insert(time);
   },
-  timeUpdate: function(time, id) {
-    console.log("methods:timeUpdate : " + id + " - " + time.$set.start);
+  timeUpdate(time, id) {
+    console.log(`methods:timeUpdate : ${id} - ${time.$set.start}`);
     console.log(time);
 
     check(time, Schemas.Times);
 
     return Times.update(id, time);
   },
-  timeRemove: function(timeid) {
-    console.log("methods:timeRemove : " + timeid);
+  timeRemove(timeid) {
+    console.log(`methods:timeRemove : ${timeid}`);
     // TODO: check if its my time entry
     return Times.remove({ _id: timeid, createdBy: Meteor.userId() });
   },
 
-  timeRunning: function(form) {
-    console.log("trying: ");
+  timeRunning(form) {
+    console.log('trying: ');
     console.log(form);
-    console.log("my user id: " + Meteor.userId());
+    console.log(`my user id: ${Meteor.userId()}`);
 
     check(form, Schemas.TimeRunning);
 
@@ -466,41 +446,41 @@ Meteor.methods({
         $push: {
           comments: {
             comment: form.comment,
-            createdAt: form.createdAt
-          }
-        }
+            createdAt: form.createdAt,
+          },
+        },
       }
     );
   },
 
-  timeImport: function(form) {
-    //throw new Meteor.Error("test", "test details");
+  timeImport(form) {
+    // throw new Meteor.Error("test", "test details");
 
-    console.log("trying: ");
+    console.log('trying: ');
     console.log(form);
 
     check(form, Schemas.TimeImport);
 
     if (!form.dateformat) {
-      form.dateformat = "DD.MM.YY HH:mm";
+      form.dateformat = 'DD.MM.YY HH:mm';
     }
     if (!form.delimiter) {
-      form.delimiter = "	";
+      form.delimiter = '	';
     }
 
-    var csv = Papa.parse(form.format + "\n" + form.data, {
+    const csv = Papa.parse(`${form.format}\n${form.data}`, {
       quotes: true,
       delimiter: form.delimiter,
-      newline: "\n",
+      newline: '\n',
       header: true,
-      skipEmptyLines: true
+      skipEmptyLines: true,
     });
 
-    console.log("parsed csv: ");
+    console.log('parsed csv: ');
     console.log(csv);
 
     if (csv.errors && csv.errors.length > 0) {
-      throw new Meteor.Error("csv-errors", csv.errors);
+      throw new Meteor.Error('csv-errors', csv.errors);
     }
 
     // only item, start and stop are allowed
@@ -508,114 +488,100 @@ Meteor.methods({
 
     if (csv.data) {
       csv.data.forEach(function(row) {
-        console.log("reparsing a single row: ");
+        console.log('reparsing a single row: ');
         console.log(row);
 
         if (!row.item || !row.start) {
-          console.log("skip row without item or start: ");
+          console.log('skip row without item or start: ');
           console.log(row);
           return;
         }
 
         row.item = row.item.trim();
 
-        var item = Items.findOne({
-          title: row.item
+        const item = Items.findOne({
+          title: row.item,
         });
 
         if (!item) {
           console.log(
-            'skip row with unknown item: "' +
-              row.item +
-              '" - please import items first!'
+            `skip row with unknown item: "${row.item}" - please import items first!`
           );
           return;
-        } else {
-          console.log('found item "' + row.item + '" with id ' + item._id);
+        }
+        console.log(`found item "${row.item}" with id ${item._id}`);
 
-          row.start = moment(row.start.trim(), form.dateformat).toDate();
+        row.start = moment(row.start.trim(), form.dateformat).toDate();
 
-          if (row.end && row.end != "") {
-            row.end = moment(row.end.trim(), form.dateformat).toDate();
-          }
+        if (row.end && row.end != '') {
+          row.end = moment(row.end.trim(), form.dateformat).toDate();
+        }
 
-          if (row.comments) {
-            row.comments = row.comments.split(",");
-            row.commentobj = [];
+        if (row.comments) {
+          row.comments = row.comments.split(',');
+          row.commentobj = [];
 
-            /*
+          /*
 						for (index = 0; index < a.length; ++index) {
 							row.comments = {comment: }
 						}*/
 
-            row.comments.forEach(function(comment) {
-              row.commentobj.push({ comment: comment });
-            });
-          } else {
-            row.commentobj = [];
-          }
+          row.comments.forEach(function(comment) {
+            row.commentobj.push({ comment });
+          });
+        } else {
+          row.commentobj = [];
+        }
 
-          var time = Times.findOne({
+        const time = Times.findOne({
+          item: item._id,
+          createdBy: Meteor.userId(),
+          start: row.start,
+        });
+
+        if (time) {
+          console.log(
+            `found time "${row.start}" with id ${time._id} - skipping row`
+          );
+        } else {
+          timeid = Times.insert({
             item: item._id,
-            createdBy: Meteor.userId(),
-            start: row.start
+            start: row.start,
+            end: row.end,
+            origin: form.origin,
+            // comments: row.comments
+            // "comments.$.comment"
+            comments: row.commentobj,
           });
 
-          if (time) {
+          if (timeid) {
             console.log(
-              'found time "' +
-                row.start +
-                '" with id ' +
-                time._id +
-                " - skipping row"
+              `created time "${item._id}: ${row.start}" with id ${timeid}`
             );
           } else {
-            timeid = Times.insert({
-              item: item._id,
-              start: row.start,
-              end: row.end,
-              origin: form.origin,
-              //comments: row.comments
-              // "comments.$.comment"
-              comments: row.commentobj
-            });
-
-            if (timeid) {
-              console.log(
-                'created time "' +
-                  item._id +
-                  ": " +
-                  row.start +
-                  '" with id ' +
-                  timeid
-              );
-            } else {
-              console.log("error during insert of time: " + row.start);
-              return;
-            }
+            console.log(`error during insert of time: ${row.start}`);
           }
         }
       });
 
       return true;
-    } else {
-      console.log("no time data found for import");
-      return false;
     }
+    console.log('no time data found for import');
+    return false;
   },
 
   // not in use!
-  timeReport: function() {
+  timeReport() {
     today = 0;
     Times.find({
       start: {
         $gte: new Date(new Date().setHours(0, 0, 0, 0)),
-        $lte: new Date(new Date().setHours(23, 59, 59, 999))
+        $lte: new Date(new Date().setHours(23, 59, 59, 999)),
       },
-      createdBy: Meteor.userId()
+      createdBy: Meteor.userId(),
     }).map(function(doc) {
-      //item.timeelapsed.today += (doc.end > 0 ? doc.end : new Date()) - doc.start;
-      //item.timeelapsed.today += (doc.end > 0 ? doc.end : reactiveDate()) - doc.start;
+      // item.timeelapsed.today += (doc.end > 0 ? doc.end : new Date()) - doc.start;
+      // item.timeelapsed.today += (doc.end > 0 ? doc.end : reactiveDate()) - doc.start;
       today += (doc.end > 0 ? doc.end : reactiveDate()) - doc.start;
     });
 
@@ -639,52 +605,43 @@ Meteor.methods({
 
   // TAGS
 
-  tagInsert: function(tag) {
-    console.log("methods:tagInsert : " + tag.name);
+  tagInsert(tag) {
+    console.log(`methods:tagInsert : ${tag.name}`);
 
     Schemas.Tags.clean(tag);
     check(tag, Schemas.Tags);
     return Tags.insert(tag);
   },
 
-  tagUpdate: function(tag, id) {
+  tagUpdate(tag, id) {
     console.log(
-      "methods:tagUpdate : " +
-        id +
-        " - " +
-        tag.$set.name +
-        ": " +
-        tag.$set.value
+      `methods:tagUpdate : ${id} - ${tag.$set.name}: ${tag.$set.value}`
     );
 
-    //return false;
-    //console.log(tag);
-    //Schemas.Tags.clean(tag);
+    // return false;
+    // console.log(tag);
+    // Schemas.Tags.clean(tag);
     check(tag, Schemas.Tags);
 
-    //console.log(Meteor.userId());
-    //console.log(tag);
+    // console.log(Meteor.userId());
+    // console.log(tag);
 
-    ///throw new Meteor.Error("do not update tags right now :\  ");
+    // /throw new Meteor.Error("do not update tags right now :\  ");
 
     return Tags.update(id, tag);
   },
 
-  tagRemove: function(tagid) {
-    console.log("methods:tagRemove : " + tagid);
+  tagRemove(tagid) {
+    console.log(`methods:tagRemove : ${tagid}`);
     // TODO: check if its my tag entry
     return Tags.remove({ _id: tagid });
   },
 
   // ATTRIBUTE
 
-  attributeInsert: function(attribute) {
+  attributeInsert(attribute) {
     console.log(
-      "methods:attributeInsert : " +
-        attribute.name +
-        " [" +
-        attribute.type +
-        "]"
+      `methods:attributeInsert : ${attribute.name} [${attribute.type}]`
     );
 
     Schemas.Attributes.clean(attribute);
@@ -692,57 +649,52 @@ Meteor.methods({
     return Attributes.insert(attribute);
   },
 
-  attributeUpdate: function(attribute, id) {
+  attributeUpdate(attribute, id) {
     console.log(
-      "methods:attributeUpdate : " +
-        id +
-        " - " +
-        attribute.$set.name +
-        " [" +
-        attribute.$set.type +
-        "]"
+      `methods:attributeUpdate : ${id} - ${attribute.$set.name} [${attribute
+        .$set.type}]`
     );
 
-    //return false;
-    //console.log(tag);
-    //Schemas.Tags.clean(tag);
+    // return false;
+    // console.log(tag);
+    // Schemas.Tags.clean(tag);
     check(attribute, Schemas.Attributes);
 
-    //console.log(Meteor.userId());
-    //console.log(tag);
+    // console.log(Meteor.userId());
+    // console.log(tag);
 
-    ///throw new Meteor.Error("do not update tags right now :\  ");
+    // /throw new Meteor.Error("do not update tags right now :\  ");
 
     return Attributes.update(id, attribute);
   },
 
-  attributeRemove: function(attributeid) {
-    console.log("methods:attributeRemove : " + attributeid);
+  attributeRemove(attributeid) {
+    console.log(`methods:attributeRemove : ${attributeid}`);
     // TODO: check if its my attribute entry
     return Attributes.remove({ _id: attributeid });
   },
 
   // SEARCH
 
-  openTimeWithItem: function(itemid) {
-    console.log("methods:openTimeWithItem : " + itemid);
+  openTimeWithItem(itemid) {
+    console.log(`methods:openTimeWithItem : ${itemid}`);
 
-    //Router.go(Router.path('item.detail', {_id: itemid}));
-    Router.go(Router.path("time.create", { _id: itemid }));
+    // Router.go(Router.path('item.detail', {_id: itemid}));
+    Router.go(Router.path('time.create', { _id: itemid }));
   },
 
   // fetchUrl
 
-  fetchUrl: function(url, options, regex) {
-    console.log("methods:fetchUrl : " + url);
+  fetchUrl(url, options, regex) {
+    console.log(`methods:fetchUrl : ${url}`);
 
     return fetchUrl(url, options, regex);
   },
 
   // calculations
 
-  doCalculations: function(updatedAt) {
-    console.log("doCalculations - user: " + Meteor.userId());
+  doCalculations(updatedAt) {
+    console.log(`doCalculations - user: ${Meteor.userId()}`);
 
     if (!updatedAt || !moment(updatedAt).isValid()) {
       // will calc through all times
@@ -750,62 +702,62 @@ Meteor.methods({
       // will leave last 2 months untouched
       // updatedAt = moment().subtract(1, 'months').startOf("month").toDate();
       // will leave current month untouched
-      updatedAt = moment().startOf("month").toDate();
+      updatedAt = moment().startOf('month').toDate();
       // will leave only today untouched
-      //updatedAt = moment().startOf("day").toDate();
+      // updatedAt = moment().startOf("day").toDate();
 
-      console.log("for all Times created before: " + updatedAt);
+      console.log(`for all Times created before: ${updatedAt}`);
     } else {
-      console.log("for all Times created before given date: " + updatedAt);
+      console.log(`for all Times created before given date: ${updatedAt}`);
     }
 
-    console.log("Total Items: " + Items.find({}).count());
+    console.log(`Total Items: ${Items.find({}).count()}`);
     console.log(
-      "My Items: " + Items.find({ createdBy: Meteor.userId() }).count()
+      `My Items: ${Items.find({ createdBy: Meteor.userId() }).count()}`
     );
 
-    console.log("Total Times: " + Times.find({}).count());
+    console.log(`Total Times: ${Times.find({}).count()}`);
     console.log(
-      "My Times: " + Times.find({ createdBy: Meteor.userId() }).count()
+      `My Times: ${Times.find({ createdBy: Meteor.userId() }).count()}`
     );
 
-    var itemCount = 0;
+    let itemCount = 0;
 
     // first reset old values (so thisweek and prevweek still work)
     Items.update(
       {
-        //_id: 'rqvj5bXJQtJL2A2go',
-        //tags: 'KwaxGTBiSybcq2d43',
+        // _id: 'rqvj5bXJQtJL2A2go',
+        // tags: 'KwaxGTBiSybcq2d43',
         $or: [
           { ownedBy: Meteor.userId() },
-          { ownedBy: null, createdBy: Meteor.userId() }
-        ]
+          { ownedBy: null, createdBy: Meteor.userId() },
+        ],
       },
       {
         $set: { ownedBy: Meteor.userId() },
-        $unset: { totals: "", totalsUpdatedAt: "" }
+        $unset: { totals: '', totalsUpdatedAt: '' },
       },
       { multi: true }
     );
 
     // go through all items
-    //Items.find({_id: 'rqvj5bXJQtJL2A2go'}).map(function(doc_item) {
+    // Items.find({_id: 'rqvj5bXJQtJL2A2go'}).map(function(doc_item) {
     Items.find({
-      //_id: 'rqvj5bXJQtJL2A2go',
-      //tags: 'KwaxGTBiSybcq2d43',
+      // _id: 'rqvj5bXJQtJL2A2go',
+      // tags: 'KwaxGTBiSybcq2d43',
       $or: [
         { ownedBy: Meteor.userId() },
-        { ownedBy: null, createdBy: Meteor.userId() }
-      ]
+        { ownedBy: null, createdBy: Meteor.userId() },
+      ],
     }).map(function(doc_item) {
-      var totals = {};
+      const totals = {};
 
       // for each timeslot ..
       for (timeslot in CNF.timeslots) {
         // define timeslot
-        //totals[timeslot] = {};
+        // totals[timeslot] = {};
 
-        //console.log('doing calculations for: '+ doc_item.title + ' timeslot: ' + timeslot );
+        // console.log('doing calculations for: '+ doc_item.title + ' timeslot: ' + timeslot );
 
         // timeslot: today
         Times.find({
@@ -814,15 +766,15 @@ Meteor.methods({
           // only count finished times - having an end time set
           end: { $ne: null },
           // only times, that come before update Date
-          createdAt: {$lte: updatedAt}
+          createdAt: { $lte: updatedAt },
         }).map(function(doc_time) {
-          //console.log('found item entry: '+ doc_time.start + ' by '+ doc_time.createdBy);
+          // console.log('found item entry: '+ doc_time.start + ' by '+ doc_time.createdBy);
 
           // sum up times per user
-          if (typeof totals[doc_time.createdBy] === "undefined") {
+          if (typeof totals[doc_time.createdBy] === 'undefined') {
             totals[doc_time.createdBy] = {};
           }
-          if (typeof totals[doc_time.createdBy][timeslot] === "undefined") {
+          if (typeof totals[doc_time.createdBy][timeslot] === 'undefined') {
             totals[doc_time.createdBy][timeslot] =
               doc_time.end - doc_time.start;
           } else {
@@ -832,7 +784,7 @@ Meteor.methods({
         });
       }
 
-      //console.log('totals: ', totals);
+      // console.log('totals: ', totals);
 
       // resulting format:
       // 		totals[_id of user1][today] = 123
@@ -854,7 +806,7 @@ Meteor.methods({
         // totals[userid].today = 123; this shold already be there
 
         totals[userid].userid = userid;
-        //totals[userid].updatedAt = updatedAt;
+        // totals[userid].updatedAt = updatedAt;
 
         doc_item.totals.push(totals[userid]);
       }
@@ -873,9 +825,9 @@ Meteor.methods({
         $set: {
           ownedBy: doc_item.ownedBy,
           totals: doc_item.totals,
-          totalsUpdatedAt: updatedAt
-        }
-        //$unset: {totals: "", totalsUpdatedAt: ""}
+          totalsUpdatedAt: updatedAt,
+        },
+        // $unset: {totals: "", totalsUpdatedAt: ""}
       });
     });
 
@@ -890,69 +842,53 @@ Meteor.methods({
 		*/
 
     console.log(
-      "doCalculations - user: " +
-        Meteor.userId() +
-        " done - summed up a total of: " +
-        itemCount +
-        " items"
+      `doCalculations - user: ${Meteor.userId()} done - summed up a total of: ${itemCount} items`
     );
-    return (
-      "doCalculations - done - summed up a total of: " + itemCount + " items"
-    );
+    return `doCalculations - done - summed up a total of: ${itemCount} items`;
   },
 
-  removeItems: function(origin) {
-    console.log(
-      "removeItems - user: " + Meteor.userId() + " origin: " + origin
-    );
+  removeItems(origin) {
+    console.log(`removeItems - user: ${Meteor.userId()} origin: ${origin}`);
     if (origin) {
-      return Items.remove({ createdBy: Meteor.userId(), origin: origin });
-    } else {
-      console.log("removeItems - missing origin string");
-      throw new Meteor.Error("Please provide an origin!");
+      return Items.remove({ createdBy: Meteor.userId(), origin });
     }
+    console.log('removeItems - missing origin string');
+    throw new Meteor.Error('Please provide an origin!');
   },
-  removeTimes: function(origin) {
-    console.log(
-      "removeTimes - user: " + Meteor.userId() + " origin: " + origin
-    );
+  removeTimes(origin) {
+    console.log(`removeTimes - user: ${Meteor.userId()} origin: ${origin}`);
     if (origin) {
-      return Times.remove({ createdBy: Meteor.userId(), origin: origin });
-    } else {
-      console.log("removeTimes - missing origin string");
-      throw new Meteor.Error("Please provide an origin!");
+      return Times.remove({ createdBy: Meteor.userId(), origin });
     }
+    console.log('removeTimes - missing origin string');
+    throw new Meteor.Error('Please provide an origin!');
   },
-  csvExport: function(item) {
-    console.log("csvExport - user: " + Meteor.userId() + " ItemID: " + item);
-    var exports = [];
-    var query = {};
-    query["createdBy"] = Meteor.userId();
+  csvExport(item) {
+    console.log(`csvExport - user: ${Meteor.userId()} ItemID: ${item}`);
+    const exports = [];
+    const query = {};
+    query.createdBy = Meteor.userId();
 
     if (item) {
-      query["item"] = item;
+      query.item = item;
     }
     Times.find(query, { sort: { start: 1 } }).map(function(time) {
       exports.push(
-        Items.findOne({ _id: time.item }).title +
-          ";" +
-          moment(time.start).format(CNF.FORMAT_DATETIME) +
-          ";" +
-          moment(time.end).format(CNF.FORMAT_DATETIME) +
-          ";" +
-          formatDuration(time.end - time.start, true) +
-          ";" +
-          (time.comments
-            ? time.comments
-                .map(function(comment) {
-                  if (comment && comment.comment) {
-                    return comment.comment;
-                  } else {
-                    return "";
-                  }
-                })
-                .join(", ")
-            : "")
+        `${Items.findOne({ _id: time.item }).title};${moment(time.start).format(
+          CNF.FORMAT_DATETIME
+        )};${moment(time.end).format(CNF.FORMAT_DATETIME)};${formatDuration(
+          time.end - time.start,
+          true
+        )};${time.comments
+          ? time.comments
+              .map(function(comment) {
+                if (comment && comment.comment) {
+                  return comment.comment;
+                }
+                return '';
+              })
+              .join(', ')
+          : ''}`
       );
     });
     return exports;
@@ -960,34 +896,34 @@ Meteor.methods({
 
   // route: /items/:id
   // returns all Times for a specific item and user
-  findTimes: function(item) {
-    //console.log("loading times for: "+ item + " user: "+ userid);
-    return Times.find({ item: item, createdBy: Meteor.userId() }).fetch();
+  findTimes(item) {
+    // console.log("loading times for: "+ item + " user: "+ userid);
+    return Times.find({ item, createdBy: Meteor.userId() }).fetch();
   },
 
   // route: /times/:id
   // returns a single time entry Times for a specific item and user
-  findTime: function(time) {
-    //console.log("loading times for: "+ item + " user: "+ userid);
-    //return Times.findOne({_id: time, createdBy: Meteor.userId()});
+  findTime(time) {
+    // console.log("loading times for: "+ item + " user: "+ userid);
+    // return Times.findOne({_id: time, createdBy: Meteor.userId()});
     return Times.findOne({ _id: time, createdBy: Meteor.userId() });
   },
 
-  createJiraAuth: function(user, password) {
-    console.log("createJiraAuth - creating new session id for user: " + user);
+  createJiraAuth(user, password) {
+    console.log(`createJiraAuth - creating new session id for user: ${user}`);
 
-    var result = fetchUrl(CNF.PLUGIN.JIRA.URL + "/rest/auth/1/session", {
-      data: { username: user, password: password }
+    const result = fetchUrl(`${CNF.PLUGIN.JIRA.URL}/rest/auth/1/session`, {
+      data: { username: user, password },
     });
     if (result.data && result.data.session && result.data.session.value) {
       return result.data.session.value;
-    } else {
-      console.log("createJiraAuth - invalid user/password combination.");
-      throw new Meteor.Error("not-authorized");
     }
+    console.log('createJiraAuth - invalid user/password combination.');
+    throw new Meteor.Error('not-authorized');
+
     // result: cookie = result.data.session.name; // { name: JSESSIONID, value: 12341234 };
   },
-  clearAttributes: function(itemid) {
+  clearAttributes(itemid) {
     /*
 		if(!itemid) {
 			itemid = "7XN664Hr4fnFyNBjn";
@@ -996,8 +932,8 @@ Meteor.methods({
 */
     // make sure all attributes are set in arrays instead of objects!
     Items.find({ attributes: { $ne: null } }).map(function(item) {
-      if (typeof item.attributes.length == "undefined") {
-        console.log(item._id + " " + item.attributes);
+      if (typeof item.attributes.length === 'undefined') {
+        console.log(`${item._id} ${item.attributes}`);
 
         Items.update(
           { _id: item._id },
@@ -1006,32 +942,32 @@ Meteor.methods({
       }
     });
   },
-  setJiraID: function(project, sessionid) {
-    console.log("setJiraID - adding JIRA ID to tickets.");
+  setJiraID(project, sessionid) {
+    console.log('setJiraID - adding JIRA ID to tickets.');
 
     if (!project) {
-      console.log("setJiraID - missing jira project in method call.");
-      throw new Meteor.Error("missing-jira-project");
+      console.log('setJiraID - missing jira project in method call.');
+      throw new Meteor.Error('missing-jira-project');
     }
 
-    var regex = new RegExp(".*(" + project + "-[0-9]+).*", "g");
+    const regex = new RegExp(`.*(${project}-[0-9]+).*`, 'g');
 
     // TODO: JIRA key will be added always to attributes.0 for each item
     // - could probably overwrite something else there
     Items.find({ title: regex }, { sort: { createdAt: 1 } }).map(function(
       itemdoc
     ) {
-      console.log("Setting JIRA reference for: " + itemdoc.title);
+      console.log(`Setting JIRA reference for: ${itemdoc.title}`);
 
-      var attribIdKey = Attributes.findOne({
-        name: CNF.PLUGIN.JIRA.ATTRIBUTES.KEY
+      const attribIdKey = Attributes.findOne({
+        name: CNF.PLUGIN.JIRA.ATTRIBUTES.KEY,
       })._id;
-      var attributeValue = {
+      const attributeValue = {
         attribid: attribIdKey,
-        value: itemdoc.title.replace(regex, "$1")
+        value: itemdoc.title.replace(regex, '$1'),
       };
-      var attributeSet = {};
-      var indexJiraID;
+      const attributeSet = {};
+      let indexJiraID;
 
       /*
 			
@@ -1052,29 +988,29 @@ Meteor.methods({
         indexJiraID = getIndexfromArray(
           attribIdKey,
           itemdoc.attributes,
-          "attribid"
+          'attribid'
         );
 
         if (indexJiraID >= 0) {
           // if attribute is already there - update them with $ operator
-          attributeSet["attributes.$"] = attributeValue;
-          console.log("Updating Item with updateded Jira Reference: ");
+          attributeSet['attributes.$'] = attributeValue;
+          console.log('Updating Item with updateded Jira Reference: ');
           console.log(attributeSet);
 
           Items.update(
             {
               _id: itemdoc._id,
-              "attributes.attribid": attributeValue.attribid
+              'attributes.attribid': attributeValue.attribid,
             },
             { $set: attributeSet }
           );
         } else {
           // if there are attributes but missing new one.
 
-          /*itemdoc.attributes.push(attributeValue);
+          /* itemdoc.attributes.push(attributeValue);
 					attributeValue = itemdoc.attributes;*/
-          attributeSet["attributes"] = attributeValue;
-          console.log("Updating Item with additional Jira Reference: ");
+          attributeSet.attributes = attributeValue;
+          console.log('Updating Item with additional Jira Reference: ');
           console.log(attributeSet);
 
           Items.update({ _id: itemdoc._id }, { $addToSet: attributeSet });
@@ -1082,16 +1018,16 @@ Meteor.methods({
       } else {
         // if there are no attribute values, just add a new subdocument
 
-        //attributeSet["attributes."+indexJiraID] = attributeValue;
-        attributeSet["attributes"] = [attributeValue];
-        console.log("Update Item with new Jira Reference: ");
+        // attributeSet["attributes."+indexJiraID] = attributeValue;
+        attributeSet.attributes = [attributeValue];
+        console.log('Update Item with new Jira Reference: ');
         console.log(attributeSet);
         Items.update({ _id: itemdoc._id }, { $set: attributeSet });
       }
 
       // update estimates as well.
       if (sessionid) {
-        Meteor.call("updateJiraDetails", itemdoc._id, sessionid);
+        Meteor.call('updateJiraDetails', itemdoc._id, sessionid);
       }
 
       /*
@@ -1101,7 +1037,7 @@ Meteor.methods({
 					"attributes."+indexJiraID+".value": 
 				}});
 			*/
-      //Items.update({_id: itemdoc._id},  {$set: {"attributes[0]": {"attribid": "4oKTwk4ZSvybBuXmj", "value": itemdoc.title.substring(0,10) } }} );
+      // Items.update({_id: itemdoc._id},  {$set: {"attributes[0]": {"attribid": "4oKTwk4ZSvybBuXmj", "value": itemdoc.title.substring(0,10) } }} );
     });
 
     // how can i use a another field in update ?
@@ -1112,22 +1048,25 @@ Meteor.methods({
 		*/
   },
 
-  loadJiraIssue: function(jiraid, sessionid) {
-    console.log("loadJiraIssue - loading jira details for: " + jiraid);
+  loadJiraIssue(jiraid, sessionid) {
+    console.log(`loadJiraIssue - loading jira details for: ${jiraid}`);
 
     if (!sessionid) {
-      console.log("loadJiraIssue - no valid Jira authentication available.");
+      console.log('loadJiraIssue - no valid Jira authentication available.');
       throw new Meteor.Error(
         "Missing valid Jira Auth Session - use: createJiraAuth('username', 'password');"
       );
-      //throw new Meteor.Error("not-authorized");
+      // throw new Meteor.Error("not-authorized");
     }
 
-    var result = fetchUrl(CNF.PLUGIN.JIRA.URL + "/rest/api/2/issue/" + jiraid, {
-      headers: { Cookie: "JSESSIONID=" + sessionid }
-    });
+    const result = fetchUrl(
+      `${CNF.PLUGIN.JIRA.URL}/rest/api/2/issue/${jiraid}`,
+      {
+        headers: { Cookie: `JSESSIONID=${sessionid}` },
+      }
+    );
 
-    var estimate = null;
+    let estimate = null;
 
     /*
 		result: data.fields.customfield_10314   Array[4]
@@ -1152,11 +1091,11 @@ Meteor.methods({
       estimate = result.data.fields.customfield_10314;
 
       if (estimate) {
-        for (var i = 0; i < estimate.length; i++) {
+        for (let i = 0; i < estimate.length; i++) {
           if (estimate[i].match(/^Role: 10304.*/) !== null) {
             estimatedValue = estimate[i].replace(
               /Role: 10304 \(([0-9]*) \|.*\)/,
-              "$1"
+              '$1'
             );
             break;
           }
@@ -1171,7 +1110,7 @@ Meteor.methods({
       }
     }
 
-    var resultCrop = {
+    const resultCrop = {
       title: result.data.fields.summary,
       description: result.data.fields.description,
       key: result.data.key,
@@ -1180,113 +1119,105 @@ Meteor.methods({
         ? result.data.fields.customfield_10300.value
         : null,
       type: result.data.fields.issuetype.name,
-      estimate: estimatedValue
-      //fullresult: result,
+      estimate: estimatedValue,
+      // fullresult: result,
     };
 
-    //console.log("loading Jira result: ");
-    //console.log(resultCrop);
+    // console.log("loading Jira result: ");
+    // console.log(resultCrop);
 
     return resultCrop;
   },
 
-  updateJiraDetails: function(itemid, sessionid) {
-    //var index = getIndexfromArray(CNF.PLUGIN.JIRA.ATTRIBUTES.KEY, this.attributes, "name");
+  updateJiraDetails(itemid, sessionid) {
+    // var index = getIndexfromArray(CNF.PLUGIN.JIRA.ATTRIBUTES.KEY, this.attributes, "name");
     // TODO: this.attributes - is not an array, but an object :\
 
-    var itemdoc;
+    let itemdoc;
     itemdoc = Items.findOne(itemid);
 
     console.log(
-      "updateJiraDetails - Updating Item with JIRA Details " + itemdoc.title
+      `updateJiraDetails - Updating Item with JIRA Details ${itemdoc.title}`
     );
 
-    var indexJiraID = getIndexfromArray(
+    const indexJiraID = getIndexfromArray(
       Attributes.findOne({ name: CNF.PLUGIN.JIRA.ATTRIBUTES.KEY })._id,
       itemdoc.attributes,
-      "attribid"
+      'attribid'
     );
-    //return "updateJiraDetails - itemid: "+ itemid +" sessionid: "+ sessionid + " found indexJiraID: "+ indexJiraID;
-    //console.log("found index: " + index);
+    // return "updateJiraDetails - itemid: "+ itemid +" sessionid: "+ sessionid + " found indexJiraID: "+ indexJiraID;
+    // console.log("found index: " + index);
 
     // check if item has a JIRA ID set
     if (indexJiraID >= 0 && itemdoc.attributes[indexJiraID].value) {
-      console.log("loading jira id: " + itemdoc.attributes[indexJiraID].value);
-      var detailsJira;
+      console.log(`loading jira id: ${itemdoc.attributes[indexJiraID].value}`);
+      let detailsJira;
 
       detailsJira = Meteor.call(
-        "loadJiraIssue",
+        'loadJiraIssue',
         itemdoc.attributes[indexJiraID].value,
         sessionid
       );
 
-      var setModifier = {
+      const setModifier = {
         $set: {
-          title:
-            detailsJira.key +
-              " " +
-              (detailsJira.type ? "[" + detailsJira.type + "]" : "") +
-              " " +
-              detailsJira.title,
+          title: `${detailsJira.key} ${detailsJira.type
+            ? `[${detailsJira.type}]`
+            : ''} ${detailsJira.title}`,
           description: detailsJira.description
             ? detailsJira.description.substring(0, 200)
-            : ""
-        }
+            : '',
+        },
       };
 
-      var attribIdEstimate = Attributes.findOne({
-        name: CNF.PLUGIN.JIRA.ATTRIBUTES.ESTIMATE
+      const attribIdEstimate = Attributes.findOne({
+        name: CNF.PLUGIN.JIRA.ATTRIBUTES.ESTIMATE,
       })._id;
-      var indexEstimate = getIndexfromArray(
+      const indexEstimate = getIndexfromArray(
         attribIdEstimate,
         itemdoc.attributes,
-        "attribid"
+        'attribid'
       );
 
-      var attributeValue = {
+      const attributeValue = {
         attribid: attribIdEstimate,
-        value: detailsJira.estimate
+        value: detailsJira.estimate,
       };
 
       if (indexEstimate >= 0) {
         // if attribute is already there - update them with $ operator
-        //attributeSet["attributes.$"] = attributeValue;
-        setModifier["$set"]["attributes.$"] = attributeValue;
-        console.log("Updating Item with updateded Jira Estimate: ");
+        // attributeSet["attributes.$"] = attributeValue;
+        setModifier.$set['attributes.$'] = attributeValue;
+        console.log('Updating Item with updateded Jira Estimate: ');
         console.log(setModifier);
 
         return Items.update(
-          { _id: itemdoc._id, "attributes.attribid": attributeValue.attribid },
+          { _id: itemdoc._id, 'attributes.attribid': attributeValue.attribid },
           setModifier
         );
-      } else {
-        // if there are attributes but missing new one.
-
-        /*itemdoc.attributes.push(attributeValue);
-				attributeValue = itemdoc.attributes;*/
-        // attributeSet["attributes"] = attributeValue;
-        setModifier["$addToSet"] = {};
-        setModifier["$addToSet"]["attributes"] = attributeValue;
-        console.log("Updating Item with additional Jira Reference: ");
-        console.log(setModifier);
-
-        return Items.update({ _id: itemdoc._id }, setModifier);
       }
-    } else {
-      console.log("no jira id is set for this item.");
-      throw new Meteor.Error("no jira id is set for this item");
+      // if there are attributes but missing new one.
+
+      /* itemdoc.attributes.push(attributeValue);
+				attributeValue = itemdoc.attributes;*/
+      // attributeSet["attributes"] = attributeValue;
+      setModifier.$addToSet = {};
+      setModifier.$addToSet.attributes = attributeValue;
+      console.log('Updating Item with additional Jira Reference: ');
+      console.log(setModifier);
+
+      return Items.update({ _id: itemdoc._id }, setModifier);
     }
+    console.log('no jira id is set for this item.');
+    throw new Meteor.Error('no jira id is set for this item');
   },
 
-  takeoverItem: function(itemid) {
-    var itemdoc;
+  takeoverItem(itemid) {
+    let itemdoc;
     itemdoc = Items.findOne(itemid);
 
     console.log(
-      "takeoverItem - takeover item: " +
-        itemdoc.title +
-        " user: " +
-        Meteor.userId()
+      `takeoverItem - takeover item: ${itemdoc.title} user: ${Meteor.userId()}`
     );
 
     Items.update(
@@ -1294,8 +1225,8 @@ Meteor.methods({
       { $set: { ownedBy: Meteor.userId() } },
       { validate: false }
     );
-    return "The Item: " + itemdoc.title + " belongs now to you";
-  }
+    return `The Item: ${itemdoc.title} belongs now to you`;
+  },
 });
 
 /*

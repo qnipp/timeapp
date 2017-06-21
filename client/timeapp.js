@@ -18,27 +18,19 @@ Template.example.helpers({
 
 // ////////// GLOBALS ////////////
 
-Template.registerHelper('currentTemplateName', function () {
-  return Blaze.currentView.parentView.name
-    .replace('Template.', '')
-    .replace('.', '-');
-});
+Template.registerHelper('currentTemplateName', () =>
+  Blaze.currentView.parentView.name.replace('Template.', '').replace('.', '-')
+);
 
-Template.registerHelper('currentRoute', function () {
-  return Router.current().route.getName();
-});
+Template.registerHelper('currentRoute', () => Router.current().route.getName());
 
 // TODO: does not work in side <head>
 // see: https://atmospherejs.com/pip87/initial-iron-meta
-Template.registerHelper('projectName', function () {
-  return CNF.APPNAME;
-});
+Template.registerHelper('projectName', () => CNF.APPNAME);
 
-Template.registerHelper('equals', function (a, b) {
-  return a === b;
-});
+Template.registerHelper('equals', (a, b) => a === b);
 
-Template.registerHelper('or', function (cond1, cond2) {
+Template.registerHelper('or', (cond1, cond2) => {
   /*
 	for (var i = 0; i < arguments.length; i++) {
 		alert(arguments[i]);
@@ -47,40 +39,35 @@ Template.registerHelper('or', function (cond1, cond2) {
   alert(cond2);
 });
 
-Template.registerHelper('ifsetelse', function (attrib, isSet, isNot) {
+Template.registerHelper('ifsetelse', (attrib, isSet, isNot) => {
   if (attrib) {
     return isSet;
   } else if (isNot) {
     return isNot;
-  } else {
-    return '';
   }
+  return '';
 });
 
-Template.registerHelper('log', function (log) {
+Template.registerHelper('log', log => {
   console.log(
-    '// DEBUG in ' +
-      Blaze.currentView.parentView.name
-        .replace('Template.', '')
-        .replace('.', '-') +
-      ': ' +
-      log
+    `// DEBUG in ${Blaze.currentView.parentView.name
+      .replace('Template.', '')
+      .replace('.', '-')}: ${log}`
   );
 });
 
 // usage: {{var_dump variable}}
 // usage: {{var_dump variable "variable name"}}
-Template.registerHelper('var_dump', function (variable, variablename) {
+Template.registerHelper('var_dump', function(variable, variablename) {
   console.log(
-    '// DEBUG in ' +
-      Blaze.currentView.parentView.name
-        .replace('Template.', '')
-        .replace('.', '-')
+    `// DEBUG in ${Blaze.currentView.parentView.name
+      .replace('Template.', '')
+      .replace('.', '-')}`
   );
 
   if (typeof variable !== 'undefined') {
     if (typeof variablename === 'string') {
-      console.log('var_dump( ' + variablename + ' ): ');
+      console.log(`var_dump( ${variablename} ): `);
       console.log(variable);
       console.log('====================');
     } else {
@@ -90,7 +77,7 @@ Template.registerHelper('var_dump', function (variable, variablename) {
     }
   } else {
     if (typeof variablename === 'string') {
-      console.log('Warning: variable ' + variablename + ' not found');
+      console.log(`Warning: variable ${variablename} not found`);
     }
     console.log('var_dump(this): ');
     console.log(this);
@@ -98,9 +85,7 @@ Template.registerHelper('var_dump', function (variable, variablename) {
   }
 });
 
-Template.registerHelper('formatDuration', function (timeinms) {
-  return formatDuration(timeinms);
-});
+Template.registerHelper('formatDuration', timeinms => formatDuration(timeinms));
 
 // make Schema available in Templates (?)
 // see: http://autoform.meteor.com/updateaf
@@ -112,7 +97,7 @@ Template.registerHelper('Collections', Collections);
 // see: https://github.com/aldeed/meteor-autoform#callbackshooks
 AutoForm.hooks({
   formSearch: {
-    onSubmit: function (doc) {
+    onSubmit(doc) {
       console.log('AutoForm.hooks([formSearch]');
       console.log(doc);
       // console.log(updateDoc);
@@ -122,31 +107,31 @@ AutoForm.hooks({
 
       this.done();
       return false;
-    }
+    },
   },
 
   formItem: {
     before: {
-      'method-update': function (doc) {
+      'method-update'(doc) {
         console.log('AutoForm.hooks([formItem]');
         console.log(doc);
         // this.done();
         // return false;
         return doc;
-      }
-    }
+      },
+    },
   },
   formTime: {
     before: {
-      'method-update': function (doc) {
+      'method-update'(doc) {
         console.log('AutoForm.hooks([formTime]');
         console.log(doc);
         // this.done();
         // return false;
         return doc;
-      }
-    }
-  }
+      },
+    },
+  },
 });
 
 /*
@@ -190,7 +175,7 @@ Template.itemlist.helpers({
 
     // 2016-08-08 - as requested sort by title.
     return Items.find({}, { sort: { title: 1 } });
-  }
+  },
 });
 
 Template.itemlistentry.helpers({
@@ -204,11 +189,11 @@ Template.itemlistentry.helpers({
   },
   isRunning(id, running) {
     return running.includes(id);
-  }
+  },
 });
 
 Template.itemform.helpers({
-  currentuserid: function () {
+  currentuserid() {
     return Meteor.userId();
   },
 
@@ -224,7 +209,7 @@ Template.itemform.helpers({
 		return Attributes.find({_id: {$in: this.attributes}});
 	},*/
 
-  renderAttributeValues: function (element) {
+  renderAttributeValues(element) {
     // Template.registerHelper('renderAttributeValues', function(attributes) {
     // {{renderAttributeValues element=this structkey="tags" structcollection="Tags" structfield="attributes" valuekey="attributes"  }}
     // Attributes._id: name [type]
@@ -252,14 +237,14 @@ Template.itemform.helpers({
 		*/
 
     // var doc = this;
-    var doc = element.hash.element;
+    const doc = element.hash.element;
 
     // attributes.hash.structkey	..	field in document, that referes to _id in structure Collection
     // attributes.hash.structcollection	..	name of the Collection that holds the structure
     // attributes.hash.structfield	..	field in collection, that holds the structure
     // attributes.hash.valuekey	..
 
-    var oFoundAttribs = {};
+    const oFoundAttribs = {};
     /*
 		//var instance = Template.instance();
 		if(!document.querySelector('.renderAttributeTarget')) {
@@ -270,9 +255,9 @@ Template.itemform.helpers({
 		}
 		*/
     if (doc.tags) {
-      Tags.find({ _id: { $in: doc.tags } }).map(function (tag) {
+      Tags.find({ _id: { $in: doc.tags } }).map(tag => {
         if (tag.attributes) {
-          for (var i = 0; i < tag.attributes.length; i++) {
+          for (let i = 0; i < tag.attributes.length; i++) {
             oFoundAttribs[tag.attributes[i]] = tag.attributes[i];
           }
         }
@@ -284,10 +269,10 @@ Template.itemform.helpers({
     // oFoundAttribs["zb7RMJ98MGccNHnLJ"] = "zb7RMJ98MGccNHnLJ"
     // ..
 
-    var aFoundAttribs = [];
-    var sHTML = '';
-    var fieldValue = null;
-    var attribIndex = null;
+    let aFoundAttribs = [];
+    let sHTML = '';
+    let fieldValue = null;
+    let attribIndex = null;
 
     // console.log("parent element: ");
     // console.log( document.querySelector('.panel-body'));
@@ -310,13 +295,11 @@ Template.itemform.helpers({
     // die als werte bereits vorhanden sind.
 
     if (oFoundAttribs) {
-      aFoundAttribs = Object.keys(oFoundAttribs).map(function (key) {
-        return oFoundAttribs[key];
-      });
+      aFoundAttribs = Object.keys(oFoundAttribs).map(key => oFoundAttribs[key]);
       // result so far:
       // aFoundAttribs = ["4oKTwk4ZSvybBuXmj", "zb7RMJ98MGccNHnLJ", ...]
 
-      var count = 0;
+      let count = 0;
       // will list all attributes that needs to be rendered, in correct order
       // having the values on the correct spot
       // if values are on indices beyound lenght - they will be put earlier
@@ -342,7 +325,7 @@ Template.itemform.helpers({
       // console.log('renderAttributeValues - items attributes: ');
       // console.log(doc.attributes);
 
-      Attributes.find({ _id: { $in: aFoundAttribs } }).map(function (attrib) {
+      Attributes.find({ _id: { $in: aFoundAttribs } }).map(attrib => {
         // console.log('renderAttributeValues - found attribute to render: ');
         // console.log(attrib);
 
@@ -360,9 +343,9 @@ Template.itemform.helpers({
         // console.log('renderAttributeValues - found value: '+ fieldValue + ' on index: '+ attribIndex);
 
         sHTML += Blaze.toHTMLWithData(Template.attributedynamic, {
-          attrib: attrib,
+          attrib,
           value: fieldValue,
-          index: count
+          index: count,
         });
         count++;
       });
@@ -371,11 +354,11 @@ Template.itemform.helpers({
     }
 
     return sHTML;
-  }
+  },
 });
 
-Template.itemform.onRendered(function () {
-  this.autorun(function (element) {
+Template.itemform.onRendered(function() {
+  this.autorun(element => {
     Template.currentData();
     try {
       AutoForm.resetForm('formItem');
@@ -385,7 +368,7 @@ Template.itemform.onRendered(function () {
 });
 
 Template.itemform.events({
-  'click .jsitemremove': function () {
+  'click .jsitemremove'() {
     if (confirm('Are you sure?')) {
       Meteor.call('itemRemove', this._id);
     }
@@ -400,7 +383,7 @@ Template.itemform.events({
 		fetchUrl('https://jira.super-fi.net/browse/INGWEB-906');
 	},*/
 
-  'click .fetchUrl.server': function () {
+  'click .fetchUrl.server'() {
     console.log('Updating details from JIRA: ');
     // var result = Meteor.call("fetchUrl", 'https://jira.super-fi.net/rest/auth/1/session', false);
 
@@ -408,7 +391,7 @@ Template.itemform.events({
       'updateJiraDetails',
       this._id,
       Session.get(CNF.PLUGIN.JIRA.SESSION.AUTH),
-      function (error, result) {
+      (error, result) => {
         if (!error) {
           console.log('updateJiraDetails result: ');
           console.log(result);
@@ -424,7 +407,7 @@ Template.itemform.events({
 		console.log(this.attributes);
 		console.log(".. for id: " + Attributes.findOne({"name": "JIRA ID"})._id + " in field: "+ "attribid");
 		*/
-  }
+  },
 });
 
 // TODO: search for url
@@ -439,32 +422,29 @@ Template.itemform.events({
 */
 
 Template.itemrecentlist.helpers({
-  itemsrecent: function () {
+  itemsrecent() {
     // show last 8 days
-    var times = Times.find(
+    const times = Times.find(
       {
         start: { $gte: new Date(new Date() - 1000 * 60 * 60 * 24 * 8) },
-        createdBy: Meteor.userId()
+        createdBy: Meteor.userId(),
       },
       { fields: { item: 1 } }
     ); // .fetch(); // FIXED - check if this fetch is necessary - no
 
     if (times) {
-      var items = times.map(function (time) {
-        return time.item;
-      });
+      const items = times.map(time => time.item);
       // items.reverse();
       // TODO: sort by last Times entry
       return Items.find({ _id: { $in: items } }, { sort: { updatedAt: -1 } });
       // return Items.find({_id: {$in: items}});
-    } else {
-      return null;
     }
-  }
+    return null;
+  },
 });
 
 Template.itemrecentlistentry.helpers({
-  item: function () {
+  item() {
     if (this.item && !this.itemobj) {
       this.itemobj = loadItem(this.item, { all: true }, null);
     }
@@ -474,61 +454,56 @@ Template.itemrecentlistentry.helpers({
   // CHECK: is running in loadItem does not work reactive (when stopping time)
   // this helper will be loaded to many times :\
   // isRunning is done within #with item, therefor this._id = this.item._id
-  isRunning: function () {
+  isRunning() {
     // console.log('check if is running: '+ this._id);
-    return Times.findOne(
+    return !!Times.findOne(
       {
         item: this._id,
         createdBy: Meteor.userId(),
         end: {
-          $not: { $ne: null }
-        }
+          $not: { $ne: null },
+        },
       },
       { limit: 1, fields: { _id: 1 } }
-    )
-      ? true
-      : false;
+    );
   },
-  currentuserid: function () {
+  currentuserid() {
     return Meteor.userId();
-  }
+  },
 });
 
 Template.itemrecentlistentry.events({
-  'click .jsitemstop': function () {
+  'click .jsitemstop'() {
     Meteor.call('itemSetEnd', this._id);
   },
-  'click .jsitemstart': function () {
+  'click .jsitemstart'() {
     Meteor.call('itemSetStart', this._id);
-  }
+  },
 });
 
 Template.itemlistentry.events({
-  'click .jsitemstop': function () {
+  'click .jsitemstop'() {
     Meteor.call('itemSetEnd', this._id);
   },
-  'click .jsitemstart': function () {
+  'click .jsitemstart'() {
     Meteor.call('itemSetStart', this._id);
-  }
+  },
 });
 
 // is called every time when page is reloaded
-Template.itemreport.onCreated(function () {
-  var self = this;
+Template.itemreport.onCreated(function() {
+  const self = this;
   self.asyncTimes = new ReactiveVar([
-    { comments: [{ comment: 'Waiting for response from server...' }] }
+    { comments: [{ comment: 'Waiting for response from server...' }] },
   ]);
 
-  Meteor.call('findTimes', Template.currentData()._id, function (error, result) {
+  Meteor.call('findTimes', Template.currentData()._id, (error, result) => {
     // console.log("itemreport onCreated with result: "+ result);
     self.asyncTimes.set(result);
   });
 
-  self.autorun(function () {
-    Meteor.call('findTimes', Template.currentData()._id, function (
-      error,
-      result
-    ) {
+  self.autorun(() => {
+    Meteor.call('findTimes', Template.currentData()._id, (error, result) => {
       // console.log("itemreport autorun with result: ");
       self.asyncTimes.set(result);
     });
@@ -537,16 +512,16 @@ Template.itemreport.onCreated(function () {
 
 Template.itemreport.events({
   // 'click .reactive-table tbody tr': function (event) {
-  'click .jstimeload': function (event) {
+  'click .jstimeload'(event) {
     Router.go(Router.path('time.detail', { _id: this._id }));
-  }
+  },
 });
 
 Template.itemreport.helpers({
-  items: function () {
+  items() {
     return Items.find({ _id: this._id });
   },
-  times: function () {
+  times() {
     // console.log("itemreport times called.");
 
     return Template.instance().asyncTimes.get();
@@ -556,17 +531,16 @@ Template.itemreport.helpers({
 			item: this._id
 		});*/
   },
-  isReady: function () {
+  isReady() {
     // console.log("itemreport isReady called.");
     return Template.instance().asyncTimes.get();
   },
 
-  totalsUpdatedAt: function () {
+  totalsUpdatedAt() {
     if (this.totalsUpdatedAt) {
       return moment(this.totalsUpdatedAt).format(CNF.FORMAT_DATETIME);
-    } else {
-      return 'ever';
     }
+    return 'ever';
   },
 
   tableSettingsGroupByItem: tableSettings(
@@ -575,8 +549,8 @@ Template.itemreport.helpers({
     'normal',
     Meteor.userId()
   ),
-  tableSettingsTimes: function () {
-    var settings = tableSettingsTime();
+  tableSettingsTimes() {
+    const settings = tableSettingsTime();
 
     settings.fields.splice(0, 1);
     settings.showFilter = false;
@@ -586,34 +560,34 @@ Template.itemreport.helpers({
     // settings.rowClass = null;
 
     return settings;
-  }
+  },
 });
 
 Template.itemrunninglist.helpers({
-  timesrunning: function () {
+  timesrunning() {
     return Times.find({
       end: { $not: { $ne: null } },
-      createdBy: Meteor.userId()
+      createdBy: Meteor.userId(),
     });
-  }
+  },
 });
 
 // ////////// TIMES ////////////
 
 Template.timelist.events({
-  'click .reactive-table tbody tr': function (event) {
+  'click .reactive-table tbody tr'(event) {
     console.log('click on row in reactive table: ');
     // console.log(event);
     // console.log(this);
 
     Router.go(Router.path('time.detail', { _id: this._id }));
-  }
+  },
 });
 
 Template.timelist.helpers({
-  tableSettingsTime: tableSettingsTime,
+  tableSettingsTime,
 
-  times: function () {
+  times() {
     // /return Times.find({},  {sort: {createdAt: -1}});
     return Times.find(
       { createdBy: Meteor.userId() },
@@ -637,18 +611,18 @@ Template.timelist.helpers({
 		}, {sort: {createdAt: -1}});
 	*/
     // db.times.aggregate([{ "$project": { "diff": { "$subtract": ["$end", "$start"] }}}])
-  }
+  },
 });
 
 Template.timelistrunningentry.events({
-  'click .jstimestop': function () {
+  'click .jstimestop'() {
     Meteor.call('timeSetEnd', this._id);
-  }
+  },
 });
 
 Template.timelistrunningentry.helpers({
-  time: function () {
-    var time = this.time;
+  time() {
+    const time = this.time;
 
     // console.log("showing running time: " + time._id);
     // console.log(time);
@@ -656,7 +630,7 @@ Template.timelistrunningentry.helpers({
     if (time.item && !time.itemobj) {
       time.itemobj = loadItem(time.item, false, null);
     } else if (!time.item) {
-      console.warn('Time Entry ' + time._id + ' does not have an item set');
+      console.warn(`Time Entry ${time._id} does not have an item set`);
       console.log(time);
     }
 
@@ -674,19 +648,19 @@ Template.timelistrunningentry.helpers({
     }
 
     return time;
-  }
+  },
 });
 
 Template.timelistentry.helpers({
-  time: function () {
-    var time = this.time;
+  time() {
+    const time = this.time;
 
     // console.log("showing time: " + time._id);
 
     if (time.item && !time.itemobj) {
       time.itemobj = loadItem(time.item, false, null);
     } else if (!time.item) {
-      console.warn('Time Entry ' + time._id + ' does not have an item set');
+      console.warn(`Time Entry ${time._id} does not have an item set`);
       console.log(time);
     }
 
@@ -707,33 +681,33 @@ Template.timelistentry.helpers({
     }
 
     return time;
-  }
+  },
 });
 
 Template.timeform.events({
-  'click .jstimeremove': function () {
+  'click .jstimeremove'() {
     Meteor.call('timeRemove', this._id);
   },
-  'click .jstimesetnow': function (event) {
+  'click .jstimesetnow'(event) {
     // console.log('clicked on label for input: ');
     // console.log(event.target.parentElement.htmlFor);
 
-    var now = moment().format('YYYY-MM-DDTHH:mm');
-    $('#' + event.target.parentElement.htmlFor).val(now);
+    const now = moment().format('YYYY-MM-DDTHH:mm');
+    $(`#${event.target.parentElement.htmlFor}`).val(now);
   },
-  'click .jstimesetlatest': function (event) {
-    var latesttime = Times.findOne(
+  'click .jstimesetlatest'(event) {
+    const latesttime = Times.findOne(
       {
         createdBy: Meteor.userId(),
         start: {
           $lte: moment().endOf('day').toDate(),
-          $gte: moment().startOf('day').toDate()
-        }
+          $gte: moment().startOf('day').toDate(),
+        },
       },
       {
         sort: { end: -1 },
         fields: { end: 1 },
-        limit: 1
+        limit: 1,
       }
     );
 
@@ -742,10 +716,10 @@ Template.timeform.events({
 
     if (latesttime) {
       latesttime.end = moment(latesttime.end).format('YYYY-MM-DDTHH:mm');
-      $('#' + event.target.parentElement.htmlFor).val(latesttime.end);
+      $(`#${event.target.parentElement.htmlFor}`).val(latesttime.end);
     } else {
-      var now = moment().format('YYYY-MM-DDTHH:mm');
-      $('#' + event.target.parentElement.htmlFor).val(now);
+      const now = moment().format('YYYY-MM-DDTHH:mm');
+      $(`#${event.target.parentElement.htmlFor}`).val(now);
     }
     /*
 		console.log('event: ');
@@ -755,7 +729,7 @@ Template.timeform.events({
 		console.log('current time: ');
 		console.log(new Date());
 		*/
-  }
+  },
 });
 
 /*
@@ -768,8 +742,8 @@ Template.timeform.helpers({
 });
 */
 
-Template.timeform.onRendered(function () {
-  this.autorun(function (element) {
+Template.timeform.onRendered(function() {
+  this.autorun(element => {
     Template.currentData();
     try {
       AutoForm.resetForm('formTime');
@@ -779,36 +753,36 @@ Template.timeform.onRendered(function () {
 });
 
 Template.timecommentlist.helpers({
-  createdAt: function () {
+  createdAt() {
     return moment(this.createdAt).format(CNF.FORMAT_DATETIME);
-  }
+  },
 });
 
 // ////////// TAGS ////////////
 
 Template.taglist.helpers({
-  tagsforitems: function () {
+  tagsforitems() {
     return Tags.find({ type: 'item-tag' }, { sort: { name: 1, value: 1 } });
   },
-  tagsfortimes: function () {
+  tagsfortimes() {
     return Tags.find({ type: 'time-tag' }, { sort: { name: 1, value: 1 } });
-  }
+  },
 });
 
 Template.tagform.events({
-  'click .jstagremove': function () {
+  'click .jstagremove'() {
     Meteor.call('tagRemove', this._id);
-  }
+  },
 });
 
 Template.tagform.helpers({
-  currentuserid: function () {
+  currentuserid() {
     return Meteor.userId();
-  }
+  },
 });
 
-Template.tagform.onRendered(function () {
-  this.autorun(function (element) {
+Template.tagform.onRendered(function() {
+  this.autorun(element => {
     Template.currentData();
     try {
       AutoForm.resetForm('formTag');
@@ -819,8 +793,8 @@ Template.tagform.onRendered(function () {
 
 Template.taglistentry.helpers({
   // TODO: check if this is necessary, tag should be set by route already
-  tag: function () {
-    var tag;
+  tag() {
+    let tag;
 
     if (this.tag && this.tag._id) {
       tag = Tags.findOne({ _id: this.tag._id });
@@ -833,14 +807,14 @@ Template.taglistentry.helpers({
     return tag;
     // TODO:
     // loadTag(this, null);
-  }
+  },
 });
 
 Template.tagreport.events({
   // 'click .reactive-table tbody tr': function (event) {
-  'click .jsitemload': function (event) {
+  'click .jsitemload'(event) {
     Router.go(Router.path('item.detail', { _id: this._id }));
-  }
+  },
 });
 
 Template.tagreport.helpers({
@@ -857,43 +831,43 @@ Template.tagreport.helpers({
     Meteor.userId()
   ),
 
-  items: function () {
-    console.log('loading items from tag: ' + this._id);
+  items() {
+    console.log(`loading items from tag: ${this._id}`);
     // console.log(this);
 
     return Items.find({ tags: this._id }, { sort: { updatedAt: -1 } });
   },
 
-  tags: function () {
-    console.log('loading tag: ' + this._id);
+  tags() {
+    console.log(`loading tag: ${this._id}`);
     // console.log(this);
 
     return Tags.find({ _id: this._id });
-  }
+  },
 });
 
 // ////////// ATTRIBUTES ////////////
 
 Template.attributelist.helpers({
-  attributes: function () {
+  attributes() {
     return Attributes.find({}, { sort: { name: 1, value: 1 } });
-  }
+  },
 });
 
 Template.attributeform.events({
-  'click .jsattributeremove': function () {
+  'click .jsattributeremove'() {
     Meteor.call('attributeRemove', this._id);
-  }
+  },
 });
 
 Template.attributeform.helpers({
-  currentuserid: function () {
+  currentuserid() {
     return Meteor.userId();
-  }
+  },
 });
 
-Template.attributeform.onRendered(function () {
-  this.autorun(function (element) {
+Template.attributeform.onRendered(function() {
+  this.autorun(element => {
     Template.currentData();
     try {
       AutoForm.resetForm('formAttribute');
@@ -903,23 +877,23 @@ Template.attributeform.onRendered(function () {
 });
 
 Template.attributedynamic.helpers({
-  fieldnameID: function () {
-    return 'attributes.' + this.index + '.attribid';
+  fieldnameID() {
+    return `attributes.${this.index}.attribid`;
   },
-  fieldnameValue: function () {
-    return 'attributes.' + this.index + '.value';
+  fieldnameValue() {
+    return `attributes.${this.index}.value`;
   },
 
-  fieldvalueID: function () {
+  fieldvalueID() {
     // console.log("fieldvalueId: "+  this.attrib._id);
     return this.attrib._id;
   },
-  fieldvalueName: function () {
+  fieldvalueName() {
     // console.log("fieldvalueName: "+  this.attrib.value);
     // console.log("fieldvalueName: "+ (this.value ? this.value : ''));
     // console.log(this);
     return this.value ? this.value : '';
-  }
+  },
 });
 /*
 Template.attributelistentry.helpers({
@@ -960,29 +934,27 @@ Template.reportcontainer.onCreated(function (){
 
 Template.reportcontainer.events({
   // 'click .reactive-table tbody tr': function (event) {
-  'click .jsitemload': function (event) {
+  'click .jsitemload'(event) {
     Router.go(Router.path('item.detail', { _id: this._id }));
   },
-  'click .jstagload': function (event) {
+  'click .jstagload'(event) {
     Router.go(Router.path('tag.detail', { _id: this._id }));
   },
-  'click .jsuserload': function (event) {
+  'click .jsuserload'(event) {
     Router.go(Router.path('report.detail', { _id: this._id }));
-  }
+  },
 });
 
 Template.reportcontainer.helpers({
   // all item tags (TODO: time-tags do not work)
-  tags: function () {
+  tags() {
     if (this._id) {
-      var oAllItems = {};
-      var aAllItems = [];
+      const oAllItems = {};
+      const aAllItems = [];
 
-      Times.find({ createdBy: this._id }, { fields: { item: 1 } }).map(function (
-        time
-      ) {
+      Times.find({ createdBy: this._id }, { fields: { item: 1 } }).map(time => {
         if (time.item) {
-          var b = {};
+          const b = {};
           // console.log(time.item);
           b[time.item] = time.item;
           jQuery.extend(oAllItems, b);
@@ -995,16 +967,16 @@ Template.reportcontainer.helpers({
         aAllItems.push(a);
       }
 
-      var oAllTags = {};
-      var aAllTags = [];
+      const oAllTags = {};
+      const aAllTags = [];
 
       Items.find(
         { $or: [{ 'totals.userid': this._id }, { _id: { $in: aAllItems } }] },
         { fields: { tags: 1 } }
-      ).map(function (item) {
+      ).map(item => {
         if (item.tags) {
-          var b = {};
-          for (var i = 0; i < item.tags.length; i++) {
+          const b = {};
+          for (let i = 0; i < item.tags.length; i++) {
             // console.log(item.tags[i]);
             b[item.tags[i]] = item.tags[i];
           }
@@ -1022,27 +994,25 @@ Template.reportcontainer.helpers({
         {
           // tags of user, or tags that where created by the user
           _id: { $in: aAllTags },
-          type: 'item-tag'
+          type: 'item-tag',
         },
         { sort: { name: 1, value: 1 } }
       );
-    } else {
-      return Tags.find({ type: 'item-tag' }, { sort: { name: 1, value: 1 } });
     }
+    return Tags.find({ type: 'item-tag' }, { sort: { name: 1, value: 1 } });
+
     // return Tags.find({}, {sort: {name: 1, value: 1}});
   },
   // all items
-  items: function () {
+  items() {
     if (this._id) {
       // only items that have the user id in totals sums
-      var oAllItems = {};
-      var aAllItems = [];
+      const oAllItems = {};
+      const aAllItems = [];
 
-      Times.find({ createdBy: this._id }, { fields: { item: 1 } }).map(function (
-        time
-      ) {
+      Times.find({ createdBy: this._id }, { fields: { item: 1 } }).map(time => {
         if (time.item) {
-          var b = {};
+          const b = {};
           // console.log(time.item);
           b[time.item] = time.item;
           jQuery.extend(oAllItems, b);
@@ -1051,7 +1021,7 @@ Template.reportcontainer.helpers({
         }
       });
 
-      for (var a in oAllItems) {
+      for (const a in oAllItems) {
         aAllItems.push(a);
       }
 
@@ -1059,20 +1029,18 @@ Template.reportcontainer.helpers({
         { $or: [{ 'totals.userid': this._id }, { _id: { $in: aAllItems } }] },
         { sort: { title: 1 } }
       );
-    } else {
-      return Items.find({}, { sort: { title: 1 } });
     }
+    return Items.find({}, { sort: { title: 1 } });
   },
   // current user (TODO: add all other users)
-  users: function () {
+  users() {
     if (this._id) {
       return Meteor.users.find(
         { _id: this._id },
         { fields: { _id: 1, emails: 1 } }
       );
-    } else {
-      return Meteor.users.find({}, { fields: { _id: 1, emails: 1 } });
     }
+    return Meteor.users.find({}, { fields: { _id: 1, emails: 1 } });
 
     // return [{ _id: Meteor.userId(),  'emails.0.address': 'andreas@qnipp.com', 'timetoday': 123 }];
   },
@@ -1083,7 +1051,7 @@ Template.reportcontainer.helpers({
     'normal',
     this._id
   ),
-  tableSettingsGroupByUser: function () {
+  tableSettingsGroupByUser() {
     return tableSettings(
       'user',
       Template.userlistentryItemSimple,
@@ -1091,17 +1059,17 @@ Template.reportcontainer.helpers({
       this._id
     );
   },
-  tableSettingsGroupByTag: function () {
+  tableSettingsGroupByTag() {
     return tableSettings('tag', Template.taglistentryItem, 'report', this._id);
   },
-  tableSettingsGroupByItem: function () {
+  tableSettingsGroupByItem() {
     return tableSettings(
       'item',
       Template.itemlistentryItemSimple,
       'report',
       this._id
     );
-  }
+  },
 
   /*
 	isReady: function() {
@@ -1111,36 +1079,36 @@ Template.reportcontainer.helpers({
 });
 
 Template.estimatedresultentry.helpers({
-  estimate: function () {
-    var item = this;
+  estimate() {
+    const item = this;
 
-    var attribIdEstimate = Attributes.findOne({
-      name: CNF.PLUGIN.JIRA.ATTRIBUTES.ESTIMATE
+    let attribIdEstimate = Attributes.findOne({
+      name: CNF.PLUGIN.JIRA.ATTRIBUTES.ESTIMATE,
     });
     if (!attribIdEstimate) return '';
     attribIdEstimate = attribIdEstimate._id;
 
-    var indexEstimate = getIndexfromArray(
+    const indexEstimate = getIndexfromArray(
       attribIdEstimate,
       item.attributes,
       'attribid'
     );
     if (indexEstimate >= 0 && item.attributes[indexEstimate].value) {
-      var timeestimated =
+      const timeestimated =
         parseFloat(item.attributes[indexEstimate].value) * 60 * 60 * 1000;
 
       // get calculated base value
-      var timeelapsed = getTimeslotValueFromTotals(item.totals, null, 'total');
+      let timeelapsed = getTimeslotValueFromTotals(item.totals, null, 'total');
 
       // add times that are not summed up for given item
       Times.find({
         item: item._id,
-        start: CNF.timeslots['total'].start
-      }).map(function (doc) {
+        start: CNF.timeslots.total.start,
+      }).map(doc => {
         timeelapsed += (doc.end > 0 ? doc.end : reactiveDate()) - doc.start;
       });
 
-      var color = 'black';
+      let color = 'black';
       // coloring result
       if (timeelapsed < timeestimated * 0.9) {
         color = 'LimeGreen';
@@ -1166,15 +1134,14 @@ Template.estimatedresultentry.helpers({
 			*/
 
       return {
-        percentage: Math.floor(timeelapsed * 100 / timeestimated) + '%',
+        percentage: `${Math.floor(timeelapsed * 100 / timeestimated)}%`,
         timeestimated: formatDuration(timeestimated, true),
         timeelapsed: formatDuration(timeelapsed, true),
-        color: color
+        color,
       };
-    } else {
-      return '';
     }
-  }
+    return '';
+  },
 });
 
 /*

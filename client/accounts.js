@@ -1,24 +1,23 @@
 Accounts.ui.config({
-  //passwordSignupFields: "USERNAME_ONLY",
+  // passwordSignupFields: "USERNAME_ONLY",
   requestPermissions: {},
   extraSignupFields: [
     {
-      fieldName: "full-name",
-      fieldLabel: "Full name",
-      inputType: "text",
+      fieldName: 'full-name',
+      fieldLabel: 'Full name',
+      inputType: 'text',
       visible: true,
-      validate: function(value, errorFunction) {
+      validate(value, errorFunction) {
         if (!value) {
-          errorFunction("Please enter your first and last name");
+          errorFunction('Please enter your first and last name');
           return false;
-        } else {
-          return true;
         }
-      }
-    }
+        return true;
+      },
+    },
   ],
   forceEmailLowercase: true,
-  forceUsernameLowercase: true
+  forceUsernameLowercase: true,
 });
 
 /*
