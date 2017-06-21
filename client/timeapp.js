@@ -179,14 +179,6 @@ Template.itemlist.helpers({
 });
 
 Template.itemlistentry.helpers({
-  item() {
-    // return loadItem(this.item, {all: true}, null);
-    if (this.item && !this.itemobj) {
-      this.itemobj = loadItem(this.item, { tags: true }, null);
-    }
-
-    return this.itemobj;
-  },
   isRunning(id, running) {
     return running.includes(id);
   },
@@ -798,10 +790,12 @@ Template.taglistentry.helpers({
 
     if (this.tag && this.tag._id) {
       tag = Tags.findOne({ _id: this.tag._id });
+    } else if (typeof this.tag === 'string') {
+      tag = Tags.findOne(this.tag);
+    }
 
-      if (tag) {
-        tag = loadTag(tag);
-      }
+    if (tag) {
+      tag = loadTag(tag);
     }
 
     return tag;
