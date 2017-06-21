@@ -6,7 +6,7 @@
 
 <div class="panel panel-default">
 	<div class="panel-heading">Your recent items:</div>
-	
+
 	<table class="table table-striped table-hover">
 		<thead class="thead-default">
 			<tr>
@@ -21,7 +21,7 @@
 		{{/each}}
 		</tbody>
 	</table>
-	
+
 </div>
 
 </template>
@@ -49,7 +49,7 @@
 				{{/if}}
 			{{/each}}
 		</td>
-		
+
 		<td>
 			{{#if isRunning}}
 				<button class="btn btn-default btn-danger jsitemstop">
@@ -73,7 +73,7 @@
 
 	<div class="row">
 		<div class="col-sm-6">
-			{{> itemlist}}
+			{{> itemlist running=running }}
 		</div>
 		<div class="col-sm-6">
 			{{#if equals currentRoute "item.create"}}
@@ -89,7 +89,7 @@
 			{{/if}}
 		</div>
 	</div>
-	
+
 </template>
 
 <template name="itemlist">
@@ -97,10 +97,10 @@
 
 <div class="panel panel-default">
 	<div class="panel-heading">Items:</div>
-	
+
 	<div class="list-group">
 	{{#each item in items}}
-		{{>itemlistentry item=item itemselected=this}}
+		{{>itemlistentry item=item running=running itemselected=this}}
 	{{/each}}
 	</div>
 </div>
@@ -142,6 +142,7 @@
 </template>
 
 <template name="itemlistentryItem">
+	<!-- NEVER USED? -->
 <span class="debug">template: {{currentTemplateName}}</span>
 	<ul class="nav nav-pills" role="tablist">
 		{{> itemlistentry item=this}}
@@ -152,12 +153,12 @@
 <span class="debug">template: {{currentTemplateName}}</span>
 
 	{{#with item}}
-	
+
 		<a class="list-group-item clearfix {{#if equals ../itemselected._id _id}} list-group-item-info {{/if}}"
 			href="{{pathFor 'item.detail' _id=_id}}">
 			<h5>{{title}} <small>{{description}}</small>
-			
-			{{#if isRunning}}
+
+			{{#if (isRunning _id ../running) }}
 				<button class="btn btn-default btn-danger jsitemstop pull-right">
 					<span class="glyphicon glyphicon-stop" aria-hidden="true"></span>
 				</button>
@@ -166,7 +167,7 @@
 					<span class="glyphicon glyphicon-play" aria-hidden="true"></span>
 				</button>
 			{{/if}}
-			
+
 				<a href="{{pathFor 'time.create' _id=_id}}" class="pull-right">
 					<span aria-hidden="true"><i class="glyphicon glyphicon-plus"></i></span>
 					add Time
@@ -178,9 +179,9 @@
 			{{/each}}
 			</ul>
 		</a>
-	
+
 	{{/with}}
-	
+
 </template>
 
 
@@ -188,7 +189,7 @@
 <span class="debug">template: {{currentTemplateName}}</span>
 
 	{{#with item}}
-	
+
 		<button class="btn btn-primary list-group-item clearfix" type="button">
 			<h5>{{title}} <small>{{description}}</small></h5>
 			<ul class="nav nav-pills pull-right" role="tablist">
@@ -197,93 +198,93 @@
 			{{/each}}
 			</ul>
 		</button>
-	
+
 	{{/with}}
-	
+
 </template>
 
 
 <template name="itemform">
 <span class="debug">template: {{currentTemplateName}}</span>
-	
+
 	{{#if _id}}
-	
+
 	<div class="panel panel-default">
 		{{#if equals ownedBy currentuserid }}
-			
+
 			<div class="panel-heading clearfix">
 				<h4>Edit Item [ {{_id}} ]
-				
+
 				<button title="remove item" type="submit" class="btn btn-danger jsitemremove pull-right"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></button>
 				</h4>
 			</div>
 			<div class="panel-body">
 			{{#autoForm id="formItem" collection="Collections.Items" doc=this type="method-update" meteormethod="itemUpdate"}}
-			    
+
 				{{> afFormGroup name="title" }}
 				{{> afFormGroup name="description" }}
 				{{> afFormGroup name="tags" }}
 				{{> afFormGroup name="ownedBy" }}
 				{{> afFormGroup name="keepOpen" }}
-								
+
 				{{{renderAttributeValues element=this}}}
-				
+
 				<div class="form-group">
 					<button type="submit" class="btn btn-primary">
 						<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Save
 					</button>
-					
+
 					<a class="btn" href="{{pathFor 'item.list'}}">Back</a>
-					
+
 					<a class="btn fetchUrl server" href="#">fetchUrl server</a>
 				</div>
 			{{/autoForm}}
 			</div>
-			
+
 		{{else}}
-		
+
 			<div class="panel-heading">
 				<h4>Show Item [ {{_id}} ]</h4>
 			</div>
 			<div class="panel-body">
 			{{#autoForm id="formItem" collection="Collections.Items" doc=this type="disabled"}}
-			
+
 				{{> afFormGroup name="title" }}
 				{{> afFormGroup name="description" }}
 				{{> afFormGroup name="tags" }}
 				{{> afFormGroup name="ownedBy" }}
 				{{> afFormGroup name="keepOpen" }}
-				
-				
+
+
 				{{{renderAttributeValues element=this}}}
-				
+
 				<div class="form-group">
-					
+
 					<a class="btn" href="{{pathFor 'item.list'}}">Back</a>
 				</div>
 			{{/autoForm}}
 			</div>
-			
+
 		{{/if}}
 	</div>
-		
+
 	{{> itemreport}}
-			
+
 	{{else}}
-	
+
 	<div class="panel panel-default">
 		<div class="panel-heading">
 			<h4>New Item</h4>
 		</div>
 		<div class="panel-body">
 		{{#autoForm id="formItem" collection="Collections.Items" type="method" meteormethod="itemInsert"}}
-		
+
 			{{> afFormGroup name="title" }}
 			{{> afFormGroup name="description" }}
 			{{> afFormGroup name="tags" }}
 			{{> afFormGroup name="ownedBy" }}
 			{{> afFormGroup name="keepOpen" }}
-			
+
 			<div class="form-group">
 				<button type="submit" class="btn btn-primary">
 					<span class="glyphicon glyphicon-ok" aria-hidden="true"></span> Create
@@ -291,27 +292,27 @@
 			</div>
 		{{/autoForm}}
 		</div>
-	
+
 	</div>
 	{{/if}}
-	
-	
+
+
 </template>
 
 <template name="itemimport">
 <span class="debug">template: {{currentTemplateName}}</span>
 
 	{{> quickForm id="formItem" schema="Schemas.ItemImport" type="method" meteormethod="itemImport" }}
-	
+
 	<!-- TODO: reset form after import - and allow default fields to be filled again. same on tag insert. -->
-		
+
 </template>
 
 
 
 <template name="itemreport">
 <span class="debug">template: {{currentTemplateName}}</span>
-	
+
 	<div class="row">
 		<div class="col-sm-12">
 			<div class="panel panel-default">
@@ -321,7 +322,7 @@
 			</div>
 		</div>
 	</div>
-	
+
 	<div class="row">
 		<div class="col-sm-12">
 			<div class="panel panel-default">
@@ -329,7 +330,7 @@
 				<h5>Details only available back to {{totalsUpdatedAt}}
 				</h5>
 			</div>
-			
+
 				<div class="clearfix">
 					{{> reactiveTable collection=times ready=isReady settings=tableSettingsTimes}}
 				</div>
