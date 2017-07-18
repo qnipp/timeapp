@@ -219,7 +219,7 @@
 				</h4>
 			</div>
 			<div class="panel-body">
-			{{#autoForm id="formItem" collection="Collections.Items" doc=this type="method-update" meteormethod="itemUpdate"}}
+			{{#autoForm id="formItem" collection="Items" doc=this type="method-update" meteormethod="itemUpdate"}}
 
 				{{> afFormGroup name="title" }}
 				{{> afFormGroup name="description" }}
@@ -247,7 +247,7 @@
 				<h4>Show Item [ {{_id}} ]</h4>
 			</div>
 			<div class="panel-body">
-			{{#autoForm id="formItem" collection="Collections.Items" doc=this type="disabled"}}
+			{{#autoForm id="formItem" collection="Items" doc=this type="disabled"}}
 
 				{{> afFormGroup name="title" }}
 				{{> afFormGroup name="description" }}
@@ -277,7 +277,7 @@
 			<h4>New Item</h4>
 		</div>
 		<div class="panel-body">
-		{{#autoForm id="formItem" collection="Collections.Items" type="method" meteormethod="itemInsert"}}
+		{{#autoForm id="formItem" collection="Items" type="method" meteormethod="itemInsert"}}
 
 			{{> afFormGroup name="title" }}
 			{{> afFormGroup name="description" }}

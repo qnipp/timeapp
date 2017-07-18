@@ -1227,6 +1227,181 @@ Meteor.methods({
     );
     return `The Item: ${itemdoc.title} belongs now to you`;
   },
+
+  calculateTimesheet(userid, starttimeframe) {
+    var times = {};
+    var lastendtime = 0;
+    var lastday = 0;
+
+    
+    if(!starttimeframe) {
+      starttimeframe = moment().subtract(24, 'months').toDate();
+      // , start: { $gte: starttimeframe }
+    }
+    
+    
+    times['days'] = [];
+    times['weeks'] = [];
+    times['months'] = [];
+
+      // aus irgendeinem grund kann man das nicht hinzufügen: , start: { $gte: starttimeframe } 
+    /*
+    Times.find({ createdBy: userid , start: { $gte: starttimeframe } },{ sort: { start: 1 } }).map(function(
+      time
+    ) {
+    */
+
+    timesResult = Times.find({ createdBy: userid , start: { $gte: starttimeframe } },{ sort: { start: 1 } });
+
+    timesResult.forEach(function(time) {
+    
+      /* formatting will be done while rendering to ensure sorting
+      var day = moment(time.start).format(CNF.FORMAT_DATE);
+      var week = moment(time.start).format(CNF.FORMAT_WEEK);
+      var month = moment(time.start).format(CNF.FORMAT_MONTH);
+      */
+      let day = moment(time.start).startOf('day').format(CNF.FORMAT_DATETIME_SORT);
+      let week = moment(time.start).startOf('isoWeek').format(CNF.FORMAT_DATETIME_SORT);
+      let month = moment(time.start).startOf('month').format(CNF.FORMAT_DATETIME_SORT);
+
+      /* start of new day */
+      if (!times['days'][day]) {
+        /* reset previous end time */
+        lastendtime = 0;
+        times['days'][day] = { start: 0, end: 0, workingtime: 0, pauses: [], continuouswork: [], violations: {} };
+      }
+      /* start of new week */
+      if (!times['weeks'][week]) {
+        times['weeks'][week] = { workingtime: 0, violations: {} };
+      }
+      /* start of new month */
+      if (!times['months'][month]) {
+        times['months'][month] = { workingtime: 0, daysoff: [], violations: {} };
+      }
+      /* set end time for running items */
+      time.end = time.end ? time.end : moment().toDate();
+      /* calculate worktime for current entry */
+      var workingtime = time.end - time.start;
+      times['days'][day].workingtime += workingtime;
+      times['weeks'][week].workingtime += workingtime;
+      times['months'][month].workingtime += workingtime;
+
+      /* set start time to minimum */
+      if (times['days'][day].start == 0 || times['days'][day].start > time.start) {
+        times['days'][day].start = time.start;
+      }
+      /* set end time to maximum */
+      if (times['days'][day].end == 0 || times['days'][day].end < time.end) {
+        times['days'][day].end = time.end;
+      }
+      /* calculate pauses - returns milliseconds, only show if longer than 6 min */
+      if (lastendtime > 0 && (time.start - lastendtime) / 1000 / 60 / 60 > CNF.workinghours.pause_minimum ) {
+        times['days'][day].pauses.push({
+          start: moment(lastendtime).format(CNF.FORMAT_DATETIME_SORT),
+          end: moment(time.start).format(CNF.FORMAT_DATETIME_SORT)
+        });
+      }
+
+      /* if pause is longer than pause_main_minimum, break working into continuous chunks */
+      if (!times['days'][day].continuouswork.length ||
+        (lastendtime > 0 && (time.start - lastendtime) / 1000 / 60 / 60 > CNF.workinghours.pause_main_minimum )) {
+        times['days'][day].continuouswork.push(workingtime);
+      } else {
+        times['days'][day].continuouswork[ times['days'][day].continuouswork.length -1 ] += workingtime;
+      }
+
+      /* calculate days off - check if there are working days between current and previous day */
+      if(lastday > 0) {
+        daysbetween = moment(time.start).startOf('day').diff(moment(lastday).startOf('day'), "days");
+      }
+      if (lastday > 0 && daysbetween > 1) {
+        for (
+          let daysadded = 1;
+          daysadded < daysbetween;
+          daysadded++
+        ) {
+          let dayoff = moment(lastday).add(daysadded, "days");
+          if (dayoff.isWorkday()) {
+            // to make sure, to book the days off into the correct month
+            var corr_month = moment(dayoff).startOf('month').format(CNF.FORMAT_DATETIME_SORT);
+            if (!times['months'][corr_month]) {
+              times['months'][corr_month] = { workingtime: 0, daysoff: [], violations: {} };
+            }
+            times['months'][corr_month].daysoff.push(moment(dayoff).format(CNF.FORMAT_DATETIME_SORT));
+          }
+        }
+      }
+
+      lastendtime = time.end;
+      lastday = time.start;
+    });
+    
+    const hours = 1000*60*60;
+    let time, previous;
+    let timesheets = {};
+    timesheets['days'] = [];
+    timesheets['weeks'] = [];
+    timesheets['months'] = [];
+    time = previous = null;
+  
+    //  times = JSON.parse(JSON.stringify(timesbkp));
+    for (let j in times) {
+      for (let k in times[j]) {
+        times[j][k].index = k;
+        if(time) {
+          previous = time;
+        } else {
+          previous = {start: 0, end: 0, workingtime: 0};
+        }
+        time = times[j][k];
+        //times[j][k].workingtime = formatDuration(times[j][k].workingtime, true);
+
+        if(CNF.workinghours && CNF.workinghours.ruleset && CNF.workinghours.ruleset.length > 0) {
+          
+          CNF.workinghours.ruleset.forEach(function(rule) {
+            
+            // only apply rules for correct context
+            if(rule.context == j) {
+
+              // if function is default, call it with parameters as this
+              if(rule.fn && rule.fn.call({ time, previous, hours })) {
+                //console.log('hitting violation', rule, times[j][k].violations);
+                // add violations only if
+                // .. there are none defined
+                // .. the groupkey is empty
+                // .. the groupkey level is lower than the current one
+                if(!times[j][k].violations || 
+                  !times[j][k].violations[rule.groupkey] ||
+                  (times[j][k].violations[rule.groupkey].alert == 'warning' && rule.alert == 'danger')) {
+
+                  //console.log('adding violation');
+                  times[j][k].violations[rule.groupkey] = {
+                    message: rule.message, 
+                    alert: rule.alert 
+                  };
+                }
+              }
+            }
+          }, times[j][k]);
+        }
+
+        
+        
+        timesheets[j].push({
+          'index': times[j][k].index,
+          'start': times[j][k].start,
+          'end': times[j][k].end,
+          'workingtime': times[j][k].workingtime,
+          'pauses': times[j][k].pauses,
+          'daysoff': times[j][k].daysoff,
+          'violations': Object.values(times[j][k].violations),
+        });
+        
+      }
+    }
+    return timesheets;
+  },
+
 });
 
 /*

@@ -90,7 +90,7 @@ Template.registerHelper('formatDuration', timeinms => formatDuration(timeinms));
 // make Schema available in Templates (?)
 // see: http://autoform.meteor.com/updateaf
 Template.registerHelper('Schemas', Schemas);
-Template.registerHelper('Collections', Collections);
+//Template.registerHelper('Collections', Collections);
 
 // ////////// SEARCH ///////////
 

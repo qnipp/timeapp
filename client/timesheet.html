@@ -1,0 +1,95 @@
+<template name="timesheetcontainer">
+  <span class="debug">template: {{currentTemplateName}}</span>
+
+  {{> userlist}}
+  {{> timesheetlist}}
+
+</template>
+
+
+<template name="userlist">
+    <span class="debug">template: {{currentTemplateName}}</span>
+    
+    <div class="row">
+      <div class="col-sm-12">
+          <div class="panel panel-default">
+            <div class="panel-heading">Users:</div>
+            
+            <ul class="nav nav-pills" role="tablist">
+            {{#each user in users}}
+              {{>userlistentry user=user userselected=this}}
+            {{/each}}
+            </ul>
+          </div>
+          
+      </div>
+    </div>
+</template>
+
+
+<template name="userlistentry">
+  <span class="debug">template: {{currentTemplateName}}</span>
+  
+  {{#with user}}
+    
+    <li role="presentation" class="small {{#if equals ../userselected._id _id}} active {{/if}} margin5 jsuserload" >
+      <a href="{{pathFor 'timesheet.detail' _id=_id}}" style="background-color: {{color.bgname}}; color: {{color.fgname}};">
+    {{#if equals ../userselected._id _id}}
+      <strong>{{#each email in emails}} {{email.address}} {{/each}}</strong>
+    {{else}}
+      {{#each email in emails}} {{email.address}} {{/each}}
+
+    {{/if}}
+      </a>
+    </li>
+  {{/with}}
+</template>
+
+
+<template name="timesheetlist">
+  <span class="debug">template: {{currentTemplateName}}</span>
+
+  <div class="row">
+    <div class="col-sm-8">
+      <div class="panel panel-default">
+        <div class="panel-heading">Months:</div>
+
+        <div class="clearfix">
+          {{> reactiveTable collection=timesheets.months settings=tableSettingsTimesheetMonths}}
+        </div>
+
+      </div>
+    </div>
+    <div class="col-sm-4">
+      <div class="panel panel-default">
+        <div class="panel-heading">Weeks:</div>
+
+        <div class="clearfix">
+          {{> reactiveTable collection=timesheets.weeks settings=tableSettingsTimesheetWeeks}}
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-sm-12">
+      <div class="panel panel-default">
+        <div class="panel-heading">Days:</div>
+
+        <div class="clearfix">
+          {{> reactiveTable collection=timesheets.days settings=tableSettingsTimesheetDays}}
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</template>
+
+<template name="workinghoursviolations">
+<span class="debug">template: {{currentTemplateName}}</span>
+  {{#each violation in violations}}
+    <p class="bg-{{violation.alert}}">{{violation.message}}</p>
+  {{/each}}
+</template>

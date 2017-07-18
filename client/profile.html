@@ -65,7 +65,7 @@
 			</h4>
 		</div>
 		<div class="panel-body">
-		{{#autoForm id="formTime" collection="Collections.Times" doc=this type="method-update" meteormethod="timeUpdate"}}
+		{{#autoForm id="formTime" collection="Times" doc=this type="method-update" meteormethod="timeUpdate"}}
 			
 			{{> afFormGroup name="item" }}
 			{{> afFormGroup name="start" }}
@@ -106,7 +106,7 @@
 			<h4>New Profile (should not be used??</h4>
 		</div>
 		<div class="panel-body">
-		{{#autoForm id="formTime" collection="Collections.Times" type="method" meteormethod="timeInsert"}}
+		{{#autoForm id="formTime" collection="Times" type="method" meteormethod="timeInsert"}}
 	
 			{{> afFormGroup name="item" value=item._id }}
 			{{> afFormGroup name="start" }}

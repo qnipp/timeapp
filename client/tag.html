@@ -129,9 +129,9 @@
 		</div>
 		<div class="panel-body">
 		
-		<!-- { {> quickForm id="formTag" collection="Collections.Tags" doc=tag type="method-update" meteormethod="tagUpdate" omitFields="createdAt,createdBy,updatedAt"  } } -->
+		<!-- { {> quickForm id="formTag" collection="Tags" doc=tag type="method-update" meteormethod="tagUpdate" omitFields="createdAt,createdBy,updatedAt"  } } -->
 		
-		{{#autoForm id="formTag" collection="Collections.Tags" doc=this type="method-update" meteormethod="tagUpdate" }}
+		{{#autoForm id="formTag" collection="Tags" doc=this type="method-update" meteormethod="tagUpdate" }}
 			
 			{{> afFormGroup name="name" }}
 			{{> afFormGroup name="value" }}
@@ -158,7 +158,7 @@
 		</div>
 		<div class="panel-body">
 				
-		{{#autoForm id="formTag" collection="Collections.Tags" doc=this type="disabled" }}
+		{{#autoForm id="formTag" collection="Tags" doc=this type="disabled" }}
 			
 			{{> afFormGroup name="name" }}
 			{{> afFormGroup name="value" }}
@@ -190,9 +190,9 @@
 			<h4>New Tag</h4>
 		</div>
 		<div class="panel-body">
-		<!-- { {> quickForm id="formTag" collection="Collections.Tags" type="method" meteormethod="tagInsert"  omitFields="createdAt,createdBy,updatedAt"} } -->
+		<!-- { {> quickForm id="formTag" collection="Tags" type="method" meteormethod="tagInsert"  omitFields="createdAt,createdBy,updatedAt"} } -->
 		
-		{{#autoForm id="formTag" collection="Collections.Tags" type="method" meteormethod="tagInsert"}}
+		{{#autoForm id="formTag" collection="Tags" type="method" meteormethod="tagInsert"}}
 		
 			{{> afFormGroup name="name" }}
 			{{> afFormGroup name="value" }}

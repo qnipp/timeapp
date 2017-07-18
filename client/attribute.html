@@ -105,9 +105,9 @@
 		</div>
 		<div class="panel-body">
 		
-		<!-- { {> quickForm id="formAttribute" collection="Collections.Attributes" doc=attribute type="method-update" meteormethod="attributeUpdate" omitFields="createdAt,createdBy,updatedAt"  } } -->
+		<!-- { {> quickForm id="formAttribute" collection="Attributes" doc=attribute type="method-update" meteormethod="attributeUpdate" omitFields="createdAt,createdBy,updatedAt"  } } -->
 		
-		{{#autoForm id="formAttribute" collection="Collections.Attributes" doc=this type="method-update" meteormethod="attributeUpdate" }}
+		{{#autoForm id="formAttribute" collection="Attributes" doc=this type="method-update" meteormethod="attributeUpdate" }}
 			
 			{{> afFormGroup name="name" }}
 			{{> afFormGroup name="type" }}
@@ -131,7 +131,7 @@
 		</div>
 		<div class="panel-body">
 				
-		{{#autoForm id="formAttribute" collection="Collections.Attributes" doc=this type="disabled" }}
+		{{#autoForm id="formAttribute" collection="Attributes" doc=this type="disabled" }}
 			
 			{{> afFormGroup name="name" }}
 			{{> afFormGroup name="type" }}
@@ -156,9 +156,8 @@
 			<h4>New Attribute</h4>
 		</div>
 		<div class="panel-body">
-		<!-- { {> quickForm id="formTag" collection="Collections.Tags" type="method" meteormethod="tagInsert"  omitFields="createdAt,createdBy,updatedAt"} } -->
-		
-		{{#autoForm id="formAttribute" collection="Collections.Attributes" type="method" meteormethod="attributeInsert"}}
+			
+		{{#autoForm id="formAttribute" collection="Attributes" type="method" meteormethod="attributeInsert"}}
 		
 			{{> afFormGroup name="name" }}
 			{{> afFormGroup name="type" }}
