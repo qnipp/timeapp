@@ -101,7 +101,7 @@ Meteor.methods({
     });
 
     let itemrunning;
-    const items_for_update = [];
+    let items_for_update = [];
 
     timesrunning.forEach(function(timerunning) {
       // load item of running time
@@ -708,6 +708,7 @@ Meteor.methods({
 
       console.log(`for all Times created before: ${updatedAt}`);
     } else {
+      updatedAt = moment(updatedAt).toDate();
       console.log(`for all Times created before given date: ${updatedAt}`);
     }
 
@@ -728,14 +729,10 @@ Meteor.methods({
       {
         // _id: 'rqvj5bXJQtJL2A2go',
         // tags: 'KwaxGTBiSybcq2d43',
-        $or: [
-          { ownedBy: Meteor.userId() },
-          { ownedBy: null, createdBy: Meteor.userId() },
-        ],
+          ownedBy: Meteor.userId()
       },
       {
-        $set: { ownedBy: Meteor.userId() },
-        $unset: { totals: '', totalsUpdatedAt: '' },
+        $unset: { totals: 1, totalsUpdatedAt: 1 },
       },
       { multi: true }
     );
@@ -744,20 +741,18 @@ Meteor.methods({
     // Items.find({_id: 'rqvj5bXJQtJL2A2go'}).map(function(doc_item) {
     Items.find({
       // _id: 'rqvj5bXJQtJL2A2go',
+      //_id: 'TmPD7f4Jobguz7MFT',
       // tags: 'KwaxGTBiSybcq2d43',
-      $or: [
-        { ownedBy: Meteor.userId() },
-        { ownedBy: null, createdBy: Meteor.userId() },
-      ],
+      ownedBy: Meteor.userId()
     }).map(function(doc_item) {
-      const totals = {};
+      let totals = {};
 
       // for each timeslot ..
       for (timeslot in CNF.timeslots) {
         // define timeslot
         // totals[timeslot] = {};
 
-        // console.log('doing calculations for: '+ doc_item.title + ' timeslot: ' + timeslot );
+        //console.log('doing calculations for: '+ doc_item.title + ' timeslot: ' + timeslot );
 
         // timeslot: today
         Times.find({
@@ -768,7 +763,7 @@ Meteor.methods({
           // only times, that come before update Date
           createdAt: { $lte: updatedAt },
         }).map(function(doc_time) {
-          // console.log('found item entry: '+ doc_time.start + ' by '+ doc_time.createdBy);
+          //console.log('found item entry: '+ doc_time.start + ' by '+ doc_time.createdBy);
 
           // sum up times per user
           if (typeof totals[doc_time.createdBy] === 'undefined') {
@@ -784,51 +779,57 @@ Meteor.methods({
         });
       }
 
-      // console.log('totals: ', totals);
+      //console.log('found totals: ', totals);
 
-      // resulting format:
-      // 		totals[_id of user1][today] = 123
-      // 		totals[_id of user2][today] = 234
-      // 		totals[_id of user1][yesterday] = 345
+      if( totals && Object.keys(totals).length !== 0 ) {
 
-      // reformat totals
-      // targeting format:
-      // 		totals[0].userid = _id of user1
-      // 		totals[0].today = 123
-      // 		totals[0].yesterday = 345
-      // 		totals[1].userid = _id of user2
-      // 		totals[1].today = 234
+        // resulting format:
+        // 		totals[_id of user1][today] = 123
+        // 		totals[_id of user2][today] = 234
+        // 		totals[_id of user1][yesterday] = 345
 
-      // reset totals for this item
-      doc_item.totals = [];
+        // reformat totals
+        // targeting format:
+        // 		totals[0].userid = _id of user1
+        // 		totals[0].today = 123
+        // 		totals[0].yesterday = 345
+        // 		totals[1].userid = _id of user2
+        // 		totals[1].today = 234
 
-      for (userid in totals) {
-        // totals[userid].today = 123; this shold already be there
+        // reset totals for this item
+        doc_item.totals = [];
 
-        totals[userid].userid = userid;
-        // totals[userid].updatedAt = updatedAt;
+        for (userid in totals) {
+          // totals[userid].today = 123; this shold already be there
 
-        doc_item.totals.push(totals[userid]);
+          totals[userid].userid = userid;
+          // totals[userid].updatedAt = updatedAt;
+
+          doc_item.totals.push(totals[userid]);
+        }
+        /*
+        console.log('updating doc_item._id: ' + doc_item._id +' - ' + 
+          ' totalsUpdatedAt: '+ updatedAt + 
+          ' title: ' + doc_item.title +
+          ' using:', doc_item.totals);
+          */
+        
+        itemCount++;
+
+        // updating current using new totals
+        return Items.update(doc_item._id, {
+          $set: {
+            //ownedBy: doc_item.ownedBy,
+            totals: doc_item.totals,
+            totalsUpdatedAt: updatedAt,
+          },
+          // $unset: {totals: "", totalsUpdatedAt: ""}
+        });
+      } else {
+        //console.log("skip updating totals");
       }
 
-      /*
-			console.log('updating doc_item._id: ' + doc_item._id +' - ' + 
-				' totalsUpdatedAt: '+ updatedAt + 
-				' title: ' + doc_item.title +
-				' using:', doc_item.totals);
-			*/
 
-      itemCount++;
-
-      // updating current using new totals
-      return Items.update(doc_item._id, {
-        $set: {
-          ownedBy: doc_item.ownedBy,
-          totals: doc_item.totals,
-          totalsUpdatedAt: updatedAt,
-        },
-        // $unset: {totals: "", totalsUpdatedAt: ""}
-      });
     });
 
     /*
@@ -865,8 +866,8 @@ Meteor.methods({
   },
   csvExport(item) {
     console.log(`csvExport - user: ${Meteor.userId()} ItemID: ${item}`);
-    const exports = [];
-    const query = {};
+    let exports = [];
+    let query = {};
     query.createdBy = Meteor.userId();
 
     if (item) {
@@ -966,7 +967,7 @@ Meteor.methods({
         attribid: attribIdKey,
         value: itemdoc.title.replace(regex, '$1'),
       };
-      const attributeSet = {};
+      let attributeSet = {};
       let indexJiraID;
 
       /*
