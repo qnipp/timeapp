@@ -62,6 +62,6 @@
 <template name="estimatedresultentry">
 <span class="debug">template: {{currentTemplateName}}</span>
 	{{#with estimate}}
-		<span style="color: {{color}}">{{percentage}} of {{timeestimated}}</span>
+		<span style="color: {{color}}" alt="{{timeelapsed}} of {{timeestimated}}">{{percentage}} of {{timeestimated}}</span>
 	{{/with}}
 </template>
