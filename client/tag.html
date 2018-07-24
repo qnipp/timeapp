@@ -97,17 +97,17 @@
 
 	{{#with tag}}
 		
-		<li role="presentation" class="small {{#if equals ../tagselected._id _id}} active {{/if}} margin5" >
-			<button class="btn btn-primary" type="button"  style="background-color: {{color.bgname}}; color: {{color.fgname}};">
-			
-		{{#if equals ../tagselected._id _id}}
-			<strong>{{name}}</strong>
-		{{else}}
-			{{name}}
-		{{/if}}
-				<span class="badge" style="background-color: {{color.bgvalue}}; color: {{color.fgvalue}};">{{value}}</span>
-			</button>
-		</li>
+		<span class="small {{#if equals ../tagselected._id _id}} active {{/if}}" >
+			<span class="left-pill" style="background-color: {{color.bgname}}; color: {{color.fgname}};">
+				{{#if equals ../tagselected._id _id}}
+					<strong>{{name}}</strong>
+				{{else}}
+					{{name}}
+				{{/if}}			
+			</span>
+		
+			<span class="right-pill" style="background-color: {{color.bgvalue}}; color: {{color.fgvalue}};">{{value}}</span>
+		</span>
 	{{/with}}
 	
 		
