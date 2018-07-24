@@ -81,3 +81,13 @@ span.clickable:hover {
 [class^="js"] {
     cursor: pointer;
 }
+
+span.left-pill {
+	padding: 4px 8px;
+	border-radius: 8px 0 0 8px;
+}
+
+span.right-pill {
+	padding: 4px 8px;
+	border-radius: 0 8px 8px 0;
+}

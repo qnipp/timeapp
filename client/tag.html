@@ -74,15 +74,17 @@
 
 	{{#with tag}}
 		
-		<li role="presentation" class="small {{#if equals ../tagselected._id _id}} active {{/if}} margin5" >
-			<a href="{{pathFor 'tag.detail' _id=_id}}" style="background-color: {{color.bgname}}; color: {{color.fgname}};">
+		<li role="presentation" class="small {{#if equals ../tagselected._id _id}} active {{/if}}" >
+			<a href="{{pathFor 'tag.detail' _id=_id}}" >
+				<span class="left-pill" style="background-color: {{color.bgname}}; color: {{color.fgname}};">
+					{{#if equals ../tagselected._id _id}}
+						<strong>{{name}}</strong>
+					{{else}}
+						{{name}}
+					{{/if}}			
+				</span>
 			
-		{{#if equals ../tagselected._id _id}}
-			<strong>{{name}}</strong>
-		{{else}}
-			{{name}}
-		{{/if}}
-				<span class="badge" style="background-color: {{color.bgvalue}}; color: {{color.fgvalue}};">{{value}}</span>
+				<span class="right-pill" style="background-color: {{color.bgvalue}}; color: {{color.fgvalue}};">{{value}}</span>
 			</a>
 		</li>
 	{{/with}}
