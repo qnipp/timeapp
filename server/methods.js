@@ -101,7 +101,7 @@ Meteor.methods({
     });
 
     let itemrunning;
-    let items_for_update = [];
+    const items_for_update = [];
 
     timesrunning.forEach(function(timerunning) {
       // load item of running time
@@ -174,8 +174,9 @@ Meteor.methods({
 
     if (!Meteor.call('itemIsTitleUnique', item.$set.title, id)) {
       console.log(
-        `methods:itemUpdate : ${item.$set
-          .title} failed - itemIsTitleUnique not met`
+        `methods:itemUpdate : ${
+          item.$set.title
+        } failed - itemIsTitleUnique not met`
       );
       throw new Meteor.Error('notUnique', 'item title is notUnique');
       return false;
@@ -505,7 +506,9 @@ Meteor.methods({
 
         if (!item) {
           console.log(
-            `skip row with unknown item: "${row.item}" - please import items first!`
+            `skip row with unknown item: "${
+              row.item
+            }" - please import items first!`
           );
           return;
         }
@@ -651,8 +654,9 @@ Meteor.methods({
 
   attributeUpdate(attribute, id) {
     console.log(
-      `methods:attributeUpdate : ${id} - ${attribute.$set.name} [${attribute
-        .$set.type}]`
+      `methods:attributeUpdate : ${id} - ${attribute.$set.name} [${
+        attribute.$set.type
+      }]`
     );
 
     // return false;
@@ -702,7 +706,9 @@ Meteor.methods({
       // will leave last 2 months untouched
       // updatedAt = moment().subtract(1, 'months').startOf("month").toDate();
       // will leave current month untouched
-      updatedAt = moment().startOf('month').toDate();
+      updatedAt = moment()
+        .startOf('month')
+        .toDate();
       // will leave only today untouched
       // updatedAt = moment().startOf("day").toDate();
 
@@ -729,7 +735,7 @@ Meteor.methods({
       {
         // _id: 'rqvj5bXJQtJL2A2go',
         // tags: 'KwaxGTBiSybcq2d43',
-          ownedBy: Meteor.userId()
+        ownedBy: Meteor.userId(),
       },
       {
         $unset: { totals: 1, totalsUpdatedAt: 1 },
@@ -741,18 +747,18 @@ Meteor.methods({
     // Items.find({_id: 'rqvj5bXJQtJL2A2go'}).map(function(doc_item) {
     Items.find({
       // _id: 'rqvj5bXJQtJL2A2go',
-      //_id: 'TmPD7f4Jobguz7MFT',
+      // _id: 'TmPD7f4Jobguz7MFT',
       // tags: 'KwaxGTBiSybcq2d43',
-      ownedBy: Meteor.userId()
+      ownedBy: Meteor.userId(),
     }).map(function(doc_item) {
-      let totals = {};
+      const totals = {};
 
       // for each timeslot ..
       for (timeslot in CNF.timeslots) {
         // define timeslot
         // totals[timeslot] = {};
 
-        //console.log('doing calculations for: '+ doc_item.title + ' timeslot: ' + timeslot );
+        // console.log('doing calculations for: '+ doc_item.title + ' timeslot: ' + timeslot );
 
         // timeslot: today
         Times.find({
@@ -763,7 +769,7 @@ Meteor.methods({
           // only times, that come before update Date
           createdAt: { $lte: updatedAt },
         }).map(function(doc_time) {
-          //console.log('found item entry: '+ doc_time.start + ' by '+ doc_time.createdBy);
+          // console.log('found item entry: '+ doc_time.start + ' by '+ doc_time.createdBy);
 
           // sum up times per user
           if (typeof totals[doc_time.createdBy] === 'undefined') {
@@ -779,10 +785,9 @@ Meteor.methods({
         });
       }
 
-      //console.log('found totals: ', totals);
+      // console.log('found totals: ', totals);
 
-      if( totals && Object.keys(totals).length !== 0 ) {
-
+      if (totals && Object.keys(totals).length !== 0) {
         // resulting format:
         // 		totals[_id of user1][today] = 123
         // 		totals[_id of user2][today] = 234
@@ -813,23 +818,20 @@ Meteor.methods({
           ' title: ' + doc_item.title +
           ' using:', doc_item.totals);
           */
-        
+
         itemCount++;
 
         // updating current using new totals
         return Items.update(doc_item._id, {
           $set: {
-            //ownedBy: doc_item.ownedBy,
+            // ownedBy: doc_item.ownedBy,
             totals: doc_item.totals,
             totalsUpdatedAt: updatedAt,
           },
           // $unset: {totals: "", totalsUpdatedAt: ""}
         });
-      } else {
-        //console.log("skip updating totals");
       }
-
-
+      // console.log("skip updating totals");
     });
 
     /*
@@ -866,8 +868,8 @@ Meteor.methods({
   },
   csvExport(item) {
     console.log(`csvExport - user: ${Meteor.userId()} ItemID: ${item}`);
-    let exports = [];
-    let query = {};
+    const exports = [];
+    const query = {};
     query.createdBy = Meteor.userId();
 
     if (item) {
@@ -880,16 +882,18 @@ Meteor.methods({
         )};${moment(time.end).format(CNF.FORMAT_DATETIME)};${formatDuration(
           time.end - time.start,
           true
-        )};${time.comments
-          ? time.comments
-              .map(function(comment) {
-                if (comment && comment.comment) {
-                  return comment.comment;
-                }
-                return '';
-              })
-              .join(', ')
-          : ''}`
+        )};${
+          time.comments
+            ? time.comments
+                .map(function(comment) {
+                  if (comment && comment.comment) {
+                    return comment.comment;
+                  }
+                  return '';
+                })
+                .join(', ')
+            : ''
+        }`
       );
     });
     return exports;
@@ -967,7 +971,7 @@ Meteor.methods({
         attribid: attribIdKey,
         value: itemdoc.title.replace(regex, '$1'),
       };
-      let attributeSet = {};
+      const attributeSet = {};
       let indexJiraID;
 
       /*
@@ -1162,9 +1166,9 @@ Meteor.methods({
 
       const setModifier = {
         $set: {
-          title: `${detailsJira.key} ${detailsJira.type
-            ? `[${detailsJira.type}]`
-            : ''} ${detailsJira.title}`,
+          title: `${detailsJira.key} ${
+            detailsJira.type ? `[${detailsJira.type}]` : ''
+          } ${detailsJira.title}`,
           description: detailsJira.description
             ? detailsJira.description.substring(0, 200)
             : '',
@@ -1229,106 +1233,162 @@ Meteor.methods({
     return `The Item: ${itemdoc.title} belongs now to you`;
   },
 
-  calculateTimesheet(userid, starttimeframe) {
-    var times = {};
-    var lastendtime = 0;
-    var lastday = 0;
+  calculateTimesheet(userid, starttimeframe, endtimeframe) {
+    const times = {};
+    let lastendtime = 0;
+    let lastday = 0;
 
-    
-    if(!starttimeframe) {
-      starttimeframe = moment().subtract(24, 'months').toDate();
+    if (!starttimeframe) {
+      starttimeframe = moment()
+        .subtract(24, 'months')
+        .toDate();
       // , start: { $gte: starttimeframe }
     }
-    
-    
-    times['days'] = [];
-    times['weeks'] = [];
-    times['months'] = [];
 
-      // aus irgendeinem grund kann man das nicht hinzufügen: , start: { $gte: starttimeframe } 
+    if (!endtimeframe) {
+      endtimeframe = moment(starttimeframe)
+        .add(24, 'months')
+        .toDate();
+    }
+
+    times.days = [];
+    times.weeks = [];
+    times.months = [];
+
+    // aus irgendeinem grund kann man das nicht hinzufügen: , start: { $gte: starttimeframe }
     /*
     Times.find({ createdBy: userid , start: { $gte: starttimeframe } },{ sort: { start: 1 } }).map(function(
       time
     ) {
     */
 
-    timesResult = Times.find({ createdBy: userid , start: { $gte: starttimeframe } },{ sort: { start: 1 } });
+    timesResult = Times.find(
+      {
+        createdBy: userid,
+        start: { $gte: starttimeframe, $lte: endtimeframe },
+      },
+      { sort: { start: 1 } }
+    ).fetch();
+
+    const additionalTime = Times.findOne({
+      createdBy: userid,
+      start: { $gt: endtimeframe },
+    });
+
+    if (additionalTime) {
+      timesResult.push(additionalTime);
+    }
 
     timesResult.forEach(function(time) {
-    
       /* formatting will be done while rendering to ensure sorting
       var day = moment(time.start).format(CNF.FORMAT_DATE);
       var week = moment(time.start).format(CNF.FORMAT_WEEK);
       var month = moment(time.start).format(CNF.FORMAT_MONTH);
       */
-      let day = moment(time.start).startOf('day').format(CNF.FORMAT_DATETIME_SORT);
-      let week = moment(time.start).startOf('isoWeek').format(CNF.FORMAT_DATETIME_SORT);
-      let month = moment(time.start).startOf('month').format(CNF.FORMAT_DATETIME_SORT);
+      const day = moment(time.start)
+        .startOf('day')
+        .format(CNF.FORMAT_DATETIME_SORT);
+      const week = moment(time.start)
+        .startOf('isoWeek')
+        .format(CNF.FORMAT_DATETIME_SORT);
+      const month = moment(time.start)
+        .startOf('month')
+        .format(CNF.FORMAT_DATETIME_SORT);
 
       /* start of new day */
-      if (!times['days'][day]) {
+      if (!times.days[day]) {
         /* reset previous end time */
         lastendtime = 0;
-        times['days'][day] = { start: 0, end: 0, workingtime: 0, pauses: [], continuouswork: [], violations: {} };
+        times.days[day] = {
+          start: 0,
+          end: 0,
+          break: 0,
+          workingtime: 0,
+          pauses: [],
+          continuouswork: [],
+          violations: {},
+        };
       }
       /* start of new week */
-      if (!times['weeks'][week]) {
-        times['weeks'][week] = { workingtime: 0, violations: {} };
+      if (!times.weeks[week]) {
+        times.weeks[week] = { workingtime: 0, violations: {} };
       }
       /* start of new month */
-      if (!times['months'][month]) {
-        times['months'][month] = { workingtime: 0, daysoff: [], violations: {} };
+      if (!times.months[month]) {
+        times.months[month] = {
+          workingtime: 0,
+          daysoff: [],
+          violations: {},
+        };
       }
       /* set end time for running items */
       time.end = time.end ? time.end : moment().toDate();
       /* calculate worktime for current entry */
-      var workingtime = time.end - time.start;
-      times['days'][day].workingtime += workingtime;
-      times['weeks'][week].workingtime += workingtime;
-      times['months'][month].workingtime += workingtime;
+      const workingtime = time.end - time.start;
+      times.days[day].workingtime += workingtime;
+      times.weeks[week].workingtime += workingtime;
+      times.months[month].workingtime += workingtime;
 
       /* set start time to minimum */
-      if (times['days'][day].start == 0 || times['days'][day].start > time.start) {
-        times['days'][day].start = time.start;
+      if (times.days[day].start == 0 || times.days[day].start > time.start) {
+        times.days[day].start = time.start;
       }
       /* set end time to maximum */
-      if (times['days'][day].end == 0 || times['days'][day].end < time.end) {
-        times['days'][day].end = time.end;
+      if (times.days[day].end == 0 || times.days[day].end < time.end) {
+        times.days[day].end = time.end;
       }
+
       /* calculate pauses - returns milliseconds, only show if longer than 6 min */
-      if (lastendtime > 0 && (time.start - lastendtime) / 1000 / 60 / 60 > CNF.workinghours.pause_minimum ) {
-        times['days'][day].pauses.push({
+      if (
+        lastendtime > 0 &&
+        (time.start - lastendtime) / 1000 / 60 / 60 >
+          CNF.workinghours.pause_minimum
+      ) {
+        times.days[day].pauses.push({
           start: moment(lastendtime).format(CNF.FORMAT_DATETIME_SORT),
-          end: moment(time.start).format(CNF.FORMAT_DATETIME_SORT)
+          end: moment(time.start).format(CNF.FORMAT_DATETIME_SORT),
         });
+        times.days[day].break += time.start - lastendtime;
       }
 
       /* if pause is longer than pause_main_minimum, break working into continuous chunks */
-      if (!times['days'][day].continuouswork.length ||
-        (lastendtime > 0 && (time.start - lastendtime) / 1000 / 60 / 60 > CNF.workinghours.pause_main_minimum )) {
-        times['days'][day].continuouswork.push(workingtime);
+      if (
+        !times.days[day].continuouswork.length ||
+        (lastendtime > 0 &&
+          (time.start - lastendtime) / 1000 / 60 / 60 >
+            CNF.workinghours.pause_main_minimum)
+      ) {
+        times.days[day].continuouswork.push(workingtime);
       } else {
-        times['days'][day].continuouswork[ times['days'][day].continuouswork.length -1 ] += workingtime;
+        times.days[day].continuouswork[
+          times.days[day].continuouswork.length - 1
+        ] += workingtime;
       }
 
       /* calculate days off - check if there are working days between current and previous day */
-      if(lastday > 0) {
-        daysbetween = moment(time.start).startOf('day').diff(moment(lastday).startOf('day'), "days");
+      if (lastday > 0) {
+        daysbetween = moment(time.start)
+          .startOf('day')
+          .diff(moment(lastday).startOf('day'), 'days');
       }
       if (lastday > 0 && daysbetween > 1) {
-        for (
-          let daysadded = 1;
-          daysadded < daysbetween;
-          daysadded++
-        ) {
-          let dayoff = moment(lastday).add(daysadded, "days");
+        for (let daysadded = 1; daysadded < daysbetween; daysadded++) {
+          const dayoff = moment(lastday).add(daysadded, 'days');
           if (dayoff.isWorkday()) {
             // to make sure, to book the days off into the correct month
-            var corr_month = moment(dayoff).startOf('month').format(CNF.FORMAT_DATETIME_SORT);
-            if (!times['months'][corr_month]) {
-              times['months'][corr_month] = { workingtime: 0, daysoff: [], violations: {} };
+            const corr_month = moment(dayoff)
+              .startOf('month')
+              .format(CNF.FORMAT_DATETIME_SORT);
+            if (!times.months[corr_month]) {
+              times.months[corr_month] = {
+                workingtime: 0,
+                daysoff: [],
+                violations: {},
+              };
             }
-            times['months'][corr_month].daysoff.push(moment(dayoff).format(CNF.FORMAT_DATETIME_SORT));
+            times.months[corr_month].daysoff.push(
+              moment(dayoff).format(CNF.FORMAT_DATETIME_SORT)
+            );
           }
         }
       }
@@ -1336,49 +1396,52 @@ Meteor.methods({
       lastendtime = time.end;
       lastday = time.start;
     });
-    
-    const hours = 1000*60*60;
+
+    const hours = 1000 * 60 * 60;
     let time, previous;
-    let timesheets = {};
-    timesheets['days'] = [];
-    timesheets['weeks'] = [];
-    timesheets['months'] = [];
+    const timesheets = {};
+    timesheets.days = [];
+    timesheets.weeks = [];
+    timesheets.months = [];
     time = previous = null;
-  
+
     //  times = JSON.parse(JSON.stringify(timesbkp));
-    for (let j in times) {
-      for (let k in times[j]) {
+    for (const j in times) {
+      for (const k in times[j]) {
         times[j][k].index = k;
-        if(time) {
+        if (time) {
           previous = time;
         } else {
-          previous = {start: 0, end: 0, workingtime: 0};
+          previous = { start: 0, end: 0, workingtime: 0 };
         }
         time = times[j][k];
-        //times[j][k].workingtime = formatDuration(times[j][k].workingtime, true);
+        // times[j][k].workingtime = formatDuration(times[j][k].workingtime, true);
 
-        if(CNF.workinghours && CNF.workinghours.ruleset && CNF.workinghours.ruleset.length > 0) {
-          
+        if (
+          CNF.workinghours &&
+          CNF.workinghours.ruleset &&
+          CNF.workinghours.ruleset.length > 0
+        ) {
           CNF.workinghours.ruleset.forEach(function(rule) {
-            
             // only apply rules for correct context
-            if(rule.context == j) {
-
+            if (rule.context == j) {
               // if function is default, call it with parameters as this
-              if(rule.fn && rule.fn.call({ time, previous, hours })) {
-                //console.log('hitting violation', rule, times[j][k].violations);
+              if (rule.fn && rule.fn.call({ time, previous, hours })) {
+                // console.log('hitting violation', rule, times[j][k].violations);
                 // add violations only if
                 // .. there are none defined
                 // .. the groupkey is empty
                 // .. the groupkey level is lower than the current one
-                if(!times[j][k].violations || 
+                if (
+                  !times[j][k].violations ||
                   !times[j][k].violations[rule.groupkey] ||
-                  (times[j][k].violations[rule.groupkey].alert == 'warning' && rule.alert == 'danger')) {
-
-                  //console.log('adding violation');
+                  (times[j][k].violations[rule.groupkey].alert == 'warning' &&
+                    rule.alert == 'danger')
+                ) {
+                  // console.log('adding violation');
                   times[j][k].violations[rule.groupkey] = {
-                    message: rule.message, 
-                    alert: rule.alert 
+                    message: rule.message,
+                    alert: rule.alert,
                   };
                 }
               }
@@ -1386,23 +1449,22 @@ Meteor.methods({
           }, times[j][k]);
         }
 
-        
-        
-        timesheets[j].push({
-          'index': times[j][k].index,
-          'start': times[j][k].start,
-          'end': times[j][k].end,
-          'workingtime': times[j][k].workingtime,
-          'pauses': times[j][k].pauses,
-          'daysoff': times[j][k].daysoff,
-          'violations': Object.values(times[j][k].violations),
-        });
-        
+        if (moment(times[j][k].index).isBefore(endtimeframe)) {
+          timesheets[j].push({
+            index: times[j][k].index,
+            start: times[j][k].start,
+            end: times[j][k].end,
+            break: times[j][k].break,
+            workingtime: times[j][k].workingtime,
+            pauses: times[j][k].pauses,
+            daysoff: times[j][k].daysoff,
+            violations: Object.values(times[j][k].violations),
+          });
+        }
       }
     }
     return timesheets;
   },
-
 });
 
 /*

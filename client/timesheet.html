@@ -10,7 +10,7 @@
 <template name="userlist">
     <span class="debug">template: {{currentTemplateName}}</span>
     
-    <div class="row">
+    <div class="row hidden-print">
       <div class="col-sm-12">
           <div class="panel panel-default">
             <div class="panel-heading">Users:</div>
@@ -24,6 +24,9 @@
           
       </div>
     </div>
+    <h1 class="visible-print-block">
+      Time statistics for {{username this}}
+    </h1>
 </template>
 
 
