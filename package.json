@@ -1,6 +1,6 @@
 {
   "name": "timeapp",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "timeapp",
   "scripts": {
     "start": "meteor run",
@@ -9,7 +9,9 @@
     "lint-fix": "eslint --fix .",
     "prettier": "prettier --single-quote --trailing-comma es5 --jsx-bracket-same-line",
     "docker-build": "docker build -t qnipp/timeapp .",
-    "docker-run": "docker run -e PORT=3000 -e ROOT_URL=http://localhost:3000 -e MONGO_URL=mongodb://localhost:27017/timeapp_qnipp_com -e MONGO_URL_OPLOG=mongodb://localhost:27017/local --network host qnipp/timeapp"
+    "docker-run": "docker run -e PORT=3000 -e ROOT_URL=http://localhost:3000 -e MONGO_URL=mongodb://localhost:27017/timeapp_qnipp_com -e MONGO_URL_OPLOG=mongodb://localhost:27017/local --network host qnipp/timeapp",
+    "docker-tag": "docker tag qnipp/timeapp qnipp/timeapp:${npm_package_version}",
+    "docker-push": "docker push qnipp/timeapp"
   },
   "dependencies": {
     "@babel/runtime": "^7.8.4",
