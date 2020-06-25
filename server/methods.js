@@ -1345,8 +1345,8 @@ Meteor.methods({
           CNF.workinghours.pause_minimum
       ) {
         times.days[day].pauses.push({
-          start: moment(lastendtime).format(CNF.FORMAT_DATETIME_SORT),
-          end: moment(time.start).format(CNF.FORMAT_DATETIME_SORT),
+          start: lastendtime,
+          end: time.start,
         });
         times.days[day].break += time.start - lastendtime;
       }
